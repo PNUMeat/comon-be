@@ -13,13 +13,21 @@ public record TeamSubjectResponse(
         String imageUrl
 ) {
     public static TeamSubjectResponse of(Article article) {
-        return new TeamSubjectResponse(
+
+        String imageUrl = null;
+        if(!article.getImages().isEmpty()){
+            imageUrl = article.getImages().get(0).getImageUrl();
+        }
+
+        TeamSubjectResponse teamSubjectResponse = new TeamSubjectResponse(
                 article.getArticleId(),
                 article.getArticleCategory().getName(),
                 article.getArticleTitle(),
                 article.getArticleBody(),
                 article.getUpdatedDate(),
-                article.getImages().get(0).getImageUrl()
+                imageUrl
         );
+
+        return teamSubjectResponse;
     }
 }

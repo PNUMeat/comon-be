@@ -214,7 +214,7 @@ public class ArticleService {
             throw new TeamMemberInvalidException();
         }
 
-        return articleRepository.findTeamSubjectByTeamAndSelectedDate(team, date)
+        return articleRepository.findTeamSubjectByTeamAndSelectedDate(teamId, date, getSubjectCategories())
                 .orElse(null);
     }
 

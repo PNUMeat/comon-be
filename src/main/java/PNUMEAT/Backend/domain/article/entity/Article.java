@@ -34,6 +34,7 @@ public class Article extends TimeStamp {
     @Column(length = 3000)
     private String articleBody;
 
+    @Enumerated(value = EnumType.STRING)
     private ArticleCategory articleCategory;
 
     private LocalDate selectedDate;

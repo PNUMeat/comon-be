@@ -174,9 +174,14 @@ public class ArticleController {
 
         Article subject = articleService.getTeamSubjectByDate(member, teamId, date);
 
+        TeamSubjectResponse teamSubjectResponse = null;
+        if(subject!= null){
+            teamSubjectResponse = TeamSubjectResponse.of(subject);
+        }
+
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(TeamSubjectResponse.of(subject)));
+                .body(ApiResponse.successResponse(teamSubjectResponse));
     }
 
 }
