@@ -3,6 +3,7 @@ package PNUMEAT.Backend.domain.article.service;
 
 
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
+import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.entity.ArticleImage;
 import PNUMEAT.Backend.domain.article.enums.ArticleCategory;
@@ -14,14 +15,15 @@ import PNUMEAT.Backend.domain.team.entity.Team;
 import PNUMEAT.Backend.domain.team.repository.TeamRepository;
 import PNUMEAT.Backend.domain.teamMember.repository.TeamMemberRepository;
 import PNUMEAT.Backend.global.error.Member.MemberNotFoundException;
+import PNUMEAT.Backend.global.error.Team.TeamManagerInvalidException;
+import PNUMEAT.Backend.global.error.Team.TeamMemberInvalidException;
 import PNUMEAT.Backend.global.error.Team.TeamNotFoundException;
-import PNUMEAT.Backend.global.error.articles.ArticleNotFoundException;
-import PNUMEAT.Backend.global.error.articles.MemberNotInTeamException;
-import PNUMEAT.Backend.global.error.articles.UnauthorizedActionException;
+import PNUMEAT.Backend.global.error.articles.*;
 import PNUMEAT.Backend.global.images.ImageService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,9 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import static PNUMEAT.Backend.domain.article.enums.ArticleCategory.fromName;
+import static PNUMEAT.Backend.domain.article.enums.ArticleCategory.getSubjectCategories;
 
 
 @Service
@@ -179,5 +184,65 @@ public class ArticleService {
         }
     }
 
+    @Transactional
+    public Article saveTeamSubject(Member member,
+                                   Long teamId,
+                                   TeamSubjectRequest teamSubjectRequest,
+                                   MultipartFile images){
 
+        Team team = getTeamById(teamId);
+
+        validateTeamManager(member, team);
+
+        LocalDate selectedDate = LocalDate.parse(teamSubjectRequest.selectedDate());
+        validateSubjectNotDuplicated(team, selectedDate);
+
+        Article subject = createArticle(member, team, teamSubjectRequest, selectedDate);
+
+        Article savedSubject = articleRepository.save(subject);
+
+        handleImageUpload(savedSubject, images);
+
+        return savedSubject;
+    }
+
+    @Transactional(readOnly = true)
+    public Article getTeamSubjectByDate(Member member, Long teamId, LocalDate date){
+        Team team = getTeamById(teamId);
+
+        if(!teamMemberRepository.existsByTeamAndMember(team, member)){
+            throw new TeamMemberInvalidException();
+        }
+
+        return articleRepository.findTeamSubjectByTeamAndSelectedDate(teamId, date, getSubjectCategories())
+                .orElse(null);
+    }
+
+    private Team getTeamById(Long teamId) {
+        return teamRepository.findById(teamId)
+                .orElseThrow(TeamNotFoundException::new);
+    }
+
+    private void validateTeamManager(Member member, Team team) {
+        if(!team.isTeamManger(member)){
+            throw new TeamManagerInvalidException();
+        }
+    }
+
+    private void validateSubjectNotDuplicated(Team team, LocalDate selectedDate) {
+        if(articleRepository.existsByTeamAndSelectedDateAndArticleCategoryIn(team, selectedDate, getSubjectCategories())){
+            throw new SubjectDuplicatedException();
+        }
+    }
+
+    private Article createArticle(Member member, Team team, TeamSubjectRequest teamSubjectRequest, LocalDate selectedDate) {
+        return Article.builder()
+                .team(team)
+                .member(member)
+                .articleTitle(teamSubjectRequest.articleTitle())
+                .articleBody(teamSubjectRequest.articleBody())
+                .articleCategory(fromName(teamSubjectRequest.articleCategory()))
+                .selectedDate(selectedDate)
+                .build();
+    }
 }

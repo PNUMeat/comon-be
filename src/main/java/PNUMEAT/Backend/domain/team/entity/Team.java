@@ -62,4 +62,8 @@ public class Team extends TimeStamp {
     }
 
     public void updateTeamAnnouncement(String teamAnnouncement) { this.teamAnnouncement = teamAnnouncement; }
+
+    public boolean isTeamManger(Member member){
+        return this.getTeamManager().isMyUuid(member.getUuid());
+    }
 }

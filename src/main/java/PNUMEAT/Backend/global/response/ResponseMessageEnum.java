@@ -14,7 +14,8 @@ public enum ResponseMessageEnum {
     //Article
     ARTICLE_CREATE_SUCCESS("게시글이 성공적으로 생성되었습니다.",201),
     ARTICLE_DELETE_SUCCESS("게시글이 성공적으로 삭제되었습니다.",200),
-    ARTICLE_PUT_SUCCESS("게시글이 성공적으로 수정되었습니다.",200);
+    ARTICLE_PUT_SUCCESS("게시글이 성공적으로 수정되었습니다.",200),
+    SUBJECT_CREATE_SUCCESS("주제가 성공적으로 생성되었습니다.", 201);
 
 
     private final String message;

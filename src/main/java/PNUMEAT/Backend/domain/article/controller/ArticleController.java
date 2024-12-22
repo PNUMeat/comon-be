@@ -1,12 +1,9 @@
 package PNUMEAT.Backend.domain.article.controller;
 
-import static PNUMEAT.Backend.global.response.ResponseMessageEnum.ARTICLE_CREATE_SUCCESS;
-import static PNUMEAT.Backend.global.response.ResponseMessageEnum.ARTICLE_DELETE_SUCCESS;
-import static PNUMEAT.Backend.global.response.ResponseMessageEnum.ARTICLE_PUT_SUCCESS;
-import static PNUMEAT.Backend.global.response.ResponseMessageEnum.TEAM_CREATED_SUCCESS;
-
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
+import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
 import PNUMEAT.Backend.domain.article.dto.response.ArticleResponse;
+import PNUMEAT.Backend.domain.article.dto.response.TeamSubjectResponse;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.service.ArticleService;
 import PNUMEAT.Backend.domain.auth.entity.Member;
@@ -29,12 +26,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import static PNUMEAT.Backend.global.response.ResponseMessageEnum.*;
 
 @RestController
 @RequestMapping("/api/v1/articles")
@@ -134,6 +132,7 @@ public class ArticleController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.createResponseWithMessage(ARTICLE_PUT_SUCCESS.getMessage()));
     }
+
     // 날짜기준 게시물 조회
     @GetMapping("/{teamId}/by-date")
     public ResponseEntity<?> getArticlesByTeamAndDate(
@@ -151,6 +150,38 @@ public class ArticleController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponse(responsePage));
+    }
+
+    @PostMapping("/teams/{teamId}/subjects")
+    public ResponseEntity<?> createTeamSubject(
+            @LoginMember Member member,
+            @PathVariable("teamId") Long teamId,
+            @ModelAttribute @Valid TeamSubjectRequest teamSubjectRequest,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        articleService.saveTeamSubject(member, teamId, teamSubjectRequest, image);
+
+        return ResponseEntity.status(SUBJECT_CREATE_SUCCESS.getStatusCode())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.createResponseWithMessage(SUBJECT_CREATE_SUCCESS.getMessage()));
+    }
+
+    @GetMapping("/teams/{teamId}/subjects")
+    public ResponseEntity<?> getTeamSubjectsByDate(
+            @LoginMember Member member,
+            @PathVariable("teamId") Long teamId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        Article subject = articleService.getTeamSubjectByDate(member, teamId, date);
+
+        TeamSubjectResponse teamSubjectResponse = null;
+        if(subject!= null){
+            teamSubjectResponse = TeamSubjectResponse.of(subject);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponse(teamSubjectResponse));
     }
 
 }
