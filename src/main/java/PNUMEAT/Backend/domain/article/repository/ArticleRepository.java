@@ -37,4 +37,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "WHERE a.team.teamId = :teamId AND DATE(a.selectedDate) = :selectedDate " +
             "AND a.articleCategory IN :articleSubjectCategories")
     Optional<Article> findTeamSubjectByTeamAndSelectedDate(@Param("teamId")Long teamId, @Param("selectedDate") LocalDate selectedDate, @Param("articleSubjectCategories")List<ArticleCategory> articleSubjectCategories);
+
+    @Query("SELECT a FROM Article a " +
+            "LEFT JOIN FETCH a.images " +
+            "WHERE a.team.teamId = :teamId AND YEAR (a.createdDate) = :year and MONTH (a.createdDate) = :month " +
+            "AND a.articleCategory IN :articleSubjectCategories")
+    List<Article> findSubjectArticlesByTeamIdAndYearAndMonth(@Param("teamId")Long teamId, @Param("year") int year, @Param("month") int month, @Param("articleSubjectCategories")List<ArticleCategory> articleSubjectCategories);
 }
