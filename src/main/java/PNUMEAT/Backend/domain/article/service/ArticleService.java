@@ -34,6 +34,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import static PNUMEAT.Backend.domain.article.enums.ArticleCategory.getSubjectCategories;
+
 
 @Service
 @Slf4j
@@ -197,7 +199,8 @@ public class ArticleService {
         }
 
         LocalDate today = LocalDate.now();
-        if(articleRepository.existsByTeamAndCreatedDate(team, today)){
+
+        if(articleRepository.existsByTeamAndCreatedDateAndArticleCategoryIn(team, today, getSubjectCategories())){
             throw new TodaySubjectAlreadyCreatedException();
         }
 

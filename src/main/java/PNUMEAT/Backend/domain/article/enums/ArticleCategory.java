@@ -1,5 +1,8 @@
 package PNUMEAT.Backend.domain.article.enums;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum ArticleCategory {
     NORMAL(-1, "일반"),
     STUDY_REVIEW(1, "스터디 복습"),
@@ -28,5 +31,17 @@ public enum ArticleCategory {
             return true;
         }
         return false;
+    }
+
+    public static List<ArticleCategory> getSubjectCategories(){
+        List<ArticleCategory> subjectCategories = new ArrayList<>();
+
+        for(ArticleCategory articleCategory : ArticleCategory.values()){
+            if(articleCategory.code > 0){
+                subjectCategories.add(articleCategory);
+            }
+        }
+
+        return subjectCategories;
     }
 }
