@@ -3,6 +3,7 @@ package PNUMEAT.Backend.domain.article.service;
 
 
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
+import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.entity.ArticleImage;
 import PNUMEAT.Backend.domain.article.enums.ArticleCategory;
@@ -14,14 +15,17 @@ import PNUMEAT.Backend.domain.team.entity.Team;
 import PNUMEAT.Backend.domain.team.repository.TeamRepository;
 import PNUMEAT.Backend.domain.teamMember.repository.TeamMemberRepository;
 import PNUMEAT.Backend.global.error.Member.MemberNotFoundException;
+import PNUMEAT.Backend.global.error.Team.TeamManagerInvalidException;
 import PNUMEAT.Backend.global.error.Team.TeamNotFoundException;
 import PNUMEAT.Backend.global.error.articles.ArticleNotFoundException;
 import PNUMEAT.Backend.global.error.articles.MemberNotInTeamException;
+import PNUMEAT.Backend.global.error.articles.TodaySubjectAlreadyCreatedException;
 import PNUMEAT.Backend.global.error.articles.UnauthorizedActionException;
 import PNUMEAT.Backend.global.images.ImageService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -179,5 +183,31 @@ public class ArticleService {
         }
     }
 
+    @Transactional
+    public Article saveTeamSubject(Member member,
+                                   Long teamId,
+                                   TeamSubjectRequest teamSubjectRequest,
+                                   MultipartFile images){
 
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(TeamNotFoundException::new);
+
+        if(!team.isTeamManger(member)){
+            throw new TeamManagerInvalidException();
+        }
+
+        LocalDate today = LocalDate.now();
+        if(articleRepository.existsByTeamAndCreatedDate(team, today)){
+            throw new TodaySubjectAlreadyCreatedException();
+        }
+
+        Article article = new Article(team, member, teamSubjectRequest.articleTitle(),
+                teamSubjectRequest.articleBody(), teamSubjectRequest.articleCategory(), new ArrayList<>());
+
+        articleRepository.save(article);
+
+        handleImageUpload(article, images);
+
+        return article;
+    }
 }

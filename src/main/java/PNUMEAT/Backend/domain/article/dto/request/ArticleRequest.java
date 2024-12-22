@@ -1,10 +1,10 @@
 package PNUMEAT.Backend.domain.article.dto.request;
 
-import PNUMEAT.Backend.domain.article.enums.ArticleCategory;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record ArticleRequest(
-    @NotBlank(message = "팀 아이디는 필수요소입니다.")
+    @NotNull(message = "팀 아이디는 필수요소입니다.")
     Long teamId,
     @NotBlank(message = "게시글 제목은 필수요소입니다")
     String articleTitle,

@@ -67,4 +67,8 @@ public class Member {
     public void updateImageUrl(String imageUrl){
         this.imageUrl = imageUrl;
     }
+
+    public boolean isMyUuid(String uuid){
+        return this.uuid.equals(uuid);
+    }
 }
