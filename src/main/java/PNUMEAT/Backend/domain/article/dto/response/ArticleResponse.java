@@ -8,16 +8,22 @@ public record ArticleResponse(
     Long articleId,
     String articleTitle,
     String articleBody,
-    LocalDateTime updatedDate,
+    LocalDateTime createdDate,
     String imageUrl
 ) {
     public static ArticleResponse of(Article article) {
+
+        String imageUrl = null;
+        if(!article.getImages().isEmpty()){
+            imageUrl = article.getImages().get(0).getImageUrl();
+        }
+
         return new ArticleResponse(
             article.getArticleId(),
             article.getArticleTitle(),
             article.getArticleBody(),
-            article.getUpdatedDate(),
-            article.getImages().get(0).getImageUrl()
+            article.getCreatedDate(),
+            imageUrl
         );
     }
 }

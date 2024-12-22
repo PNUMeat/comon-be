@@ -9,7 +9,7 @@ public record TeamSubjectResponse(
         String articleCategory,
         String articleTitle,
         String articleBody,
-        LocalDateTime updatedDate,
+        LocalDateTime createdDate,
         String imageUrl
 ) {
     public static TeamSubjectResponse of(Article article) {
@@ -24,7 +24,7 @@ public record TeamSubjectResponse(
                 article.getArticleCategory().getName(),
                 article.getArticleTitle(),
                 article.getArticleBody(),
-                article.getUpdatedDate(),
+                article.getCreatedDate(),
                 imageUrl
         );
 
