@@ -13,13 +13,12 @@ public record TeamSubjectResponse(
         String imageUrl
 ) {
     public static TeamSubjectResponse of(Article article) {
-
         String imageUrl = null;
         if(!article.getImages().isEmpty()){
             imageUrl = article.getImages().get(0).getImageUrl();
         }
 
-        TeamSubjectResponse teamSubjectResponse = new TeamSubjectResponse(
+        return new TeamSubjectResponse(
                 article.getArticleId(),
                 article.getArticleCategory().getName(),
                 article.getArticleTitle(),
@@ -27,7 +26,5 @@ public record TeamSubjectResponse(
                 article.getCreatedDate(),
                 imageUrl
         );
-
-        return teamSubjectResponse;
     }
 }

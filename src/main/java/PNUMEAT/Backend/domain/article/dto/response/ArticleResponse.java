@@ -12,7 +12,6 @@ public record ArticleResponse(
     String imageUrl
 ) {
     public static ArticleResponse of(Article article) {
-
         String imageUrl = null;
         if(!article.getImages().isEmpty()){
             imageUrl = article.getImages().get(0).getImageUrl();

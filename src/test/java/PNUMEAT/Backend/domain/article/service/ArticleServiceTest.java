@@ -1,6 +1,7 @@
 package PNUMEAT.Backend.domain.article.service;
 
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
+import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.enums.ArticleCategory;
 import PNUMEAT.Backend.domain.article.repository.ArticleRepository;
@@ -9,6 +10,7 @@ import PNUMEAT.Backend.domain.auth.repository.MemberRepository;
 import PNUMEAT.Backend.domain.team.entity.Team;
 import PNUMEAT.Backend.domain.team.enums.Topic;
 import PNUMEAT.Backend.domain.team.repository.TeamRepository;
+import PNUMEAT.Backend.domain.teamMember.entity.TeamMember;
 import PNUMEAT.Backend.global.error.Member.MemberNotFoundException;
 import PNUMEAT.Backend.global.error.articles.UnauthorizedActionException;
 import PNUMEAT.Backend.global.images.ImageService;
@@ -21,11 +23,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static PNUMEAT.Backend.domain.article.enums.ArticleCategory.getSubjectCategories;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -151,5 +157,70 @@ class ArticleServiceTest {
         assertThrows(UnauthorizedActionException.class, () ->
                 articleService.updateArticle(testArticle.getArticleId(), updateRequest, mockImage, anotherMember.getId())
         );
+    }
+
+
+    /*
+    @Test
+    @DisplayName("팀 주제 저장하기 - 정상 저장")
+    void saveTeamSubject_팀_주제_정상_저장() {
+        // given
+        Long teamId = testTeam.getTeamId();
+        MockMultipartFile mockImage = new MockMultipartFile("image", "image.jpg", "image/jpeg", "mock-image-content".getBytes());
+
+        String selectedDateStr = "2024-12-02";
+        TeamSubjectRequest teamSubjectRequest = new TeamSubjectRequest("스터디", selectedDateStr, "글제목", "글내용");
+
+        LocalDate selectedDate = LocalDate.parse(selectedDateStr);
+
+        given(teamRepository.findById(teamId)).willReturn(Optional.of(testTeam));
+        given(articleRepository.existsByTeamAndSelectedDateAndArticleCategoryIn(testTeam, selectedDate, getSubjectCategories()));
+
+        // when
+        Article savedTeamSubject = articleService.saveTeamSubject(testMember,teamId,teamSubjectRequest, mockImage);
+
+        // then
+        assertThat(savedTeamSubject.getArticleCategory().getName()).isEqualTo(teamSubjectRequest.articleCategory());
+        assertThat(savedTeamSubject.getSelectedDate().toString()).isEqualTo(teamSubjectRequest.selectedDate());
+        assertThat(savedTeamSubject.getArticleTitle()).isEqualTo(teamSubjectRequest.articleTitle());
+        assertThat(savedTeamSubject.getArticleBody()).isEqualTo(teamSubjectRequest.articleBody());
+    } */
+
+    @Test
+    @DisplayName("팀 주제 저장하기 - 팀이 존재하지 않는 경우")
+    void saveTeamSubject_팀_주제_팀이_존재하지_않는_경우() {
+        // given
+
+        // expected
+    }
+
+    @Test
+    @DisplayName("팀 주제 저장하기 - 팀 매니저가 아닌 경우")
+    void saveTeamSubject_팀_매니저가_아닌_경우() {
+    }
+
+    @Test
+    @DisplayName("팀 주제 저장하기 - 해당 일에 이미 주제가 등록되어 있는 경우")
+    void saveTeamSubject_해당일에_주제가_이미_등록되어있는_경우() {
+    }
+
+    @Test
+    @DisplayName("특정 날짜로 팀 주제 가져오기 - 정상")
+    void getTeamSubjectByDate_정상() {
+    }
+
+    @Test
+    @DisplayName("특정 날짜로 팀 주제 가져오기 - 팀이 존재하지 않는 경우")
+    void getTeamSubjectByDate_팀이_존재하지_않는_경우() {
+    }
+
+    @Test
+    @DisplayName("특정 날짜로 팀 주제 가져오기 - 팀원이 아닌 경우 ")
+    void getTeamSubjectByDate_팀원이_아닌_경우() {
+    }
+
+    @Test
+    @DisplayName("특정 날짜로 팀 주제 가져오기 - 게시글이 없는 경우 ")
+    void getTeamSubjectByDate_게시글이_없는_경우() {
     }
 }
