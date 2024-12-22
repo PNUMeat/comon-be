@@ -19,7 +19,7 @@ import PNUMEAT.Backend.global.error.Team.TeamManagerInvalidException;
 import PNUMEAT.Backend.global.error.Team.TeamNotFoundException;
 import PNUMEAT.Backend.global.error.articles.ArticleNotFoundException;
 import PNUMEAT.Backend.global.error.articles.MemberNotInTeamException;
-import PNUMEAT.Backend.global.error.articles.SubjectAlreadyCreatedException;
+import PNUMEAT.Backend.global.error.articles.SubjectDuplicatedException;
 import PNUMEAT.Backend.global.error.articles.UnauthorizedActionException;
 import PNUMEAT.Backend.global.images.ImageService;
 import java.time.LocalDate;
@@ -192,23 +192,14 @@ public class ArticleService {
                                    TeamSubjectRequest teamSubjectRequest,
                                    MultipartFile images){
 
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+        Team team = getTeamById(teamId);
 
-        checkMemberIsTeamManager(member, team);
+        validateTeamManager(member, team);
 
         LocalDate selectedDate = LocalDate.parse(teamSubjectRequest.selectedDate());
-        checkSubjectAlreadyCreated(team, selectedDate);
+        validateSubjectNotDuplicated(team, selectedDate);
 
-        Article subject = Article.builder()
-                .team(team)
-                .member(member)
-                .articleTitle(teamSubjectRequest.articleTitle())
-                .articleBody(teamSubjectRequest.articleBody())
-                .articleCategory(fromName(teamSubjectRequest.articleCategory()))
-                .selectedDate(selectedDate)
-                .images(new ArrayList<>())
-                .build();
+        Article subject = createArticle(member, team, teamSubjectRequest, selectedDate);
 
         Article savedSubject = articleRepository.save(subject);
 
@@ -217,16 +208,32 @@ public class ArticleService {
         return savedSubject;
     }
 
-    private static void checkMemberIsTeamManager(Member member, Team team) {
+    private Team getTeamById(Long teamId) {
+        return teamRepository.findById(teamId)
+                .orElseThrow(TeamNotFoundException::new);
+    }
+
+    private void validateTeamManager(Member member, Team team) {
         if(!team.isTeamManger(member)){
             throw new TeamManagerInvalidException();
         }
     }
 
-    private void checkSubjectAlreadyCreated(Team team, LocalDate selectedDate) {
+    private void validateSubjectNotDuplicated(Team team, LocalDate selectedDate) {
         if(articleRepository.existsByTeamAndSelectedDateAndArticleCategoryIn(team, selectedDate, getSubjectCategories())){
-            throw new SubjectAlreadyCreatedException();
+            throw new SubjectDuplicatedException();
         }
     }
 
+    private Article createArticle(Member member, Team team, TeamSubjectRequest teamSubjectRequest, LocalDate selectedDate) {
+        return Article.builder()
+                .team(team)
+                .member(member)
+                .articleTitle(teamSubjectRequest.articleTitle())
+                .articleBody(teamSubjectRequest.articleBody())
+                .articleCategory(fromName(teamSubjectRequest.articleCategory()))
+                .selectedDate(selectedDate)
+                .images(new ArrayList<>())
+                .build();
+    }
 }

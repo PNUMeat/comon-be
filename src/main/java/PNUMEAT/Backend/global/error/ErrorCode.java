@@ -22,7 +22,7 @@ public enum ErrorCode {
     ARTICLE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "존재 하지 않는 게시글 입니다."),
     MEMBER_NOT_IN_TEAM(HttpStatus.FORBIDDEN,"팀에 멤버가 존재하지않습니다."),
     UNAUTORIZED_ACTION(HttpStatus.FORBIDDEN,"게시물의 작성자가 아닙니다."),
-    SUBJECT_ALREADY_CREATED_ERROR(HttpStatus.CONFLICT, "이미 주제를 작성했습니다."),
+    SUBJECT_DUPLICATED_ERROR(HttpStatus.CONFLICT, "이미 주제를 작성했습니다."),
     ARTICLE_CATEGORY_INVALID_ERROR(HttpStatus.BAD_REQUEST, "해당 게시물 카테고리가 존재하지 않습니다."),
 
     //TEAM
