@@ -8,6 +8,9 @@ import PNUMEAT.Backend.domain.auth.repository.MemberRepository;
 import PNUMEAT.Backend.domain.team.entity.Team;
 import PNUMEAT.Backend.domain.team.enums.Topic;
 import PNUMEAT.Backend.domain.team.repository.TeamRepository;
+import jakarta.persistence.EntityManager;
+import java.time.Month;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,9 @@ class ArticleRepositoryTest {
     @Autowired
     private TeamRepository teamRepository;
 
+    @Autowired
+    private EntityManager em;
+
     private Member testMember;
     private Team testTeam;
     private Article testArticle;
@@ -56,10 +62,42 @@ class ArticleRepositoryTest {
                 new Article(testTeam, testMember, "Test Title", "Test Body", ArticleCategory.NORMAL, new ArrayList<>())
         );
 
+        Article subjectArticle1 = new Article(
+                testTeam,
+                testMember,
+                "test1",
+                "test1",
+                ArticleCategory.STUDY_PREVIEW,
+                LocalDate.parse("2024-12-11")
+        );
+
+        Article subjectArticle2 = new Article(
+                testTeam,
+                testMember,
+                "test2",
+                "test2",
+                ArticleCategory.STUDY,
+                LocalDate.parse("2024-12-12")
+        );
+
+        Article subjectArticle3 = new Article(
+                testTeam,
+                testMember,
+                "test3",
+                "test3",
+                ArticleCategory.STUDY_REVIEW,
+                LocalDate.parse("2024-12-13")
+        );
+
         // Add an ArticleImage to the Article
         ArticleImage testImage = new ArticleImage("http://test-image-url.com", testArticle);
         testArticle.addImage(testImage);
         articleRepository.save(testArticle);
+        articleRepository.save(subjectArticle1);
+        articleRepository.save(subjectArticle2);
+        articleRepository.save(subjectArticle3);
+
+        em.clear();
     }
 
     @Test
@@ -117,5 +155,26 @@ class ArticleRepositoryTest {
         assertThat(articles.getContent()).hasSize(1);
         Article retrievedArticle = articles.getContent().get(0);
         assertThat(retrievedArticle.getArticleTitle()).isEqualTo("Test Title");
+    }
+
+    @Test
+    @DisplayName("팀ID와 날짜 정보릃 활용하여 주제 게시글 조회")
+    void 팀_ID와_날짜_정보를_활용하여_주제_게시글_조회_테스트(){
+        //given
+        LocalDate date = LocalDate.parse("2024-12-13");
+
+        //when
+        List<Article> subjectArticles = articleRepository.findSubjectArticlesByTeamIdAndYearAndMonth(
+                testTeam.getTeamId(),
+                date.getYear(),
+                date.getMonth().getValue(),
+                ArticleCategory.getSubjectCategories()
+        );
+
+        //expected
+        assertThat(subjectArticles.size()).isEqualTo(3);
+        assertThat(subjectArticles.get(0).getArticleCategory()).isEqualTo(ArticleCategory.STUDY_PREVIEW);
+        assertThat(subjectArticles.get(1).getArticleCategory()).isEqualTo(ArticleCategory.STUDY);
+        assertThat(subjectArticles.get(2).getArticleCategory()).isEqualTo(ArticleCategory.STUDY_REVIEW);
     }
 }

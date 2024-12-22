@@ -1,8 +1,10 @@
 package PNUMEAT.Backend.domain.article.controller;
 
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
+import PNUMEAT.Backend.domain.article.dto.request.CalenderSubjectRequest;
 import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
 import PNUMEAT.Backend.domain.article.dto.response.ArticleResponse;
+import PNUMEAT.Backend.domain.article.dto.response.CalenderSubjectResponse;
 import PNUMEAT.Backend.domain.article.dto.response.TeamSubjectResponse;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.service.ArticleService;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -182,6 +185,23 @@ public class ArticleController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponse(teamSubjectResponse));
+    }
+
+    @GetMapping("/teams/{teamId}/subjects/calender")
+    public ResponseEntity<ApiResponse<?>> getCalenderInformation(
+            @LoginMember Member member,
+            @RequestBody @Valid CalenderSubjectRequest calenderSubjectRequest,
+            @PathVariable("teamId") Long teamId
+    ) {
+        CalenderSubjectResponse subjectArticlesUsingCalender = articleService.getSubjectArticlesUsingCalender(
+                member,
+                teamId,
+                calenderSubjectRequest
+        );
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponse(subjectArticlesUsingCalender));
     }
 
 }
