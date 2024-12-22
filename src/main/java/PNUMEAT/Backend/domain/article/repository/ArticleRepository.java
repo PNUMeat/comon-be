@@ -31,4 +31,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("SELECT a FROM Article a WHERE a.team.teamId = :teamId AND DATE(a.createdDate) = :date")
     Page<Article> findByTeamIdAndDate(@Param("teamId") Long teamId, @Param("date") LocalDate date, Pageable pageable);
+
+    @Query("SELECT a FROM Article a LEFT JOIN FETCH a.images WHERE a.team.teamId = :teamId AND DATE(a.selectedDate) = :selectedDate")
+    Optional<Article> findTeamSubjectByTeamAndSelectedDate(Team team, LocalDate selectedDate);
 }

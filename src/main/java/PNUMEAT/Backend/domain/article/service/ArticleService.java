@@ -16,11 +16,9 @@ import PNUMEAT.Backend.domain.team.repository.TeamRepository;
 import PNUMEAT.Backend.domain.teamMember.repository.TeamMemberRepository;
 import PNUMEAT.Backend.global.error.Member.MemberNotFoundException;
 import PNUMEAT.Backend.global.error.Team.TeamManagerInvalidException;
+import PNUMEAT.Backend.global.error.Team.TeamMemberInvalidException;
 import PNUMEAT.Backend.global.error.Team.TeamNotFoundException;
-import PNUMEAT.Backend.global.error.articles.ArticleNotFoundException;
-import PNUMEAT.Backend.global.error.articles.MemberNotInTeamException;
-import PNUMEAT.Backend.global.error.articles.SubjectDuplicatedException;
-import PNUMEAT.Backend.global.error.articles.UnauthorizedActionException;
+import PNUMEAT.Backend.global.error.articles.*;
 import PNUMEAT.Backend.global.images.ImageService;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -208,6 +206,18 @@ public class ArticleService {
         return savedSubject;
     }
 
+    @Transactional(readOnly = true)
+    public Article getTeamSubjectByDate(Member member, Long teamId, LocalDate date){
+        Team team = getTeamById(teamId);
+
+        if(!teamMemberRepository.existsByTeamAndMember(team, member)){
+            throw new TeamMemberInvalidException();
+        }
+
+        return articleRepository.findTeamSubjectByTeamAndSelectedDate(team, date)
+                .orElse(null);
+    }
+
     private Team getTeamById(Long teamId) {
         return teamRepository.findById(teamId)
                 .orElseThrow(TeamNotFoundException::new);
@@ -233,7 +243,6 @@ public class ArticleService {
                 .articleBody(teamSubjectRequest.articleBody())
                 .articleCategory(fromName(teamSubjectRequest.articleCategory()))
                 .selectedDate(selectedDate)
-                .images(new ArrayList<>())
                 .build();
     }
 }

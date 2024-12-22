@@ -21,7 +21,7 @@ public enum ErrorCode {
     ARTICLE_FORBIDDEN_ERROR(HttpStatus.FORBIDDEN, "게시글 권한이 없습니다."),
     ARTICLE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "존재 하지 않는 게시글 입니다."),
     MEMBER_NOT_IN_TEAM(HttpStatus.FORBIDDEN,"팀에 멤버가 존재하지않습니다."),
-    UNAUTORIZED_ACTION(HttpStatus.FORBIDDEN,"게시물의 작성자가 아닙니다."),
+    UNAUTHORIZED_ACTION(HttpStatus.FORBIDDEN,"게시물의 작성자가 아닙니다."),
     SUBJECT_DUPLICATED_ERROR(HttpStatus.CONFLICT, "이미 주제를 작성했습니다."),
     ARTICLE_CATEGORY_INVALID_ERROR(HttpStatus.BAD_REQUEST, "해당 게시물 카테고리가 존재하지 않습니다."),
 
@@ -31,6 +31,7 @@ public enum ErrorCode {
     TEAM_PASSWORD_INVALID(HttpStatus.BAD_REQUEST, "팀 비밀번호가 옳지 않습니다."),
     TEAM_ALREADY_JOIN(HttpStatus.CONFLICT, "이미 팀에 가입했습니다."),
     TEAM_MANAGER_INVALID_ERROR(HttpStatus.BAD_REQUEST, "팀의 매니저가 옳지 않습니다."),
+    TEAM_MEMBER_INVALID_ERROR(HttpStatus.BAD_REQUEST, "팀의 멤버가 아닙니다."),
 
     //IMAGE
     IMAGE_FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST,"이미지 파일 업로드 에러발생."),

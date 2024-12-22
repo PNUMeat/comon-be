@@ -3,6 +3,7 @@ package PNUMEAT.Backend.domain.article.controller;
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
 import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
 import PNUMEAT.Backend.domain.article.dto.response.ArticleResponse;
+import PNUMEAT.Backend.domain.article.dto.response.TeamSubjectResponse;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.service.ArticleService;
 import PNUMEAT.Backend.domain.auth.entity.Member;
@@ -163,6 +164,19 @@ public class ArticleController {
         return ResponseEntity.status(SUBJECT_CREATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.createResponseWithMessage(SUBJECT_CREATE_SUCCESS.getMessage()));
+    }
+
+    @GetMapping("/teams/{teamId}/subjects")
+    public ResponseEntity<?> getTeamSubjectsByDate(
+            @LoginMember Member member,
+            @PathVariable("teamId") Long teamId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        Article subject = articleService.getTeamSubjectByDate(member, teamId, date);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponse(TeamSubjectResponse.of(subject)));
     }
 
 }

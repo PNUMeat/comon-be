@@ -66,20 +66,17 @@ public class Article extends TimeStamp {
 
     @Builder
     public Article(Team team, Member member, String articleTitle, String articleBody,
-                   ArticleCategory articleCategory, LocalDate selectedDate, List<ArticleImage> images) {
+                   ArticleCategory articleCategory, LocalDate selectedDate) {
         this.team = team;
         this.member = member;
         this.articleTitle = articleTitle;
         this.articleBody = articleBody;
         this.articleCategory = articleCategory;
         this.selectedDate = selectedDate;
-        this.images = images;
     }
 
     public void addImage(ArticleImage image) {
         images.add(image);
         image.updateArticle(this);
     }
-
-
 }
