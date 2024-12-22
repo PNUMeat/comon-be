@@ -18,8 +18,7 @@ import java.util.Optional;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
     Optional<Article> findByArticleId(Long articleId);
-    boolean existsByTeamAndCreatedDateAndArticleCategoryIn(Team team, LocalDate createdDate, List<ArticleCategory> articleCategories);
-
+    boolean existsByTeamAndSelectedDateAndArticleCategoryIn(Team team, LocalDate selectedDate, List<ArticleCategory> articleCategories);
 
     @Query("SELECT a FROM Article a LEFT JOIN FETCH a.images WHERE a.member.id = :memberId")
     List<Article> findByMemberIdWithImages(@Param("memberId") Long memberId);

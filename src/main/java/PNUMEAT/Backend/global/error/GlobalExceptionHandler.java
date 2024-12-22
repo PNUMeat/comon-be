@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.time.format.DateTimeParseException;
+
+import static PNUMEAT.Backend.global.error.ErrorCode.DATETIME_PARSE_ERROR;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -29,8 +33,18 @@ public class GlobalExceptionHandler {
         .body(ApiResponse.validationErrorResponse(errorValidationResult));
   }
 
+  @ResponseBody
+  @ExceptionHandler(DateTimeParseException.class)
+  public ResponseEntity<ApiResponse<?>> dateTimeParseExceptionHandler(DateTimeParseException e) {
+    ErrorResult errorResult = new ErrorResult(DATETIME_PARSE_ERROR.getStatus().value(), DATETIME_PARSE_ERROR.getMessage());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(ApiResponse.errorResponse(errorResult));
+  }
+
   @ExceptionHandler(ComonException.class)
-  public ResponseEntity<ApiResponse<?>> team24ExceptionHandler(ComonException e) {
+  public ResponseEntity<ApiResponse<?>> comonExceptionHandler(ComonException e) {
     ErrorResult errorResult = new ErrorResult(e.getStatusCode(), e.getMessage());
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)

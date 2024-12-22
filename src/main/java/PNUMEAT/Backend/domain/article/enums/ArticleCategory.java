@@ -1,7 +1,11 @@
 package PNUMEAT.Backend.domain.article.enums;
 
-import java.util.ArrayList;
+import PNUMEAT.Backend.global.error.articles.ArticleCategoryInvalidException;
+
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 public enum ArticleCategory {
     NORMAL(-1, "일반"),
@@ -34,14 +38,15 @@ public enum ArticleCategory {
     }
 
     public static List<ArticleCategory> getSubjectCategories(){
-        List<ArticleCategory> subjectCategories = new ArrayList<>();
+        return Arrays.stream(ArticleCategory.values())
+                .filter(articleCategory -> articleCategory.code > 0)
+                .collect(Collectors.toList());
+    }
 
-        for(ArticleCategory articleCategory : ArticleCategory.values()){
-            if(articleCategory.code > 0){
-                subjectCategories.add(articleCategory);
-            }
-        }
-
-        return subjectCategories;
+    public static ArticleCategory fromName(String name){
+        return Arrays.stream(ArticleCategory.values())
+                .filter(category -> category.getName().equals(name))
+                .findFirst()
+                .orElseThrow(ArticleCategoryInvalidException::new);
     }
 }

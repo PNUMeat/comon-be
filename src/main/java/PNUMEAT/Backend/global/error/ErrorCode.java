@@ -22,7 +22,8 @@ public enum ErrorCode {
     ARTICLE_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "존재 하지 않는 게시글 입니다."),
     MEMBER_NOT_IN_TEAM(HttpStatus.FORBIDDEN,"팀에 멤버가 존재하지않습니다."),
     UNAUTORIZED_ACTION(HttpStatus.FORBIDDEN,"게시물의 작성자가 아닙니다."),
-    TODAY_SUBJECT_ALREADY_CREATED(HttpStatus.CONFLICT, "이미 오늘의 주제를 작성했습니다."),
+    SUBJECT_ALREADY_CREATED_ERROR(HttpStatus.CONFLICT, "이미 주제를 작성했습니다."),
+    ARTICLE_CATEGORY_INVALID_ERROR(HttpStatus.BAD_REQUEST, "해당 게시물 카테고리가 존재하지 않습니다."),
 
     //TEAM
     TOPIC_INVALID_ERROR(HttpStatus.BAD_REQUEST, "주제가 올바른 형식이 아닙니다."),
@@ -34,7 +35,10 @@ public enum ErrorCode {
     //IMAGE
     IMAGE_FILE_UPLOAD_ERROR(HttpStatus.BAD_REQUEST,"이미지 파일 업로드 에러발생."),
     IMAGE_FILE_DELETE_ERROR(HttpStatus.BAD_REQUEST,"이미지 파일 삭제 에러발생."),
-    S3_NETWORK_ERROR(HttpStatus.BAD_REQUEST,"S3 연결 에러 발생");
+    S3_NETWORK_ERROR(HttpStatus.BAD_REQUEST,"S3 연결 에러 발생"),
+
+    //GENERAL
+    DATETIME_PARSE_ERROR(HttpStatus.BAD_REQUEST, "날짜 및 날짜 형식이 올바르지 않습니다.");
 
     private final HttpStatus status;
 

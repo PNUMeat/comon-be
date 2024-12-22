@@ -19,7 +19,7 @@ import PNUMEAT.Backend.global.error.Team.TeamManagerInvalidException;
 import PNUMEAT.Backend.global.error.Team.TeamNotFoundException;
 import PNUMEAT.Backend.global.error.articles.ArticleNotFoundException;
 import PNUMEAT.Backend.global.error.articles.MemberNotInTeamException;
-import PNUMEAT.Backend.global.error.articles.TodaySubjectAlreadyCreatedException;
+import PNUMEAT.Backend.global.error.articles.SubjectAlreadyCreatedException;
 import PNUMEAT.Backend.global.error.articles.UnauthorizedActionException;
 import PNUMEAT.Backend.global.images.ImageService;
 import java.time.LocalDate;
@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import static PNUMEAT.Backend.domain.article.enums.ArticleCategory.fromName;
 import static PNUMEAT.Backend.domain.article.enums.ArticleCategory.getSubjectCategories;
 
 
@@ -194,23 +195,38 @@ public class ArticleService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(TeamNotFoundException::new);
 
+        checkMemberIsTeamManager(member, team);
+
+        LocalDate selectedDate = LocalDate.parse(teamSubjectRequest.selectedDate());
+        checkSubjectAlreadyCreated(team, selectedDate);
+
+        Article subject = Article.builder()
+                .team(team)
+                .member(member)
+                .articleTitle(teamSubjectRequest.articleTitle())
+                .articleBody(teamSubjectRequest.articleBody())
+                .articleCategory(fromName(teamSubjectRequest.articleCategory()))
+                .selectedDate(selectedDate)
+                .images(new ArrayList<>())
+                .build();
+
+        Article savedSubject = articleRepository.save(subject);
+
+        handleImageUpload(savedSubject, images);
+
+        return savedSubject;
+    }
+
+    private static void checkMemberIsTeamManager(Member member, Team team) {
         if(!team.isTeamManger(member)){
             throw new TeamManagerInvalidException();
         }
-
-        LocalDate today = LocalDate.now();
-
-        if(articleRepository.existsByTeamAndCreatedDateAndArticleCategoryIn(team, today, getSubjectCategories())){
-            throw new TodaySubjectAlreadyCreatedException();
-        }
-
-        Article article = new Article(team, member, teamSubjectRequest.articleTitle(),
-                teamSubjectRequest.articleBody(), teamSubjectRequest.articleCategory(), new ArrayList<>());
-
-        articleRepository.save(article);
-
-        handleImageUpload(article, images);
-
-        return article;
     }
+
+    private void checkSubjectAlreadyCreated(Team team, LocalDate selectedDate) {
+        if(articleRepository.existsByTeamAndSelectedDateAndArticleCategoryIn(team, selectedDate, getSubjectCategories())){
+            throw new SubjectAlreadyCreatedException();
+        }
+    }
+
 }
