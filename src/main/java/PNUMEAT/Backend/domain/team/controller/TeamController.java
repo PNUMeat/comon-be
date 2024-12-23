@@ -7,8 +7,10 @@ import PNUMEAT.Backend.domain.team.dto.request.TeamRequest;
 import PNUMEAT.Backend.domain.team.dto.response.MyTeamResponse;
 import PNUMEAT.Backend.domain.team.dto.response.TeamAllResponse;
 import PNUMEAT.Backend.domain.team.dto.response.TeamCombinedResponse;
+import PNUMEAT.Backend.domain.team.dto.response.TeamJoinResponse;
 import PNUMEAT.Backend.domain.team.entity.Team;
 import PNUMEAT.Backend.domain.team.service.TeamService;
+import PNUMEAT.Backend.domain.teamMember.entity.TeamMember;
 import PNUMEAT.Backend.global.error.dto.response.ApiResponse;
 import PNUMEAT.Backend.global.security.annotation.LoginMember;
 import jakarta.validation.Valid;
@@ -101,11 +103,13 @@ public class TeamController {
     public ResponseEntity<ApiResponse<?>> joinTeam(@PathVariable("teamId") Long teamId,
                                                     @RequestBody TeamJoinRequest teamJoinRequest,
                                                     @LoginMember Member member){
-        teamService.joinTeam(member, teamJoinRequest.password(), teamId);
+        TeamMember teamMember = teamService.joinTeam(member, teamJoinRequest.password(), teamId);
+
+        TeamJoinResponse teamJoinResponse = TeamJoinResponse.of(teamMember);
 
         return ResponseEntity.status(TEAM_JOIN_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithMessage(TEAM_JOIN_SUCCESS.getMessage()));
+                .body(ApiResponse.successResponse(teamJoinResponse));
     }
 
     @PatchMapping("/{teamId}/announcement")
