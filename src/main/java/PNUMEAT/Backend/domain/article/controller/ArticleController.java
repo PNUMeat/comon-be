@@ -1,6 +1,7 @@
 package PNUMEAT.Backend.domain.article.controller;
 
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
+import PNUMEAT.Backend.domain.article.dto.request.ArticleUpdateRequest;
 import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
 import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectUpdateRequest;
 import PNUMEAT.Backend.domain.article.dto.response.ArticleResponse;
@@ -124,11 +125,11 @@ public class ArticleController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateArticle(
             @PathVariable Long id,
-            @ModelAttribute ArticleRequest articleRequest,
+            @ModelAttribute ArticleUpdateRequest articleUpdateRequest,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @LoginMember Member member) {
 
-        articleService.updateArticle(id, articleRequest, image, member.getId());
+        articleService.updateArticle(id, articleUpdateRequest, image, member.getId());
 
         return ResponseEntity.status(ARTICLE_PUT_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)

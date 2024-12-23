@@ -2,10 +2,7 @@
 package PNUMEAT.Backend.domain.article.service;
 
 
-import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
-import PNUMEAT.Backend.domain.article.dto.request.CalenderSubjectRequest;
-import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
-import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectUpdateRequest;
+import PNUMEAT.Backend.domain.article.dto.request.*;
 import PNUMEAT.Backend.domain.team.dto.response.TeamPageResponse;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.entity.ArticleImage;
@@ -112,7 +109,7 @@ public class ArticleService {
     }
 
     @Transactional
-    public void updateArticle(Long articleId, ArticleRequest articleRequest, MultipartFile image, Long memberId) {
+    public void updateArticle(Long articleId, ArticleUpdateRequest articleUpdateRequest, MultipartFile image, Long memberId) {
         Article article = articleRepository.findByIdWithImages(articleId).orElseThrow(
                 ArticleNotFoundException::new
         );
@@ -121,7 +118,7 @@ public class ArticleService {
             throw new UnauthorizedActionException();
         }
 
-        updateArticleFields(article, articleRequest);
+        updateArticleFields(article, articleUpdateRequest);
 
         handleImageUpdate(article, image);
     }
@@ -152,12 +149,12 @@ public class ArticleService {
     }
 
 
-    private void updateArticleFields(Article article, ArticleRequest articleRequest) {
-        if (articleRequest.articleTitle() != null) {
-            article.updateTitle(articleRequest.articleTitle());
+    private void updateArticleFields(Article article, ArticleUpdateRequest articleUpdateRequest) {
+        if (articleUpdateRequest.articleTitle() != null) {
+            article.updateTitle(articleUpdateRequest.articleTitle());
         }
-        if (articleRequest.articleBody() != null) {
-            article.updateBody(articleRequest.articleBody());
+        if (articleUpdateRequest.articleBody() != null) {
+            article.updateBody(articleUpdateRequest.articleBody());
         }
 
     }
