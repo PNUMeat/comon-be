@@ -20,7 +20,11 @@ public class ApiResponse<T> {
     private final String message;
     private final T data;
 
-    public static <T> ApiResponse<?> successResponse(T data){
+    public static <T> ApiResponse<?> successResponse(T data, String message){
+        return new ApiResponse<>(SUCCESS, HttpStatus.OK.value(), message, data);
+    }
+
+    public static <T> ApiResponse<?> successResponseWithData(T data){
         return new ApiResponse<>(SUCCESS, HttpStatus.OK.value(), null, data);
     }
 
