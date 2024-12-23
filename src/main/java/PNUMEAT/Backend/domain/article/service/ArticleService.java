@@ -224,7 +224,7 @@ public class ArticleService {
 
         validateTeamManager(member, team);
 
-        if(articleRepository.existsById(articleId)){
+        if(!articleRepository.existsById(articleId)){
             throw new ArticleNotFoundException();
         }
 
