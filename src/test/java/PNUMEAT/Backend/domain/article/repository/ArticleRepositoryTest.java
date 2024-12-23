@@ -9,8 +9,6 @@ import PNUMEAT.Backend.domain.team.entity.Team;
 import PNUMEAT.Backend.domain.team.enums.Topic;
 import PNUMEAT.Backend.domain.team.repository.TeamRepository;
 import jakarta.persistence.EntityManager;
-import java.time.Month;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static PNUMEAT.Backend.domain.article.enums.ArticleCategory.getSubjectCategories;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -46,6 +45,7 @@ class ArticleRepositoryTest {
     private Member testMember;
     private Team testTeam;
     private Article testArticle;
+    private  Article subjectArticle1;
 
     @BeforeEach
     void setup() {
@@ -62,7 +62,7 @@ class ArticleRepositoryTest {
                 new Article(testTeam, testMember, "Test Title", "Test Body", ArticleCategory.NORMAL, new ArrayList<>())
         );
 
-        Article subjectArticle1 = new Article(
+        subjectArticle1 = new Article(
                 testTeam,
                 testMember,
                 "test1",
@@ -89,7 +89,6 @@ class ArticleRepositoryTest {
                 LocalDate.parse("2024-12-13")
         );
 
-        // Add an ArticleImage to the Article
         ArticleImage testImage = new ArticleImage("http://test-image-url.com", testArticle);
         testArticle.addImage(testImage);
         articleRepository.save(testArticle);
@@ -176,5 +175,42 @@ class ArticleRepositoryTest {
         assertThat(subjectArticles.get(0).getArticleCategory()).isEqualTo(ArticleCategory.STUDY_PREVIEW);
         assertThat(subjectArticles.get(1).getArticleCategory()).isEqualTo(ArticleCategory.STUDY);
         assertThat(subjectArticles.get(2).getArticleCategory()).isEqualTo(ArticleCategory.STUDY_REVIEW);
+    }
+
+    @Test
+    @DisplayName("팀과 설정 날짜로 팀 주제 찾기 - 주제가 있는 경우")
+    void findTeamSubjectByTeamAndSelectedDate_주제가_있는_경우() {
+        // given
+        LocalDate selectedDate = LocalDate.parse("2024-12-11");
+
+        // when
+        Optional<Article> subjectArticle = articleRepository.findTeamSubjectByTeamAndSelectedDate(
+                testTeam.getTeamId(),
+                selectedDate,
+                ArticleCategory.getSubjectCategories()
+        );
+
+        // then
+        assertThat(subjectArticle.isPresent()).isEqualTo(true);
+        assertThat(subjectArticle.get().getArticleId()).isEqualTo(subjectArticle1.getArticleId());
+        assertThat(subjectArticle.get().getTeam().getTeamId()).isEqualTo(testTeam.getTeamId());
+        assertThat(subjectArticle.get().getSelectedDate()).isEqualTo(subjectArticle.get().getSelectedDate());
+    }
+
+    @Test
+    @DisplayName("팀과 설정 날짜로 팀 주제 찾기 - 주제가 없는 경우")
+    void findTeamSubjectByTeamAndSelectedDate_주제가_없는_경우() {
+        // given
+        LocalDate selectedDate = LocalDate.parse("2024-12-09");
+
+        // when
+        Optional<Article> subjectArticle = articleRepository.findTeamSubjectByTeamAndSelectedDate(
+                testTeam.getTeamId(),
+                selectedDate,
+                ArticleCategory.getSubjectCategories()
+        );
+
+        // then
+        assertThat(subjectArticle.isEmpty()).isEqualTo(true);
     }
 }

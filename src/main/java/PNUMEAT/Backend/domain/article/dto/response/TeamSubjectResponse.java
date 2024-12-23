@@ -1,6 +1,7 @@
 package PNUMEAT.Backend.domain.article.dto.response;
 
 import PNUMEAT.Backend.domain.article.entity.Article;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
 
@@ -9,6 +10,7 @@ public record TeamSubjectResponse(
         String articleCategory,
         String articleTitle,
         String articleBody,
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdDate,
         String imageUrl
 ) {
