@@ -187,6 +187,19 @@ public class ArticleController {
                 .body(ApiResponse.successResponse(teamSubjectResponse));
     }
 
+    @DeleteMapping ("/teams/{teamId}/subjects/{articleId}")
+    public ResponseEntity<?> deleteTeamSubjectsByArticleId(
+            @LoginMember Member member,
+            @PathVariable("teamId") Long teamId,
+            @PathVariable("articleId") Long articleId) {
+
+        articleService.deleteTeamSubjectByArticleId(member, teamId, articleId);
+
+        return ResponseEntity.status(SUBJECT_DELETE_SUCCESS.getStatusCode())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponseWithMessage(SUBJECT_DELETE_SUCCESS.getMessage()));
+    }
+
     @GetMapping("/teams/{teamId}/subjects/calender")
     public ResponseEntity<ApiResponse<?>> getCalenderInformation(
             @LoginMember Member member,

@@ -220,6 +220,17 @@ public class ArticleService {
                 .orElse(null);
     }
 
+    @Transactional
+    public void deleteTeamSubjectByArticleId(Member member, Long teamId, Long articleId){
+        Team team = getTeamById(teamId);
+
+        validateTeamManager(member, team);
+
+        validateArticleExists(articleId);
+
+        articleRepository.deleteById(articleId);
+    }
+
     @Transactional(readOnly = true)
     public CalenderSubjectResponse getSubjectArticlesUsingCalender(Member member, Long teamId, CalenderSubjectRequest calenderSubjectRequest){
         Team team = getTeamById(teamId);
@@ -259,5 +270,11 @@ public class ArticleService {
                 .articleCategory(fromName(teamSubjectRequest.articleCategory()))
                 .selectedDate(selectedDate)
                 .build();
+    }
+
+    private void validateArticleExists(Long articleId) {
+        if(articleRepository.existsById(articleId)){
+            throw new ArticleNotFoundException();
+        }
     }
 }
