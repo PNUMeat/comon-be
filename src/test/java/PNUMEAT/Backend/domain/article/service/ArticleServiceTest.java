@@ -88,7 +88,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("팀 주제 저장하기 - 정상 저장, 이미지 있음")
+    @DisplayName("팀 주제 저장할 때 이미지가 있는 경우 테스트")
     void saveTeamSubject_팀_주제_정상_저장_이미지있음() {
         // given
         Long teamId = testTeam.getTeamId();
@@ -116,7 +116,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("팀 주제 저장하기 - 정상 저장, 이미지 없음")
+    @DisplayName("팀 주제를 저장할 때 이미지가 없는 경우 테스트")
     void saveTeamSubject_팀_주제_정상_저장_이미지없음() {
         // given
         Long teamId = testTeam.getTeamId();
@@ -142,7 +142,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("팀 주제 저장하기 - 팀이 존재하지 않는 경우")
+    @DisplayName("팀 주제 저장할 때 팀이 존재하지 않는 경우, team not found exception 발생")
     void saveTeamSubject_팀_주제_팀이_존재하지_않는_경우() {
         // given
         Long teamId = testTeam.getTeamId();
@@ -158,7 +158,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("팀 주제 저장하기 - 팀 매니저가 아닌 경우")
+    @DisplayName("팀 주제 저장할 때 팀 매니저가 아닌 경우, team manager invalid exception 발생")
     void saveTeamSubject_팀_매니저가_아닌_경우() {
         // given
         Long teamId = testTeam.getTeamId();
@@ -175,7 +175,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("팀 주제 저장하기 - 해당 일에 이미 주제가 등록되어 있는 경우")
+    @DisplayName("팀 주제를 저장할 때 해당 날에 이미 주제가 등록되어 있는 경우, subject duplicated exception 발생")
     void saveTeamSubject_해당일에_주제가_이미_등록되어있는_경우() {
         // given
         Long teamId = testTeam.getTeamId();
@@ -192,7 +192,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("특정 날짜로 팀 주제 가져오기 - 정상: 해당 날짜에 주제 O")
+    @DisplayName("특정 날짜로 팀 주제 가져올 때 주제가 있으면, 주제를 반환")
     void getTeamSubjectByDate_정상_주제_있음() {
         // given
         Long teamId = testTeam.getTeamId();
@@ -212,7 +212,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("특정 날짜로 팀 주제 가져오기 - 정상: 해당 날짜에 주제가 X, null 반환")
+    @DisplayName("특정 날짜로 팀 주제 가져올 때 주제가 없으면, null 반환")
     void getTeamSubjectByDate_정상_주제_없음() {
         // given
         Long teamId = testTeam.getTeamId();
@@ -231,7 +231,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("특정 날짜로 팀 주제 가져오기 - 팀이 존재하지 않는 경우")
+    @DisplayName("특정 날짜로 팀 주제 가져올 때 팀이 존재하지 않는 경우, team not found exception 발생")
     void getTeamSubjectByDate_팀이_존재하지_않는_경우() {
         // given
         Long teamId = testTeam.getTeamId();
@@ -246,7 +246,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("특정 날짜로 팀 주제 가져오기 - 팀원이 아닌 경우 ")
+    @DisplayName("특정 날짜로 팀 주제 가져올 때 팀원이 아닌 경우, team member invalid exception 발생")
     void getTeamSubjectByDate_팀원이_아닌_경우() {
         // given
         Long teamId = testTeam.getTeamId();

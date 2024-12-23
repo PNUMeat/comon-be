@@ -157,7 +157,7 @@ class ArticleRepositoryTest {
     }
 
     @Test
-    @DisplayName("팀ID와 날짜 정보릃 활용하여 주제 게시글 조회")
+    @DisplayName("팀 ID와 날짜 정보릃 활용하여 주제 게시글 조회")
     void 팀_ID와_날짜_정보를_활용하여_주제_게시글_조회_테스트(){
         //given
         LocalDate date = LocalDate.parse("2024-12-13");
@@ -178,7 +178,7 @@ class ArticleRepositoryTest {
     }
 
     @Test
-    @DisplayName("팀과 설정 날짜로 팀 주제 찾기 - 주제가 있는 경우")
+    @DisplayName("팀과 설정 날짜로 팀 주제 찾을 때, 주제가 있는 경우 테스트")
     void findTeamSubjectByTeamAndSelectedDate_주제가_있는_경우() {
         // given
         LocalDate selectedDate = LocalDate.parse("2024-12-11");
@@ -198,7 +198,7 @@ class ArticleRepositoryTest {
     }
 
     @Test
-    @DisplayName("팀과 설정 날짜로 팀 주제 찾기 - 주제가 없는 경우")
+    @DisplayName("팀과 설정 날짜로 팀 주제 찾을 때, 주제가 없는 경우 테스트")
     void findTeamSubjectByTeamAndSelectedDate_주제가_없는_경우() {
         // given
         LocalDate selectedDate = LocalDate.parse("2024-12-09");
