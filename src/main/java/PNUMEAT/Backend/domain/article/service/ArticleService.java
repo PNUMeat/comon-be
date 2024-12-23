@@ -5,6 +5,7 @@ package PNUMEAT.Backend.domain.article.service;
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
 import PNUMEAT.Backend.domain.article.dto.request.CalenderSubjectRequest;
 import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
+import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectUpdateRequest;
 import PNUMEAT.Backend.domain.article.dto.response.CalenderSubjectResponse;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.entity.ArticleImage;
@@ -138,9 +139,6 @@ public class ArticleService {
         }
     }
 
-
-
-
     private void handleImageUpload(Article article, MultipartFile images) {
         if (images != null && !images.isEmpty()) {
             String imageUrl = imageService.articleImageUpload(images);
@@ -226,9 +224,27 @@ public class ArticleService {
 
         validateTeamManager(member, team);
 
-        validateArticleExists(articleId);
+        if(articleRepository.existsById(articleId)){
+            throw new ArticleNotFoundException();
+        }
 
         articleRepository.deleteById(articleId);
+    }
+
+    @Transactional
+    public Article updateTeamSubjectByArticleId(Member member, Long teamId, Long articleId, MultipartFile image, TeamSubjectUpdateRequest teamSubjectUpdateRequest){
+        Team team = getTeamById(teamId);
+
+        validateTeamManager(member, team);
+
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(ArticleNotFoundException::new);
+
+        updateTeamSubject(teamSubjectUpdateRequest, article);
+
+        handleImageUpdate(article, image);
+
+        return article;
     }
 
     @Transactional(readOnly = true)
@@ -272,9 +288,18 @@ public class ArticleService {
                 .build();
     }
 
-    private void validateArticleExists(Long articleId) {
-        if(articleRepository.existsById(articleId)){
-            throw new ArticleNotFoundException();
+    private void updateTeamSubject(TeamSubjectUpdateRequest teamSubjectUpdateRequest, Article article) {
+        if(teamSubjectUpdateRequest.articleTitle() != null){
+            article.updateTitle(teamSubjectUpdateRequest.articleTitle());
+        }
+
+        if(teamSubjectUpdateRequest.articleCategory() != null){
+            ArticleCategory updatedCategory = ArticleCategory.fromName(teamSubjectUpdateRequest.articleCategory());
+            article.updateCategory(updatedCategory);
+        }
+
+        if(teamSubjectUpdateRequest.articleBody() != null){
+            article.updateBody(teamSubjectUpdateRequest.articleBody());
         }
     }
 }
