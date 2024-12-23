@@ -1,5 +1,8 @@
 package PNUMEAT.Backend.domain.team.controller;
 
+import PNUMEAT.Backend.domain.article.dto.request.CalenderSubjectRequest;
+import PNUMEAT.Backend.domain.team.dto.response.TeamPageResponse;
+import PNUMEAT.Backend.domain.article.service.ArticleService;
 import PNUMEAT.Backend.domain.auth.entity.Member;
 import PNUMEAT.Backend.domain.team.dto.request.TeamAnnouncementRequest;
 import PNUMEAT.Backend.domain.team.dto.request.TeamJoinRequest;
@@ -36,6 +39,7 @@ import static PNUMEAT.Backend.global.response.ResponseMessageEnum.*;
 public class TeamController {
 
     private final TeamService teamService;
+    private final ArticleService articleService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createTeam(@ModelAttribute @Valid TeamRequest teamRequest,
@@ -121,6 +125,23 @@ public class TeamController {
         return ResponseEntity.status(TEAM_ANNOUNCEMENT_UPDATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponseWithMessage(TEAM_ANNOUNCEMENT_UPDATE_SUCCESS.getMessage()));
+    }
+
+    @GetMapping("/{teamId}/team-page")
+    public ResponseEntity<ApiResponse<?>> getCalenderInformation(
+            @LoginMember Member member,
+            @RequestBody @Valid CalenderSubjectRequest calenderSubjectRequest,
+            @PathVariable("teamId") Long teamId
+    ) {
+        TeamPageResponse subjectArticlesUsingCalender = articleService.getSubjectArticlesUsingCalender(
+                member,
+                teamId,
+                calenderSubjectRequest
+        );
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponse(subjectArticlesUsingCalender));
     }
 }
 
