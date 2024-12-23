@@ -230,7 +230,7 @@ public class ArticleService {
 
         List<Article> subjectArticles = articleRepository.findSubjectArticlesByTeamIdAndYearAndMonth(teamId, calenderSubjectRequest.year(), calenderSubjectRequest.month(), getSubjectCategories());
 
-        return CalenderSubjectResponse.from(team.getTeamAnnouncement(), team.isTeamManger(member), subjectArticles);
+        return CalenderSubjectResponse.from(team, team.isTeamManger(member), subjectArticles);
     }
 
     private Team getTeamById(Long teamId) {
