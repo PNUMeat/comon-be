@@ -118,7 +118,7 @@ public class ArticleController {
 
         return ResponseEntity.status(ARTICLE_DELETE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.createResponseWithMessage(ARTICLE_DELETE_SUCCESS.getMessage()));
+                .body(ApiResponse.successResponseWithMessage(ARTICLE_DELETE_SUCCESS.getMessage()));
     }
 
     // 게시글 수정
@@ -133,7 +133,7 @@ public class ArticleController {
 
         return ResponseEntity.status(ARTICLE_PUT_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.createResponseWithMessage(ARTICLE_PUT_SUCCESS.getMessage()));
+                .body(ApiResponse.successResponseWithMessage(ARTICLE_PUT_SUCCESS.getMessage()));
     }
 
     // 날짜기준 게시물 조회
