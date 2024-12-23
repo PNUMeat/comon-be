@@ -2,9 +2,7 @@
 package PNUMEAT.Backend.domain.article.service;
 
 
-import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
-import PNUMEAT.Backend.domain.article.dto.request.CalenderSubjectRequest;
-import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
+import PNUMEAT.Backend.domain.article.dto.request.*;
 import PNUMEAT.Backend.domain.team.dto.response.TeamPageResponse;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.entity.ArticleImage;
@@ -111,7 +109,7 @@ public class ArticleService {
     }
 
     @Transactional
-    public void updateArticle(Long articleId, ArticleRequest articleRequest, MultipartFile image, Long memberId) {
+    public void updateArticle(Long articleId, ArticleUpdateRequest articleUpdateRequest, MultipartFile image, Long memberId) {
         Article article = articleRepository.findByIdWithImages(articleId).orElseThrow(
                 ArticleNotFoundException::new
         );
@@ -120,7 +118,7 @@ public class ArticleService {
             throw new UnauthorizedActionException();
         }
 
-        updateArticleFields(article, articleRequest);
+        article.updateArticle(articleUpdateRequest.articleTitle(), articleUpdateRequest.articleBody());
 
         handleImageUpdate(article, image);
     }
@@ -138,9 +136,6 @@ public class ArticleService {
         }
     }
 
-
-
-
     private void handleImageUpload(Article article, MultipartFile images) {
         if (images != null && !images.isEmpty()) {
             String imageUrl = imageService.articleImageUpload(images);
@@ -151,17 +146,6 @@ public class ArticleService {
 
             articleImageRepository.save(articleImage);
         }
-    }
-
-
-    private void updateArticleFields(Article article, ArticleRequest articleRequest) {
-        if (articleRequest.articleTitle() != null) {
-            article.updateTitle(articleRequest.articleTitle());
-        }
-        if (articleRequest.articleBody() != null) {
-            article.updateBody(articleRequest.articleBody());
-        }
-
     }
 
     private void handleImageUpdate(Article article, MultipartFile image) {
@@ -218,6 +202,35 @@ public class ArticleService {
 
         return articleRepository.findTeamSubjectByTeamAndSelectedDate(teamId, date, getSubjectCategories())
                 .orElse(null);
+    }
+
+    @Transactional
+    public void deleteTeamSubjectByArticleId(Member member, Long teamId, Long articleId){
+        Team team = getTeamById(teamId);
+
+        validateTeamManager(member, team);
+
+        if(!articleRepository.existsById(articleId)){
+            throw new ArticleNotFoundException();
+        }
+
+        articleRepository.deleteById(articleId);
+    }
+
+    @Transactional
+    public Article updateTeamSubjectByArticleId(Member member, Long teamId, Long articleId, MultipartFile image, TeamSubjectUpdateRequest teamSubjectUpdateRequest){
+        Team team = getTeamById(teamId);
+
+        validateTeamManager(member, team);
+
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(ArticleNotFoundException::new);
+
+        article.updateSubject(teamSubjectUpdateRequest.articleTitle(), teamSubjectUpdateRequest.articleBody(), teamSubjectUpdateRequest.articleCategory());
+
+        handleImageUpdate(article, image);
+
+        return article;
     }
 
     @Transactional(readOnly = true)

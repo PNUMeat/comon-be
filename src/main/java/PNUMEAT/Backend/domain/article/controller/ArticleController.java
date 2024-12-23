@@ -1,7 +1,9 @@
 package PNUMEAT.Backend.domain.article.controller;
 
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
+import PNUMEAT.Backend.domain.article.dto.request.ArticleUpdateRequest;
 import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
+import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectUpdateRequest;
 import PNUMEAT.Backend.domain.article.dto.response.ArticleResponse;
 import PNUMEAT.Backend.domain.article.dto.response.TeamSubjectResponse;
 import PNUMEAT.Backend.domain.article.entity.Article;
@@ -20,6 +22,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -115,22 +118,22 @@ public class ArticleController {
 
         return ResponseEntity.status(ARTICLE_DELETE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.createResponseWithMessage(ARTICLE_DELETE_SUCCESS.getMessage()));
+                .body(ApiResponse.successResponseWithMessage(ARTICLE_DELETE_SUCCESS.getMessage()));
     }
 
     // 게시글 수정
     @PutMapping("/{id}")
     public ResponseEntity<?> updateArticle(
             @PathVariable Long id,
-            @ModelAttribute ArticleRequest articleRequest,
+            @ModelAttribute ArticleUpdateRequest articleUpdateRequest,
             @RequestPart(value = "image", required = false) MultipartFile image,
             @LoginMember Member member) {
 
-        articleService.updateArticle(id, articleRequest, image, member.getId());
+        articleService.updateArticle(id, articleUpdateRequest, image, member.getId());
 
         return ResponseEntity.status(ARTICLE_PUT_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.createResponseWithMessage(ARTICLE_PUT_SUCCESS.getMessage()));
+                .body(ApiResponse.successResponseWithMessage(ARTICLE_PUT_SUCCESS.getMessage()));
     }
 
     // 날짜기준 게시물 조회
@@ -182,5 +185,33 @@ public class ArticleController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponse(teamSubjectResponse));
+    }
+
+    @DeleteMapping ("/teams/{teamId}/subjects/{articleId}")
+    public ResponseEntity<?> deleteTeamSubjectsByArticleId(
+            @LoginMember Member member,
+            @PathVariable("teamId") Long teamId,
+            @PathVariable("articleId") Long articleId) {
+
+        articleService.deleteTeamSubjectByArticleId(member, teamId, articleId);
+
+        return ResponseEntity.status(SUBJECT_DELETE_SUCCESS.getStatusCode())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponseWithMessage(SUBJECT_DELETE_SUCCESS.getMessage()));
+    }
+
+    @PutMapping("/teams/{teamId}/subjects/{articleId}")
+    public ResponseEntity<?> updateTeamSubjectsByArticleId(
+            @LoginMember Member member,
+            @PathVariable("teamId") Long teamId,
+            @PathVariable("articleId") Long articleId,
+            @ModelAttribute TeamSubjectUpdateRequest teamSubjectUpdateRequest,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        articleService.updateTeamSubjectByArticleId(member, teamId, articleId, image, teamSubjectUpdateRequest);
+
+        return ResponseEntity.status(SUBJECT_UPDATE_SUCCESS.getStatusCode())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponseWithMessage(SUBJECT_UPDATE_SUCCESS.getMessage()));
     }
 }

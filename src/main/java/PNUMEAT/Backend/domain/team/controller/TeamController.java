@@ -130,7 +130,7 @@ public class TeamController {
     @GetMapping("/{teamId}/team-page")
     public ResponseEntity<ApiResponse<?>> getCalenderInformation(
             @LoginMember Member member,
-            @RequestBody @Valid CalenderSubjectRequest calenderSubjectRequest,
+            @ModelAttribute @Valid CalenderSubjectRequest calenderSubjectRequest,
             @PathVariable("teamId") Long teamId
     ) {
         TeamPageResponse subjectArticlesUsingCalender = articleService.getSubjectArticlesUsingCalender(
