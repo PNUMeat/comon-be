@@ -49,7 +49,7 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(MemberProfileResponse.of(updatedMember)));
+                .body(ApiResponse.successResponseWithData(MemberProfileResponse.of(updatedMember)));
     }
 
     @GetMapping("/own-profile")
@@ -57,7 +57,7 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(MemberProfileResponse.of(member)));
+                .body(ApiResponse.successResponseWithData(MemberProfileResponse.of(member)));
     }
 
     @GetMapping("/profile/{uuid}")
@@ -67,6 +67,6 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(MemberProfileResponse.of(findMember)));
+                .body(ApiResponse.successResponseWithData(MemberProfileResponse.of(findMember)));
     }
 }

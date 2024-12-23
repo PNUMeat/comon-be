@@ -64,7 +64,7 @@ public class TeamController {
 
         return ResponseEntity.status(TEAM_TOTAL_DETAILS_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(teamAllResponses));
+                .body(ApiResponse.successResponseWithData(teamAllResponses));
     }
 
     @GetMapping("/my")
@@ -77,7 +77,7 @@ public class TeamController {
 
         return ResponseEntity.status(MY_TEAM_DETAILS_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(myTeamResponse));
+                .body(ApiResponse.successResponseWithData(myTeamResponse));
     }
 
     @GetMapping("/combined")
@@ -100,7 +100,7 @@ public class TeamController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(teamCombinedResponse));
+                .body(ApiResponse.successResponseWithData(teamCombinedResponse));
     }
 
     @PostMapping("/{teamId}/join")
@@ -113,7 +113,7 @@ public class TeamController {
 
         return ResponseEntity.status(TEAM_JOIN_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(teamJoinResponse));
+                .body(ApiResponse.successResponse(teamJoinResponse,TEAM_JOIN_SUCCESS.getMessage()));
     }
 
     @PatchMapping("/{teamId}/announcement")
@@ -141,7 +141,7 @@ public class TeamController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(subjectArticlesUsingCalender));
+                .body(ApiResponse.successResponseWithData(subjectArticlesUsingCalender));
     }
 }
 

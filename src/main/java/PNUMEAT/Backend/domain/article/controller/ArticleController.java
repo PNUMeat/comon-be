@@ -22,7 +22,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -73,7 +72,7 @@ public class ArticleController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(responses));
+                .body(ApiResponse.successResponseWithData(responses));
     }
 
     // 팀 기준 게시글 조회
@@ -91,7 +90,7 @@ public class ArticleController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(responses));
+                .body(ApiResponse.successResponseWithData(responses));
     }
 
     // 특정 게시글 조회 이건 쓸일 없을것같음
@@ -105,7 +104,7 @@ public class ArticleController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(response));
+                .body(ApiResponse.successResponseWithData(response));
     }
 
     // 게시글 삭제
@@ -152,7 +151,7 @@ public class ArticleController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(responsePage));
+                .body(ApiResponse.successResponseWithData(responsePage));
     }
 
     @PostMapping("/teams/{teamId}/subjects")
@@ -184,7 +183,7 @@ public class ArticleController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(teamSubjectResponse));
+                .body(ApiResponse.successResponseWithData(teamSubjectResponse));
     }
 
     @DeleteMapping ("/teams/{teamId}/subjects/{articleId}")
