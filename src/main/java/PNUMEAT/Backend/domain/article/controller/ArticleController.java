@@ -139,10 +139,10 @@ public class ArticleController {
     // 날짜기준 게시물 조회
     @GetMapping("/{teamId}/by-date")
     public ResponseEntity<?> getArticlesByTeamAndDate(
-            @PathVariable Long teamId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @PathVariable("teamId") Long teamId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @LoginMember Member member,
-            @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 6, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         articleService.isMemberInTeam(member.getId(), teamId);
 
