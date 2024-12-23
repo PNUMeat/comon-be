@@ -6,11 +6,13 @@ import java.util.stream.Collectors;
 
 public record CalenderSubjectResponse(
         String teamAnnouncement,
+        Boolean teamManager,
         List<SubjectArticleDateAndTagResponse> subjectArticleDateAndTagResponses
 ) {
-    public static CalenderSubjectResponse of(String teamAnnouncement, List<Article> articles){
+    public static CalenderSubjectResponse from(String teamAnnouncement,Boolean teamManager ,List<Article> articles){
         return new CalenderSubjectResponse(
                 teamAnnouncement,
+                teamManager,
                 articles.stream()
                         .map(SubjectArticleDateAndTagResponse::of)
                         .collect(Collectors.toList())
