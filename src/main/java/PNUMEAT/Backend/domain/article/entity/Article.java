@@ -42,14 +42,28 @@ public class Article extends TimeStamp {
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ArticleImage> images = new ArrayList<>();
 
-    public void updateTitle(String title){
-        this.articleTitle = title;
+    public void updateArticle(String articleTitle, String articleBody){
+        if(articleTitle != null){
+            this.articleTitle = articleTitle;
+        }
+
+        if(articleBody != null){
+            this.articleBody = articleBody;
+        }
     }
-    public void updateBody(String body){
-        this.articleBody = body;
-    }
-    public void updateCategory(ArticleCategory articleCategory){
-        this.articleCategory = articleCategory;
+
+    public void updateSubject(String articleTitle, String articleBody, String articleCategory){
+        if(articleTitle != null){
+            this.articleTitle = articleTitle;
+        }
+
+        if(articleBody != null){
+            this.articleBody = articleBody;
+        }
+
+        if(articleCategory != null){
+            this.articleCategory = ArticleCategory.fromName(articleCategory);
+        }
     }
 
     public Article() {}

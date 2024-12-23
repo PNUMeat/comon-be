@@ -118,7 +118,7 @@ public class ArticleService {
             throw new UnauthorizedActionException();
         }
 
-        updateArticleFields(article, articleUpdateRequest);
+        article.updateArticle(articleUpdateRequest.articleTitle(), articleUpdateRequest.articleBody());
 
         handleImageUpdate(article, image);
     }
@@ -146,17 +146,6 @@ public class ArticleService {
 
             articleImageRepository.save(articleImage);
         }
-    }
-
-
-    private void updateArticleFields(Article article, ArticleUpdateRequest articleUpdateRequest) {
-        if (articleUpdateRequest.articleTitle() != null) {
-            article.updateTitle(articleUpdateRequest.articleTitle());
-        }
-        if (articleUpdateRequest.articleBody() != null) {
-            article.updateBody(articleUpdateRequest.articleBody());
-        }
-
     }
 
     private void handleImageUpdate(Article article, MultipartFile image) {
@@ -237,7 +226,7 @@ public class ArticleService {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(ArticleNotFoundException::new);
 
-        updateTeamSubject(teamSubjectUpdateRequest, article);
+        article.updateSubject(teamSubjectUpdateRequest.articleTitle(), teamSubjectUpdateRequest.articleBody(), teamSubjectUpdateRequest.articleCategory());
 
         handleImageUpdate(article, image);
 
@@ -283,20 +272,5 @@ public class ArticleService {
                 .articleCategory(fromName(teamSubjectRequest.articleCategory()))
                 .selectedDate(selectedDate)
                 .build();
-    }
-
-    private void updateTeamSubject(TeamSubjectUpdateRequest teamSubjectUpdateRequest, Article article) {
-        if(teamSubjectUpdateRequest.articleTitle() != null){
-            article.updateTitle(teamSubjectUpdateRequest.articleTitle());
-        }
-
-        if(teamSubjectUpdateRequest.articleCategory() != null){
-            ArticleCategory updatedCategory = ArticleCategory.fromName(teamSubjectUpdateRequest.articleCategory());
-            article.updateCategory(updatedCategory);
-        }
-
-        if(teamSubjectUpdateRequest.articleBody() != null){
-            article.updateBody(teamSubjectUpdateRequest.articleBody());
-        }
     }
 }
