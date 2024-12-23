@@ -5,7 +5,7 @@ package PNUMEAT.Backend.domain.article.service;
 import PNUMEAT.Backend.domain.article.dto.request.ArticleRequest;
 import PNUMEAT.Backend.domain.article.dto.request.CalenderSubjectRequest;
 import PNUMEAT.Backend.domain.article.dto.request.TeamSubjectRequest;
-import PNUMEAT.Backend.domain.article.dto.response.CalenderSubjectResponse;
+import PNUMEAT.Backend.domain.team.dto.response.TeamPageResponse;
 import PNUMEAT.Backend.domain.article.entity.Article;
 import PNUMEAT.Backend.domain.article.entity.ArticleImage;
 import PNUMEAT.Backend.domain.article.enums.ArticleCategory;
@@ -221,7 +221,7 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public CalenderSubjectResponse getSubjectArticlesUsingCalender(Member member, Long teamId, CalenderSubjectRequest calenderSubjectRequest){
+    public TeamPageResponse getSubjectArticlesUsingCalender(Member member, Long teamId, CalenderSubjectRequest calenderSubjectRequest){
         Team team = getTeamById(teamId);
 
         if(!teamMemberRepository.existsByTeamAndMember(team, member)){
@@ -230,7 +230,7 @@ public class ArticleService {
 
         List<Article> subjectArticles = articleRepository.findSubjectArticlesByTeamIdAndYearAndMonth(teamId, calenderSubjectRequest.year(), calenderSubjectRequest.month(), getSubjectCategories());
 
-        return CalenderSubjectResponse.from(team, team.isTeamManger(member), subjectArticles);
+        return TeamPageResponse.from(team, team.isTeamManger(member), subjectArticles);
     }
 
     private Team getTeamById(Long teamId) {
