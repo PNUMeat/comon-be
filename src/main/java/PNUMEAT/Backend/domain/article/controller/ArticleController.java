@@ -178,7 +178,7 @@ public class ArticleController {
 
         TeamSubjectResponse teamSubjectResponse = null;
         if(subject!= null){
-            teamSubjectResponse = TeamSubjectResponse.of(subject);
+            teamSubjectResponse = TeamSubjectResponse.of(subject, member);
         }
 
         return ResponseEntity.status(HttpStatus.OK)
