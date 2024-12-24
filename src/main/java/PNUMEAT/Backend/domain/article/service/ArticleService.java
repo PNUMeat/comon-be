@@ -125,7 +125,7 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public Page<Article> getArticlesByTeamAndDate(Long teamId, LocalDate date, Pageable pageable) {
-        return articleRepository.findByTeamIdAndDate(teamId, date, pageable);
+        return articleRepository.findByTeamIdAndDateWithMember(teamId, date, pageable);
     }
 
 

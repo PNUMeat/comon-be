@@ -138,10 +138,10 @@ public class ArticleController {
     // 날짜기준 게시물 조회
     @GetMapping("/{teamId}/by-date")
     public ResponseEntity<?> getArticlesByTeamAndDate(
-            @PathVariable("teamId") Long teamId,
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @LoginMember Member member,
-            @PageableDefault(size = 6, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
+        @PathVariable("teamId") Long teamId,
+        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+        @LoginMember Member member,
+        @PageableDefault(size = 6, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         articleService.isMemberInTeam(member.getId(), teamId);
 
@@ -150,9 +150,10 @@ public class ArticleController {
         Page<ArticleResponse> responsePage = articlePage.map(ArticleResponse::of);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(responsePage));
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(ApiResponse.successResponseWithData(responsePage));
     }
+
 
     @PostMapping("/teams/{teamId}/subjects")
     public ResponseEntity<?> createTeamSubject(
