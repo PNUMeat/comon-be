@@ -7,6 +7,7 @@ import PNUMEAT.Backend.domain.team.enums.Topic;
 import PNUMEAT.Backend.domain.team.repository.TeamRepository;
 import PNUMEAT.Backend.domain.teamMember.entity.TeamMember;
 import PNUMEAT.Backend.domain.teamMember.repository.TeamMemberRepository;
+import PNUMEAT.Backend.domain.teamMember.service.TeamMemberService;
 import PNUMEAT.Backend.global.error.Team.TeamAlreadyJoinException;
 import PNUMEAT.Backend.global.error.Team.TeamManagerInvalidException;
 import PNUMEAT.Backend.global.error.Team.TeamNotFoundException;
@@ -19,9 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,6 +32,7 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final ImageService imageService;
+    private final TeamMemberService teamMemberService;
 
     @Transactional
     public Team createTeam(TeamRequest teamRequest,
@@ -62,12 +64,10 @@ public class TeamService {
     }
 
     public List<Team> getMyTeam(Member member){
-        List<Long> teamIds = teamMemberRepository.findTeamIdsByMemberId(member.getId());
-
-        if(teamIds.isEmpty()){
-            return Collections.emptyList();
-        }
-        return teamRepository.findTeamsWithMembersByTeamIds(Arrays.asList(teamIds.getLast()));
+        List<TeamMember> teamMembers = teamMemberService.getTeamMembersByMember(member);
+        return teamMembers.stream()
+                .map(TeamMember::getTeam)
+                .collect(Collectors.toList());
     }
 
     @Transactional

@@ -12,10 +12,12 @@ import java.util.List;
 
 @Repository
 public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
-    @Query("SELECT tm.team.teamId " +
-            "FROM TeamMember tm " +
-            "WHERE tm.member.id = :memberId")
-    List<Long> findTeamIdsByMemberId(@Param("memberId") Long memberId);
+    @Query("SELECT tm FROM TeamMember tm " +
+            "JOIN FETCH tm.team t " +
+            "JOIN FETCH t.teamMembers " +
+            "WHERE tm.member.id = :memberId " +
+            "ORDER BY tm.teamInfoId DESC")
+    List<TeamMember> findByMemberIdOrderByTeamInfoIdDesc(@Param("memberId") Long memberId);
 
     boolean existsByTeamAndMember(Team team, Member member);
 
