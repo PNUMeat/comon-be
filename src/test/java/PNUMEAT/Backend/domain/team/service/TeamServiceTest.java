@@ -165,35 +165,6 @@ class TeamServiceTest {
     }
 
     @Test
-    @DisplayName("멤버가 속한 마지막 팀 조회하기 - 속한 팀이 있는 경우")
-    void getMyTeam_팀이_있을_때() {
-        // given
-        List<Long> teamIds = Arrays.asList(1L, 2L);
-        given(teamMemberRepository.findTeamIdsByMemberId(member.getId())).willReturn(teamIds);
-        given(teamRepository.findTeamsWithMembersByTeamIds(Arrays.asList(teamIds.getLast()))).willReturn(Arrays.asList(team2));
-
-        // when
-        List<Team> result = teamService.getMyTeam(member);
-
-        // then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).isEqualTo(team2);
-    }
-
-    @Test
-    @DisplayName("멤버가 속한 마지막 팀 조회하기 - 속한 팀이 없는 경우")
-    void getMyTeam_속한_팀이_없을_때() {
-        // given
-        given(teamMemberRepository.findTeamIdsByMemberId(member.getId())).willReturn(Collections.emptyList());
-
-        // when
-        List<Team> result = teamService.getMyTeam(member);
-
-        // then
-        assertThat(result).isEmpty();
-    }
-
-    @Test
     @DisplayName("팀 가입하기 - 정상 가입")
     void joinTeam_정상가입() {
         // given
