@@ -29,8 +29,15 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query("SELECT a FROM Article a LEFT JOIN FETCH a.images WHERE a.articleId = :articleId AND a.articleCategory = 'NORMAL'")
     Optional<Article> findByIdWithImages(@Param("articleId") Long articleId);
 
-    @Query("SELECT a FROM Article a WHERE a.team.teamId = :teamId AND DATE(a.createdDate) = :date AND a.articleCategory = 'NORMAL'")
-    Page<Article> findByTeamIdAndDate(@Param("teamId") Long teamId, @Param("date") LocalDate date, Pageable pageable);
+    @Query("SELECT a FROM Article a " +
+        "JOIN FETCH a.member " +
+        "WHERE a.team.teamId = :teamId " +
+        "AND DATE(a.createdDate) = :date " +
+        "AND a.articleCategory = 'NORMAL' " +
+        "ORDER BY a.createdDate DESC")
+    Page<Article> findByTeamIdAndDateWithMember(@Param("teamId") Long teamId, @Param("date") LocalDate date, Pageable pageable);
+
+
 
     @Query("SELECT a FROM Article a " +
             "LEFT JOIN FETCH a.images " +
