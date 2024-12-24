@@ -67,6 +67,23 @@ public class TeamController {
                 .body(ApiResponse.successResponseWithData(teamAllResponses));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<?>> getAllTeamsByKeyword(
+            @RequestParam(name = "keyword") String keyword,
+            @RequestParam(name = "sort", defaultValue = "recent") String sort,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "6") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        Page<Team> teams = teamService.getAllTeamsByKeyword(pageable,keyword);
+
+        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::of);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponseWithData(teamAllResponses));
+    }
+
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<?>> getMyTeam(@LoginMember Member member){
         List<Team> teamMembers =  teamService.getMyTeam(member);
