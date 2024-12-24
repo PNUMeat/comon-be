@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,6 +60,10 @@ public class TeamService {
 
     public Page<Team> getAllTeams(Pageable pageable){
         return teamRepository.findAll(pageable);
+    }
+
+    public Page<Team> getAllTeamsByKeyword(Pageable pageable, String keyword){
+        return teamRepository.findByTeamNameContaining(keyword, pageable);
     }
 
     public List<Team> getMyTeam(Member member){
