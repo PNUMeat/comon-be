@@ -43,3 +43,9 @@ out/
 
 application-secret.properties
 application-monitor.properties
+
+# Gradle Wrapper
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+gradlew
+gradlew.bat
