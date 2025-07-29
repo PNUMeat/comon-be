@@ -8,8 +8,12 @@ import lombok.Getter;
 
 @Entity
 @Getter
-@Table(name = "problem")
-public class Problem extends TimeStamp {
+@Table(
+        name = "problem",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"platform", "platform_problem_id"})
+        }
+)public class Problem extends TimeStamp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long problemId;
