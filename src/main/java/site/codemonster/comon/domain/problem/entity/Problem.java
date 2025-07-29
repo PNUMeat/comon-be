@@ -23,7 +23,7 @@ import lombok.Getter;
     private Platform platform;
 
     @Column(nullable = false)
-    private Long platformProblemId;
+    private String platformProblemId;
 
     @Column(nullable = false)
     private String title;
@@ -34,7 +34,7 @@ import lombok.Getter;
     private String url;
 
     @Builder
-    public Problem(Platform platform, Long platformProblemId, String title, String difficulty, String url) {
+    public Problem(Platform platform, String platformProblemId, String title, String difficulty, String url) {
         this.platform = platform;
         this.platformProblemId = platformProblemId;
         this.title = title;
