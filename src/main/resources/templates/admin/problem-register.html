@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - 문제 등록</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .platform-card {
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .platform-card:hover {
+            border-color: #0d6efd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
+        }
+        .platform-card.active {
+            border-color: #0d6efd;
+            background: linear-gradient(135deg, #f8f9ff, #e3f2fd);
+        }
+        .form-section {
+            display: none;
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid #e9ecef;
+        }
+        .form-section.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .btn-check-info {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-check-info:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+        .problem-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .problem-item {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s ease;
+        }
+        .problem-item:last-child {
+            border-bottom: none;
+        }
+        .problem-item:hover {
+            background-color: #e9ecef;
+        }
+        .status-success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-duplicate {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .btn-register-all {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        .btn-register-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+        }
+        .btn-clear-all {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-clear-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+        }
+        .platform-logo {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .platform-img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        .platform-card:hover .platform-img {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h1 class="display-6 fw-bold text-primary">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    관리자 페이지 - 문제 등록
+                </h1>
+                <p class="text-muted">코딩 테스트 문제를 플랫폼별로 등록하고 관리하세요</p>
+            </div>
+
+            <!-- 플랫폼 선택 -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>플랫폼 선택</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="platform-card text-center p-3" data-platform="BAEKJOON">
+                                <div class="platform-logo mb-3">
+                                    <img src="/images/platforms/baekjoon-logo.png"
+                                         alt="백준 로고" class="platform-img">
+                                </div>
+                                <h6 class="fw-bold">백준</h6>
+                                <small class="text-muted">자동 수집 가능</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="platform-card text-center p-3" data-platform="PROGRAMMERS">
+                                <div class="platform-logo mb-3">
+                                    <img src="/images/platforms/programmers-logo.png"
+                                         alt="프로그래머스 로고" class="platform-img">
+                                </div>
+                                <h6 class="fw-bold">프로그래머스</h6>
+                                <small class="text-muted">수동 입력 필요</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="platform-card text-center p-3" data-platform="LEETCODE">
+                                <div class="platform-logo mb-3">
+                                    <img src="/images/platforms/leetcode-logo.png"
+                                         alt="리트코드 로고" class="platform-img">
+                                </div>
+                                <h6 class="fw-bold">리트코드</h6>
+                                <small class="text-muted">자동 수집 가능</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 백준 폼 -->
+            <div class="form-section" id="baekjoon-form">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-trophy me-2"></i>백준 문제 등록
+                    <span class="badge bg-success ms-2">자동 수집</span>
+                </h5>
+                <div class="row">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">문제번호</label>
+                        <input type="text" class="form-control form-control-lg"
+                               id="baekjoon-problem-id" placeholder="예: 1000">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" class="btn btn-check-info w-100"
+                                onclick="checkBaekjoon()">
+                            <i class="fas fa-plus me-2"></i>추가
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 프로그래머스 폼 -->
+            <div class="form-section" id="programmers-form">
+                <h5 class="text-success mb-3">
+                    <i class="fas fa-code me-2"></i>프로그래머스 문제 등록
+                    <span class="badge bg-warning text-dark ms-2">수동 입력</span>
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">문제번호</label>
+                        <input type="text" class="form-control" id="programmers-problem-id"
+                               placeholder="예: 42577">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">제목</label>
+                        <input type="text" class="form-control" id="programmers-title"
+                               placeholder="예: 전화번호 목록">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">난이도</label>
+                        <select class="form-select" id="programmers-difficulty">
+                            <option value="">선택하세요</option>
+                            <option value="Level 0">Level 0</option>
+                            <option value="Level 1">Level 1</option>
+                            <option value="Level 2">Level 2</option>
+                            <option value="Level 3">Level 3</option>
+                            <option value="Level 4">Level 4</option>
+                            <option value="Level 5">Level 5</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">태그</label>
+                        <input type="text" class="form-control" id="programmers-tags"
+                               placeholder="예: 해시">
+                    </div>
+                    <div class="col-12 text-center">
+                        <button type="button" class="btn btn-check-info"
+                                onclick="checkProgrammers()">
+                            <i class="fas fa-plus me-2"></i>추가
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 리트코드 폼 -->
+            <div class="form-section" id="leetcode-form">
+                <h5 class="text-warning mb-3">
+                    <i class="fas fa-bolt me-2"></i>리트코드 문제 등록
+                    <span class="badge bg-success ms-2">자동 수집</span>
+                </h5>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">입력 방법</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="leetcode-input-type"
+                                   id="leetcode-slug" value="slug" checked>
+                            <label class="form-check-label" for="leetcode-slug">Slug 입력</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="leetcode-input-type"
+                                   id="leetcode-url" value="url">
+                            <label class="form-check-label" for="leetcode-url">URL 입력</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">입력값</label>
+                        <input type="text" class="form-control form-control-lg"
+                               id="leetcode-input" placeholder="예: merge-strings-alternately">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" class="btn btn-check-info w-100"
+                                onclick="checkLeetcode()">
+                            <i class="fas fa-plus me-2"></i>추가
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 문제 목록 -->
+            <div class="card mt-4" id="problem-list-card" style="display: none;">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i>등록할 문제 목록</h5>
+                    <span class="badge bg-white text-info" id="problem-count">0개</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="problem-list" id="problem-list">
+                        <!-- 문제들이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 등록 버튼들 -->
+            <div class="text-center mt-4 mb-5" id="action-buttons" style="display: none;">
+                <button type="button" class="btn btn-register-all me-3"
+                        onclick="registerAllProblems()" id="register-btn">
+                    <i class="fas fa-save me-2"></i>모든 문제 등록하기
+                </button>
+                <button type="button" class="btn btn-clear-all"
+                        onclick="clearAllProblems()">
+                    <i class="fas fa-trash me-2"></i>목록 비우기
+                </button>
+            </div>
+
+            <!-- 팁 카드 -->
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>관리자 팁</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>백준:</strong> 문제번호만 입력하면 모든 정보 자동 수집</li>
+                        <li><strong>프로그래머스:</strong> 수동 입력 필요</li>
+                        <li><strong>리트코드:</strong> Slug나 URL만 있으면 모든 정보 자동수집</li>
+                        <li><strong>일괄 등록:</strong> 여러 문제를 추가한 후 한번에 등록 가능</li>
+                        <li><strong>중복 체크:</strong> 이미 등록된 문제는 자동으로 표시됩니다</li>
+                    </ul>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>주의:</strong> API 호출 제한으로 연속 등록시 딜레이가 있을 수 있습니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 성공/실패 알림 모달 -->
+<div class="modal fade" id="resultModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-header">
+                <h5 class="modal-title" id="modal-title">알림</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- 메시지가 여기에 표시됩니다 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentPlatform = null;
+    let problemList = [];
+    let problemIdCounter = 0;
+
+    // 플랫폼 선택
+    document.querySelectorAll('.platform-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.platform-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+
+            this.classList.add('active');
+            currentPlatform = this.dataset.platform;
+
+            document.getElementById(currentPlatform.toLowerCase() + '-form').classList.add('active');
+            clearInputs();
+        });
+    });
+
+    // 백준 문제 확인 및 추가
+    function checkBaekjoon() {
+        const problemId = document.getElementById('baekjoon-problem-id').value.trim();
+        if (!problemId) {
+            alert('문제번호를 입력해주세요.');
+            return;
+        }
+
+        fetch('/admin/problems/check/baekjoon', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'problemId=' + encodeURIComponent(problemId)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addProblemToList(data);
+                    document.getElementById('baekjoon-problem-id').value = '';
+                } else {
+                    alert('오류: ' + data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('문제 정보를 가져오는데 실패했습니다.');
+            });
+    }
+
+    // 프로그래머스 문제 확인 및 추가
+    function checkProgrammers() {
+        const data = {
+            platformProblemId: document.getElementById('programmers-problem-id').value.trim(),
+            title: document.getElementById('programmers-title').value.trim(),
+            difficulty: document.getElementById('programmers-difficulty').value,
+            tags: document.getElementById('programmers-tags').value.trim()
+        };
+
+        if (!data.platformProblemId || !data.title || !data.difficulty) {
+            alert('모든 필수 정보를 입력해주세요.');
+            return;
+        }
+
+        fetch('/admin/problems/check/programmers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addProblemToList(data);
+                    clearProgrammersInputs();
+                } else {
+                    alert('오류: ' + data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('문제 정보를 처리하는데 실패했습니다.');
+            });
+    }
+
+    // 리트코드 문제 확인 및 추가
+    function checkLeetcode() {
+        const input = document.getElementById('leetcode-input').value.trim();
+        const inputType = document.querySelector('input[name="leetcode-input-type"]:checked').value;
+
+        if (!input) {
+            alert('Slug 또는 URL을 입력해주세요.');
+            return;
+        }
+
+        fetch('/admin/problems/check/leetcode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `input=${encodeURIComponent(input)}&inputType=${inputType}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addProblemToList(data);
+                    document.getElementById('leetcode-input').value = '';
+                } else {
+                    alert('오류: ' + data.errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('문제 정보를 가져오는데 실패했습니다.');
+            });
+    }
+
+    // 문제 목록에 추가
+    function addProblemToList(problemData) {
+        const exists = problemList.some(p =>
+            p.platform === problemData.platform &&
+            p.platformProblemId === problemData.platformProblemId
+        );
+
+        if (exists) {
+            alert('이미 목록에 추가된 문제입니다.');
+            return;
+        }
+
+        problemData.id = ++problemIdCounter;
+        problemList.push(problemData);
+        renderProblemList();
+        showProblemListCard();
+    }
+
+    // 문제 목록 렌더링
+    function renderProblemList() {
+        const container = document.getElementById('problem-list');
+        const countBadge = document.getElementById('problem-count');
+
+        if (problemList.length === 0) {
+            container.innerHTML = '<div class="text-center p-4 text-muted">등록할 문제가 없습니다.</div>';
+            countBadge.textContent = '0개';
+            return;
+        }
+
+        container.innerHTML = problemList.map(problem => {
+            const statusClass = problem.isDuplicate ? 'status-duplicate' : 'status-success';
+            const statusIcon = problem.isDuplicate ? 'fas fa-times-circle' : 'fas fa-check-circle';
+            const statusText = problem.isDuplicate ? '중복됨' : '확인';
+
+            return `
+                    <div class="problem-item d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge bg-primary me-2">${problem.platform}</span>
+                                <strong>${problem.platformProblemId}</strong>
+                                <span class="ms-2">${problem.title}</span>
+                                <span class="${statusClass} ms-2">
+                                    <i class="${statusIcon}"></i> ${statusText}
+                                </span>
+                            </div>
+                            <small class="text-muted">
+                                ${problem.difficulty} | ${problem.tags || '태그 없음'}
+                            </small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                onclick="removeProblem(${problem.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+        }).join('');
+
+        countBadge.textContent = `${problemList.length}개`;
+    }
+
+    // 문제 제거
+    function removeProblem(id) {
+        problemList = problemList.filter(p => p.id !== id);
+        renderProblemList();
+
+        if (problemList.length === 0) {
+            hideProblemListCard();
+        }
+    }
+
+    // 모든 문제 등록
+    function registerAllProblems() {
+        const validProblems = problemList.filter(p => !p.isDuplicate);
+
+        if (validProblems.length === 0) {
+            alert('등록할 수 있는 문제가 없습니다.');
+            return;
+        }
+
+        if (!confirm(`${validProblems.length}개의 문제를 등록하시겠습니까?`)) {
+            return;
+        }
+
+        const requestData = {
+            problems: validProblems.map(p => ({
+                platform: p.platform,
+                platformProblemId: p.platformProblemId,
+                title: p.title,
+                difficulty: p.difficulty,
+                url: p.url,
+                tags: p.tags || ''
+            }))
+        };
+
+        fetch('/admin/problems/register/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`${data.count}개 문제가 성공적으로 등록되었습니다!`);
+                    clearAllProblems();
+                } else {
+                    alert('문제 등록에 실패했습니다: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('문제 등록 중 오류가 발생했습니다.');
+            });
+    }
+
+    // 모든 문제 목록 비우기
+    function clearAllProblems() {
+        if (problemList.length > 0 && !confirm('모든 문제를 목록에서 제거하시겠습니까?')) {
+            return;
+        }
+
+        problemList = [];
+        renderProblemList();
+        hideProblemListCard();
+    }
+
+    // 문제 목록 카드 표시/숨김
+    function showProblemListCard() {
+        document.getElementById('problem-list-card').style.display = 'block';
+        document.getElementById('action-buttons').style.display = 'block';
+    }
+
+    function hideProblemListCard() {
+        document.getElementById('problem-list-card').style.display = 'none';
+        document.getElementById('action-buttons').style.display = 'none';
+    }
+
+    // 입력 필드 초기화
+    function clearInputs() {
+        document.getElementById('baekjoon-problem-id').value = '';
+        clearProgrammersInputs();
+        if (document.getElementById('leetcode-input')) {
+            document.getElementById('leetcode-input').value = '';
+        }
+    }
+
+    function clearProgrammersInputs() {
+        document.getElementById('programmers-problem-id').value = '';
+        document.getElementById('programmers-title').value = '';
+        document.getElementById('programmers-difficulty').value = '';
+        document.getElementById('programmers-tags').value = '';
+    }
+
+    // Enter 키 처리
+    document.getElementById('baekjoon-problem-id').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') checkBaekjoon();
+    });
+</script>
+</body>
+</html>

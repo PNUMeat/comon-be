@@ -65,7 +65,8 @@ public class SecurityConfiguration {
                             "api/v1/articles/teams/{teamId}/subjects",
                             "api/v1/teams/search",
                             "/api/v1/recruitments",
-                            "/api/v1/recruitments/{recruitId}"
+                            "/api/v1/recruitments/{recruitId}",
+                            "/admin/**"
                     ).permitAll()
                     .anyRequest().authenticated())
 
@@ -80,6 +81,7 @@ public class SecurityConfiguration {
         return web -> web.ignoring()
                 .requestMatchers("/favicon.ico")
                 .requestMatchers("/error")
-                .requestMatchers("/actuator/prometheus");
+                .requestMatchers("/actuator/prometheus")
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**");
     }
 }
