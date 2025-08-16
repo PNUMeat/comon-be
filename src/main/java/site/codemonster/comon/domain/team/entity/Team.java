@@ -38,9 +38,9 @@ public class Team extends TimeStamp {
 
     private String teamAnnouncement="";
 
-    private Integer recommendDays = 0;
+    private Integer recommendDays;
 
-    private Integer dailyProblemCount = 6;
+    private Integer dailyProblemCount;
 
     private Boolean autoRecommendationEnabled = false;
 

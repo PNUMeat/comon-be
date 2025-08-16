@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.problem.entity;
 
+import lombok.Setter;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.global.entityListeners.TimeStamp;
 import jakarta.persistence.*;
@@ -8,12 +9,14 @@ import lombok.Getter;
 
 @Entity
 @Getter
+@Setter
 @Table(
         name = "problem",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"platform", "platform_problem_id"})
         }
-)public class Problem extends TimeStamp {
+)
+public class Problem extends TimeStamp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long problemId;
@@ -33,27 +36,18 @@ import lombok.Getter;
     @Column(columnDefinition = "TEXT")
     private String url;
 
+    private String tags; // 문제 유형
+
     @Builder
-    public Problem(Platform platform, String platformProblemId, String title, String difficulty, String url) {
+    public Problem(Platform platform, String platformProblemId, String title, String difficulty, String url, String tags) {
         this.platform = platform;
         this.platformProblemId = platformProblemId;
         this.title = title;
         this.difficulty = difficulty;
         this.url = url;
+        this.tags = tags;
     }
 
-    protected Problem(){
-    }
-
-    public void updateProblemInfo(String title, String difficulty, String url) {
-        if (title != null) {
-            this.title = title;
-        }
-        if (difficulty != null) {
-            this.difficulty = difficulty;
-        }
-        if (url != null) {
-            this.url = url;
-        }
+    protected Problem() {
     }
 }
