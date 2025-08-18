@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import site.codemonster.comon.domain.adminAuth.controller.AdminAuthController;
+import site.codemonster.comon.domain.adminAuth.controller.AdminAuthPageController;
 import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
 import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
 import site.codemonster.comon.domain.problem.enums.Platform;
@@ -66,7 +66,7 @@ public class AdminProblemPageController {
 
     // 모든 페이지에 관리자 정보 추가
     private void addAdminInfoToModel(Model model, HttpSession session) {
-        AdminMember adminMember = (AdminMember) session.getAttribute(AdminAuthController.ADMIN_SESSION_KEY);
+        AdminMember adminMember = (AdminMember) session.getAttribute(AdminAuthPageController.ADMIN_SESSION_KEY);
         if (adminMember != null) {
             model.addAttribute("adminMember", adminMember);
             model.addAttribute("adminName", adminMember.getName());

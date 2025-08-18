@@ -10,7 +10,6 @@ import site.codemonster.comon.global.entityListeners.TimeStamp;
 @Getter
 @NoArgsConstructor
 public class AdminMember extends TimeStamp {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
