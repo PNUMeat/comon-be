@@ -32,7 +32,7 @@ public class AdminAuthPageController {
 
     @GetMapping("/login")
     public String loginPage(Model model, HttpSession session) {
-        if (session.getAttribute(ADMIN_SESSION_KEY) != null) // 이미 로그인된 상태라면 대시보드로 리다이렉트
+        if (session.getAttribute(ADMIN_SESSION_KEY) != null)
             return "redirect:/admin/problems";
 
         model.addAttribute("loginRequest", new AdminLoginRequest());
