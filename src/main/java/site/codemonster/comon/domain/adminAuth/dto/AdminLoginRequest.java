@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class AdminLoginRequest {
-
     @NotBlank(message = "관리자 ID를 입력해주세요.")
     private String adminId;
 
