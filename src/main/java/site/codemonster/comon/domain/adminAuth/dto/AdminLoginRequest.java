@@ -1,4 +1,4 @@
-package site.codemonster.comon.domain.admin.dto;
+package site.codemonster.comon.domain.adminAuth.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -15,9 +15,4 @@ public class AdminLoginRequest {
 
     @NotBlank(message = "비밀번호를 입력해주세요.")
     private String password;
-
-    public AdminLoginRequest(String adminId, String password) {
-        this.adminId = adminId;
-        this.password = password;
-    }
 }

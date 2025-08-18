@@ -1,4 +1,4 @@
-package site.codemonster.comon.domain.admin.entity;
+package site.codemonster.comon.domain.adminAuth.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -23,25 +23,4 @@ public class AdminMember extends TimeStamp {
 
     @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
-    private boolean isActive = true;
-
-    public AdminMember(String adminId, String password, String name) {
-        this.adminId = adminId;
-        this.password = password;
-        this.name = name;
-    }
-
-    public void updatePassword(String newPassword) {
-        this.password = newPassword;
-    }
-
-    public void deactivate() {
-        this.isActive = false;
-    }
-
-    public void activate() {
-        this.isActive = true;
-    }
 }
