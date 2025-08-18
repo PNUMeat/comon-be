@@ -1,4 +1,4 @@
-package site.codemonster.comon.domain.admin.interceptor;
+package site.codemonster.comon.domain.adminAuth.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import site.codemonster.comon.domain.admin.controller.AdminAuthController;
-import site.codemonster.comon.domain.admin.entity.AdminMember;
+import site.codemonster.comon.domain.adminAuth.controller.AdminAuthController;
+import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
 
 @Slf4j
 @Component
@@ -37,14 +37,6 @@ public class AdminLoginInterceptor implements HandlerInterceptor {
         AdminMember adminMember = (AdminMember) session.getAttribute(AdminAuthController.ADMIN_SESSION_KEY);
         if (adminMember == null) {
             log.info("관리자 세션 정보 없음 - URI: {}", requestURI);
-            redirectToLogin(response, requestURI);
-            return false;
-        }
-
-        // 비활성화된 관리자 체크
-        if (!adminMember.isActive()) {
-            log.warn("비활성화된 관리자 접근 시도 - ID: {}, URI: {}", adminMember.getAdminId(), requestURI);
-            session.invalidate();
             redirectToLogin(response, requestURI);
             return false;
         }

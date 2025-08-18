@@ -1,4 +1,4 @@
-package site.codemonster.comon.domain.admin.controller;
+package site.codemonster.comon.domain.adminAuth.controller;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -10,9 +10,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import site.codemonster.comon.domain.admin.dto.AdminLoginRequest;
-import site.codemonster.comon.domain.admin.entity.AdminMember;
-import site.codemonster.comon.domain.admin.service.AdminService;
+import site.codemonster.comon.domain.adminAuth.dto.AdminLoginRequest;
+import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
+import site.codemonster.comon.domain.adminAuth.service.AdminService;
 
 @Slf4j
 @Controller
