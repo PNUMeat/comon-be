@@ -195,4 +195,8 @@ public class TeamService {
             throw new TeamAlreadyJoinException();
         }
     }
+
+    public List<Team> getAllTeams() {
+        return teamRepository.findAll();
+    }
 }

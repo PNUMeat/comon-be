@@ -180,4 +180,8 @@ public class ProblemService {
             }
         });
     }
+
+    public List<Problem> getProblemsByPlatform(Platform platform) {
+        return problemRepository.findByPlatform(platform);
+    }
 }

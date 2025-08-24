@@ -25,7 +25,10 @@ public class AdminWebConfig implements WebMvcConfigurer {
                         // 정적 리소스
                         "/admin/css/**",
                         "/admin/js/**",
-                        "/admin/images/**"
+                        "/admin/images/**",
+
+                        // API
+                        "/admin/problems/api/**"
                 )
                 .order(0);
     }

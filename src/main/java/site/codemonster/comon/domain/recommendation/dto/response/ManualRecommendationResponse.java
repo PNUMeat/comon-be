@@ -21,4 +21,15 @@ public record ManualRecommendationResponse(
                 message
         );
     }
+
+    public static ManualRecommendationResponse of(int totalRecommended,
+                                                  List<String> createdArticleTitles,
+                                                  String message) {
+        return new ManualRecommendationResponse(
+                totalRecommended,
+                createdArticleTitles.size(),
+                createdArticleTitles,
+                message
+        );
+    }
 }

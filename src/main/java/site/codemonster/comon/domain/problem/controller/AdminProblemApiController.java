@@ -85,6 +85,23 @@ public class AdminProblemApiController {
         }
     }
 
+    @GetMapping("/api/list-by-platform")
+    public List<Map<String, Object>> getProblemListByPlatform(@RequestParam(required = false) String platform) {
+        try {
+            if (platform == null || platform.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            List<Problem> problems = problemService.getProblemsByPlatform(Platform.valueOf(platform.toUpperCase()));
+
+            return problems.stream()
+                    .map(this::toProblemMap)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
     @PutMapping("/api/{problemId}")
     public Map<String, Object> updateProblem(@PathVariable Long problemId, @RequestBody Map<String, String> updateData) {
         try {

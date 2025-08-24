@@ -11,7 +11,6 @@
 <body>
 <div class="container-fluid">
     <div class="row">
-        <!-- 사이드바 -->
         <div class="col-md-3 col-lg-2 px-0">
             <div class="sidebar">
                 <a href="/admin/problems" class="brand-logo">
@@ -38,7 +37,7 @@
                     </a>
                     <div class="dropdown-divider" style="border-color: rgba(255,255,255,0.1); margin: 20px 0;"></div>
                     <form th:action="@{/admin/logout}" method="post" style="margin: 0;">
-                        <button type="submit" class="nav-link logout-btn">
+                        <button type="submit" class="logout-btn">
                             <i class="fas fa-sign-out-alt"></i>
                             로그아웃
                         </button>
@@ -47,50 +46,37 @@
             </div>
         </div>
 
-        <!-- 메인 콘텐츠 -->
         <div class="col-md-9 col-lg-10">
             <div class="main-content p-4">
-                <!-- Header -->
                 <div class="mb-4">
                     <h1 class="h3 mb-0 text-dark fw-bold">
                         <i class="fas fa-magic text-primary me-2"></i>
                         문제 추천 설정
                     </h1>
-                    <p class="text-muted mb-0">팀별 자동 문제 추천과 수동 추천을 설정하고 관리하세요</p>
                 </div>
 
-                <!-- 팀 선택 -->
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0"><i class="fas fa-users me-2"></i>팀 선택</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-8">
                                 <label class="form-label fw-bold">추천을 설정할 팀을 선택하세요</label>
                                 <select class="form-select form-select-lg" id="team-select" onchange="handleTeamChange()">
                                     <option value="">팀을 선택하세요</option>
-                                    <option th:each="team : ${teams}"
-                                            th:value="${team.teamId}"
-                                            th:text="${team.teamName + ' (' + team.memberCount + '명)'}">
-                                    </option>
                                 </select>
                             </div>
-                            <div class="col-md-6 d-flex align-items-end">
-                                <button type="button" class="btn btn-outline-secondary me-2"
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-secondary"
                                         onclick="loadTeamSettings()" id="load-btn" disabled>
                                     <i class="fas fa-download me-2"></i>설정 불러오기
-                                </button>
-                                <button type="button" class="btn btn-outline-danger"
-                                        onclick="resetSettings()" id="reset-btn" disabled>
-                                    <i class="fas fa-undo me-2"></i>초기화
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 플랫폼별 추천 설정 -->
                 <div class="card mb-4" id="platform-settings-card" style="display: none;">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>플랫폼별 추천 설정</h5>
@@ -106,38 +92,28 @@
                                              th:alt="${platform.name + ' 로고'}" class="platform-img">
                                     </div>
                                     <h6 class="fw-bold" th:text="${platform.name}"></h6>
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input platform-toggle" type="checkbox"
-                                               th:id="'toggle-' + ${platform.name().toLowerCase()}"
-                                               onchange="togglePlatform(this)">
-                                        <label class="form-check-label" th:for="'toggle-' + ${platform.name().toLowerCase()}">
-                                            활성화
-                                        </label>
-                                    </div>
+                                    <button type="button"
+                                            class="platform-toggle-btn"
+                                            th:id="'toggle-' + ${platform.name().toLowerCase()}"
+                                            onclick="togglePlatform(event, this)">
+                                        활성화
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 플랫폼별 상세 설정 -->
                         <div class="platform-detail-settings mt-4" id="platform-details" style="display: none;">
-                            <!-- 백준 설정 -->
                             <div class="platform-setting" id="baekjoon-setting" style="display: none;">
                                 <h6 class="text-primary mb-3"><i class="fas fa-trophy me-2"></i>백준 추천 설정</h6>
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <label class="form-label">난이도</label>
                                         <select class="form-select" id="baekjoon-difficulty" multiple>
-                                            <option value="Bronze">Bronze</option>
-                                            <option value="Silver">Silver</option>
-                                            <option value="Gold">Gold</option>
-                                            <option value="Platinum">Platinum</option>
-                                            <option value="Diamond">Diamond</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label">태그</label>
                                         <select class="form-select" id="baekjoon-tags" multiple>
-                                            <!-- 동적으로 로드 -->
                                         </select>
                                     </div>
                                     <div class="col-md-4">
@@ -148,25 +124,17 @@
                                 </div>
                             </div>
 
-                            <!-- 프로그래머스 설정 -->
                             <div class="platform-setting" id="programmers-setting" style="display: none;">
                                 <h6 class="text-success mb-3"><i class="fas fa-code me-2"></i>프로그래머스 추천 설정</h6>
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <label class="form-label">난이도</label>
                                         <select class="form-select" id="programmers-difficulty" multiple>
-                                            <option value="Level 0">Level 0</option>
-                                            <option value="Level 1">Level 1</option>
-                                            <option value="Level 2">Level 2</option>
-                                            <option value="Level 3">Level 3</option>
-                                            <option value="Level 4">Level 4</option>
-                                            <option value="Level 5">Level 5</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label">태그</label>
                                         <select class="form-select" id="programmers-tags" multiple>
-                                            <!-- 동적으로 로드 -->
                                         </select>
                                     </div>
                                     <div class="col-md-4">
@@ -177,22 +145,17 @@
                                 </div>
                             </div>
 
-                            <!-- 리트코드 설정 -->
                             <div class="platform-setting" id="leetcode-setting" style="display: none;">
                                 <h6 class="text-warning mb-3"><i class="fas fa-bolt me-2"></i>리트코드 추천 설정</h6>
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <label class="form-label">난이도</label>
                                         <select class="form-select" id="leetcode-difficulty" multiple>
-                                            <option value="Easy">Easy</option>
-                                            <option value="Medium">Medium</option>
-                                            <option value="Hard">Hard</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label">태그</label>
                                         <select class="form-select" id="leetcode-tags" multiple>
-                                            <!-- 동적으로 로드 -->
                                         </select>
                                     </div>
                                     <div class="col-md-4">
@@ -206,7 +169,6 @@
                     </div>
                 </div>
 
-                <!-- 자동 추천 스케줄 설정 -->
                 <div class="card mb-4" id="schedule-settings-card" style="display: none;">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0"><i class="fas fa-clock me-2"></i>자동 추천 스케줄</h5>
@@ -214,37 +176,71 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-12">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="auto-recommendation-enabled">
-                                    <label class="form-check-label fw-bold" for="auto-recommendation-enabled">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">자동 추천 설정</label>
+                                    <br>
+                                    <button type="button" class="auto-recommendation-btn" id="auto-recommendation-enabled"
+                                            onclick="toggleAutoRecommendation(this)">
                                         자동 추천 활성화
-                                    </label>
+                                    </button>
                                 </div>
                             </div>
                             <div class="col-md-6" id="schedule-time-settings">
                                 <label class="form-label fw-bold">추천 시간</label>
                                 <select class="form-select" id="recommendation-time">
-                                    <option th:each="hour : ${hours}" th:value="${hourStat.index}" th:text="${hour}"></option>
+                                    <option value="0">00:00</option>
+                                    <option value="1">01:00</option>
+                                    <option value="2">02:00</option>
+                                    <option value="3">03:00</option>
+                                    <option value="4">04:00</option>
+                                    <option value="5">05:00</option>
+                                    <option value="6">06:00</option>
+                                    <option value="7">07:00</option>
+                                    <option value="8">08:00</option>
+                                    <option value="9" selected>09:00</option>
+                                    <option value="10">10:00</option>
+                                    <option value="11">11:00</option>
+                                    <option value="12">12:00</option>
+                                    <option value="13">13:00</option>
+                                    <option value="14">14:00</option>
+                                    <option value="15">15:00</option>
+                                    <option value="16">16:00</option>
+                                    <option value="17">17:00</option>
+                                    <option value="18">18:00</option>
+                                    <option value="19">19:00</option>
+                                    <option value="20">20:00</option>
+                                    <option value="21">21:00</option>
+                                    <option value="22">22:00</option>
+                                    <option value="23">23:00</option>
                                 </select>
                             </div>
                             <div class="col-md-6" id="schedule-days-settings">
                                 <label class="form-label fw-bold">추천 요일</label>
                                 <div class="d-flex flex-wrap gap-2">
-                                    <div class="form-check" th:each="day : ${daysOfWeek}">
-                                        <input class="form-check-input day-checkbox" type="checkbox"
-                                               th:id="'day-' + ${day.name().toLowerCase()}"
-                                               th:value="${day.name()}">
-                                        <label class="form-check-label" th:for="'day-' + ${day.name().toLowerCase()}"
-                                               th:text="${day.name()}">
-                                        </label>
-                                    </div>
+                                    <button type="button" class="day-btn" data-day="MONDAY" onclick="toggleDay(this)">월</button>
+                                    <button type="button" class="day-btn" data-day="TUESDAY" onclick="toggleDay(this)">화</button>
+                                    <button type="button" class="day-btn" data-day="WEDNESDAY" onclick="toggleDay(this)">수</button>
+                                    <button type="button" class="day-btn" data-day="THURSDAY" onclick="toggleDay(this)">목</button>
+                                    <button type="button" class="day-btn" data-day="FRIDAY" onclick="toggleDay(this)">금</button>
+                                    <button type="button" class="day-btn" data-day="SATURDAY" onclick="toggleDay(this)">토</button>
+                                    <button type="button" class="day-btn" data-day="SUNDAY" onclick="toggleDay(this)">일</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 수동 추천 설정 -->
+                <div class="text-center mt-4 mb-4" id="save-buttons" style="display: none;">
+                    <button type="button" class="btn btn-register-all me-3"
+                            onclick="saveSettings()" id="save-btn">
+                        <i class="fas fa-save me-2"></i>설정 저장
+                    </button>
+                    <button type="button" class="btn btn-clear-all"
+                            onclick="resetCurrentSettings()">
+                        <i class="fas fa-undo me-2"></i>현재 설정 초기화
+                    </button>
+                </div>
+
                 <div class="card mb-4" id="manual-recommendation-card" style="display: none;">
                     <div class="card-header bg-warning text-dark">
                         <h5 class="mb-0"><i class="fas fa-hand-point-right me-2"></i>수동 추천</h5>
@@ -270,19 +266,6 @@
                     </div>
                 </div>
 
-                <!-- 저장 버튼 -->
-                <div class="text-center mt-4 mb-5" id="save-buttons" style="display: none;">
-                    <button type="button" class="btn btn-register-all me-3"
-                            onclick="saveSettings()" id="save-btn">
-                        <i class="fas fa-save me-2"></i>설정 저장
-                    </button>
-                    <button type="button" class="btn btn-clear-all"
-                            onclick="resetCurrentSettings()">
-                        <i class="fas fa-undo me-2"></i>현재 설정 초기화
-                    </button>
-                </div>
-
-                <!-- 팁 카드 -->
                 <div class="card border-info">
                     <div class="card-header bg-info text-white">
                         <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>추천 설정 가이드</h6>

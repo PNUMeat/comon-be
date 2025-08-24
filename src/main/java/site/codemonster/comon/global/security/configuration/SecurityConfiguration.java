@@ -66,7 +66,8 @@ public class SecurityConfiguration {
                             "api/v1/teams/search",
                             "/api/v1/recruitments",
                             "/api/v1/recruitments/{recruitId}",
-                            "/admin/**"
+                            "/admin/**",
+                            "/api/v1/teams/all"
                     ).permitAll()
                     .anyRequest().authenticated())
 
@@ -79,9 +80,15 @@ public class SecurityConfiguration {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.ignoring()
-                .requestMatchers("/favicon.ico")
-                .requestMatchers("/error")
-                .requestMatchers("/actuator/prometheus")
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**");
+                .requestMatchers(
+                        "/favicon.ico",
+                        "/error",
+                        "/actuator/prometheus",
+                        "/css/**",
+                        "/js/**",
+                        "/images/**",
+                        "/webjars/**",
+                        "/api/v1/teams/all"
+                );
     }
 }

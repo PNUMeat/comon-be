@@ -8,6 +8,8 @@ let platformSettings = {
     PROGRAMMERS: { enabled: false, difficulties: [], tags: [], problemCount: 2 },
     LEETCODE: { enabled: false, difficulties: [], tags: [], problemCount: 2 }
 };
+let autoRecommendationEnabled = false;
+let selectedDays = [];
 
 /**
  * DOM 로드 완료 시 초기화
@@ -15,8 +17,8 @@ let platformSettings = {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('문제 추천 설정 페이지 초기화');
     updateActiveNavigation();
-    setupEventListeners();
     initializeDatePicker();
+    loadTeamOptions(); // 이 부분이 핵심
 });
 
 /**
@@ -35,24 +37,6 @@ function updateActiveNavigation() {
 }
 
 /**
- * 이벤트 리스너 설정
- */
-function setupEventListeners() {
-    // 자동 추천 활성화 토글
-    const autoToggle = document.getElementById('auto-recommendation-enabled');
-    if (autoToggle) {
-        autoToggle.addEventListener('change', toggleScheduleSettings);
-    }
-
-    // 플랫폼 토글 이벤트
-    document.querySelectorAll('.platform-toggle').forEach(toggle => {
-        toggle.addEventListener('change', function() {
-            togglePlatform(this);
-        });
-    });
-}
-
-/**
  * 날짜 선택기 초기화
  */
 function initializeDatePicker() {
@@ -62,6 +46,50 @@ function initializeDatePicker() {
         const today = new Date().toISOString().split('T')[0];
         datePicker.min = today;
     }
+}
+
+/**
+ * 팀 옵션 로드
+ */
+function loadTeamOptions() {
+    fetch('/api/v1/teams/all')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // data.status를 사용하여 성공 여부를 명확히 판단
+            if (data.status === 'success') {
+                populateTeamOptions(data.data);
+            } else {
+                console.error('팀 목록 로드 실패:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('팀 목록 로드 중 오류:', error);
+        });
+}
+
+/**
+ * 팀 선택 옵션 채우기
+ */
+function populateTeamOptions(teams) {
+    const teamSelect = document.getElementById('team-select');
+
+    // 기존 옵션 제거 (첫 번째 "팀을 선택하세요" 옵션 제외)
+    while (teamSelect.children.length > 1) {
+        teamSelect.removeChild(teamSelect.lastChild);
+    }
+
+    // 새 팀 옵션 추가
+    teams.forEach(team => {
+        const option = document.createElement('option');
+        option.value = team.teamId;
+        option.textContent = `${team.teamName} (${team.memberCount}명)`;
+        teamSelect.appendChild(option);
+    });
 }
 
 // ==================== 팀 관련 함수들 ====================
@@ -77,6 +105,9 @@ function handleTeamChange() {
         currentTeamId = selectedTeamId;
         enableTeamDependentElements();
         showSettingsCards();
+
+        // ★★★ 팀 선택 시 팀 설정과 플랫폼 옵션을 모두 자동으로 불러옴 ★★★
+        loadTeamSettings();
         loadPlatformOptions();
     } else {
         currentTeamId = null;
@@ -90,7 +121,6 @@ function handleTeamChange() {
  */
 function enableTeamDependentElements() {
     document.getElementById('load-btn').disabled = false;
-    document.getElementById('reset-btn').disabled = false;
 }
 
 /**
@@ -98,7 +128,6 @@ function enableTeamDependentElements() {
  */
 function disableTeamDependentElements() {
     document.getElementById('load-btn').disabled = true;
-    document.getElementById('reset-btn').disabled = true;
 }
 
 /**
@@ -107,8 +136,8 @@ function disableTeamDependentElements() {
 function showSettingsCards() {
     document.getElementById('platform-settings-card').style.display = 'block';
     document.getElementById('schedule-settings-card').style.display = 'block';
-    document.getElementById('manual-recommendation-card').style.display = 'block';
     document.getElementById('save-buttons').style.display = 'block';
+    document.getElementById('manual-recommendation-card').style.display = 'block';
 
     // 애니메이션 효과
     setTimeout(() => {
@@ -152,9 +181,8 @@ function loadTeamSettings() {
         })
         .then(data => {
             hideLoading();
-            if (data.success) {
+            if (data.status === 'success') {
                 applyTeamSettings(data.data);
-                alert('팀 설정을 성공적으로 불러왔습니다.');
             } else {
                 alert('설정을 불러오는데 실패했습니다: ' + (data.message || '알 수 없는 오류'));
             }
@@ -173,7 +201,12 @@ function applyTeamSettings(settings) {
     // 자동 추천 설정
     const autoToggle = document.getElementById('auto-recommendation-enabled');
     if (autoToggle && settings.autoRecommendationEnabled !== undefined) {
-        autoToggle.checked = settings.autoRecommendationEnabled;
+        autoRecommendationEnabled = settings.autoRecommendationEnabled;
+        if (autoRecommendationEnabled) {
+            autoToggle.classList.add('active');
+        } else {
+            autoToggle.classList.remove('active');
+        }
         toggleScheduleSettings();
     }
 
@@ -185,16 +218,73 @@ function applyTeamSettings(settings) {
 
     // 요일 설정
     if (settings.recommendDays) {
-        settings.recommendDays.forEach(day => {
-            const dayCheckbox = document.getElementById(`day-${day.toLowerCase()}`);
-            if (dayCheckbox) {
-                dayCheckbox.checked = true;
+        selectedDays = settings.recommendDays;
+        document.querySelectorAll('.day-btn').forEach(btn => {
+            const day = btn.getAttribute('data-day');
+            if (selectedDays.includes(day)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
             }
         });
     }
 
-    // 플랫폼 설정 (추후 구현)
-    console.log('플랫폼 설정 적용:', settings.platformSettings);
+    // ★★★ 플랫폼 설정 적용 로직 (새로 추가) ★★★
+    // 전역 변수 초기화
+    Object.keys(platformSettings).forEach(platform => {
+        platformSettings[platform] = { enabled: false, difficulties: [], tags: [], problemCount: 2 };
+    });
+
+    // 모든 플랫폼 카드와 상세 설정을 초기화 (비활성화)
+    document.querySelectorAll('.platform-toggle-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.platform-card').forEach(card => card.classList.remove('enabled'));
+    document.querySelectorAll('.platform-setting').forEach(setting => setting.style.display = 'none');
+
+    if (settings.platformSettings) {
+        settings.platformSettings.forEach(loadedSetting => {
+            const platform = loadedSetting.platform.toUpperCase();
+            const platformLower = platform.toLowerCase();
+            const isEnabled = loadedSetting.enabled;
+
+            // 전역 상태 업데이트
+            platformSettings[platform].enabled = isEnabled;
+            platformSettings[platform].difficulties = loadedSetting.difficulties;
+            platformSettings[platform].tags = loadedSetting.tags;
+            platformSettings[platform].problemCount = loadedSetting.problemCount;
+
+            // UI 업데이트
+            if (isEnabled) {
+                const card = document.querySelector(`.platform-card[data-platform="${platform}"]`);
+                const toggleBtn = document.getElementById(`toggle-${platformLower}`);
+                const countInput = document.getElementById(`${platformLower}-count`);
+                const difficultySelect = document.getElementById(`${platformLower}-difficulty`);
+                const tagsSelect = document.getElementById(`${platformLower}-tags`);
+
+                if (card) card.classList.add('enabled');
+                if (toggleBtn) toggleBtn.classList.add('active');
+                if (countInput) countInput.value = loadedSetting.problemCount;
+
+                // 난이도 드롭다운 값 설정
+                if (difficultySelect && loadedSetting.difficulties) {
+                    Array.from(difficultySelect.options).forEach(option => {
+                        if (loadedSetting.difficulties.includes(option.value)) {
+                            option.selected = true;
+                        }
+                    });
+                }
+
+                // 태그 드롭다운 값 설정
+                if (tagsSelect && loadedSetting.tags) {
+                    Array.from(tagsSelect.options).forEach(option => {
+                        if (loadedSetting.tags.includes(option.value)) {
+                            option.selected = true;
+                        }
+                    });
+                }
+            }
+        });
+        updatePlatformDetailsVisibility();
+    }
 }
 
 // ==================== 플랫폼 관련 함수들 ====================
@@ -219,24 +309,28 @@ function handlePlatformClick(element) {
 }
 
 /**
- * 플랫폼 토글 스위치 핸들러
+ * 플랫폼 토글 버튼 핸들러
  */
-function togglePlatform(toggleElement) {
-    const platform = toggleElement.id.replace('toggle-', '').toUpperCase();
-    const isEnabled = toggleElement.checked;
-    const platformCard = toggleElement.closest('.platform-card');
+function togglePlatform(event, buttonElement) {
+    event.stopPropagation(); // 카드 클릭 이벤트 방지
 
-    console.log(`플랫폼 ${platform} ${isEnabled ? '활성화' : '비활성화'}`);
+    const platform = buttonElement.id.replace('toggle-', '').toUpperCase();
+    const isEnabled = buttonElement.classList.contains('active');
+    const platformCard = buttonElement.closest('.platform-card');
 
-    // 카드 스타일 업데이트
+    console.log(`플랫폼 ${platform} ${isEnabled ? '비활성화' : '활성화'}`);
+
+    // 버튼 상태 토글
     if (isEnabled) {
-        platformCard.classList.add('enabled');
-    } else {
+        buttonElement.classList.remove('active');
         platformCard.classList.remove('enabled');
+    } else {
+        buttonElement.classList.add('active');
+        platformCard.classList.add('enabled');
     }
 
     // 플랫폼 설정 업데이트
-    platformSettings[platform].enabled = isEnabled;
+    platformSettings[platform].enabled = !isEnabled;
 
     // 플랫폼 상세 설정 표시/숨김
     updatePlatformDetailsVisibility();
@@ -278,60 +372,195 @@ function updatePlatformDetailsVisibility() {
 }
 
 /**
- * 플랫폼 옵션 로드 (난이도, 태그)
+ * 플랫폼 옵션 로드 (난이도, 태그) - 동적으로 로드
  */
 function loadPlatformOptions() {
     const platforms = ['BAEKJOON', 'PROGRAMMERS', 'LEETCODE'];
 
     platforms.forEach(platform => {
-        fetch(`/admin/recommendations/options/${platform}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    populatePlatformOptions(platform, data.data);
-                }
-            })
-            .catch(error => {
-                console.error(`${platform} 옵션 로드 실패:`, error);
-            });
+        loadPlatformData(platform);
     });
 }
 
 /**
- * 플랫폼 옵션 채우기
+ * 특정 플랫폼의 문제 데이터를 로드하고 난이도/태그 옵션 생성
  */
-function populatePlatformOptions(platform, options) {
+function loadPlatformData(platform) {
+    console.log(`${platform} 플랫폼 데이터 로드 중...`);
+
+    // 문제 목록 API를 호출해서 해당 플랫폼의 문제들만 가져오기
+    fetch(`/admin/problems/api/list-by-platform?platform=${platform}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(`${platform} 플랫폼 데이터 로드 성공:`, data);
+            populatePlatformOptions(platform, data);
+        })
+        .catch(error => {
+            console.error(`${platform} 옵션 로드 실패:`, error);
+            // 에러 발생 시 기본 옵션만 표시
+            populateDefaultOptions(platform);
+        });
+}
+
+/**
+ * 플랫폼별 문제 데이터에서 난이도, 태그 옵션 생성
+ */
+function populatePlatformOptions(platform, problems) {
     const platformLower = platform.toLowerCase();
 
-    // 태그 옵션 채우기
-    const tagsSelect = document.getElementById(`${platformLower}-tags`);
-    if (tagsSelect && options.tags) {
-        tagsSelect.innerHTML = '';
-        options.tags.forEach(tag => {
+    // 난이도 옵션 생성
+    let difficulties = [];
+    if (problems && problems.length > 0) {
+        difficulties = [...new Set(problems
+            .map(p => p.difficulty)
+            .filter(d => d && d.trim()) // null, undefined, 빈 문자열 필터링
+            .map(d => d.trim())
+        )].sort();
+    }
+
+    const difficultySelect = document.getElementById(`${platformLower}-difficulty`);
+    if (difficultySelect) {
+        difficultySelect.innerHTML = '';
+        if (difficulties.length > 0) {
+            difficulties.forEach(difficulty => {
+                const option = document.createElement('option');
+                option.value = difficulty;
+                option.textContent = difficulty;
+                difficultySelect.appendChild(option);
+            });
+        } else {
             const option = document.createElement('option');
-            option.value = tag;
-            option.textContent = tag;
+            option.value = "";
+            option.textContent = "난이도 없음";
+            option.disabled = true;
+            difficultySelect.appendChild(option);
+        }
+        console.log(`${platform} 난이도 옵션:`, difficulties);
+    }
+
+    // 태그 옵션 생성
+    let allTags = [];
+    if (problems && problems.length > 0) {
+        allTags = problems
+            .map(p => p.tags)
+            .filter(t => t && t.trim()) // null, undefined, 빈 문자열 필터링
+            .flatMap(t => t.split(',').map(tag => tag.trim()))
+            .filter(tag => tag.length > 0);
+    }
+
+    const uniqueTags = [...new Set(allTags)].sort();
+
+    const tagsSelect = document.getElementById(`${platformLower}-tags`);
+    if (tagsSelect) {
+        tagsSelect.innerHTML = '';
+        if (uniqueTags.length > 0) {
+            uniqueTags.forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                tagsSelect.appendChild(option);
+            });
+        } else {
+            const option = document.createElement('option');
+            option.value = "";
+            option.textContent = "태그 없음";
+            option.disabled = true;
             tagsSelect.appendChild(option);
+        }
+        console.log(`${platform} 태그 옵션:`, uniqueTags.slice(0, 10), `... 총 ${uniqueTags.length}개`);
+    }
+}
+
+/**
+ * 기본 옵션 설정 (API 호출 실패 시)
+ */
+function populateDefaultOptions(platform) {
+    const platformLower = platform.toLowerCase();
+
+    // 플랫폼별 기본 난이도
+    const defaultDifficulties = {
+        'baekjoon': ['Bronze I', 'Bronze II', 'Bronze III', 'Bronze IV', 'Bronze V',
+            'Silver I', 'Silver II', 'Silver III', 'Silver IV', 'Silver V',
+            'Gold I', 'Gold II', 'Gold III', 'Gold IV', 'Gold V',
+            'Platinum I', 'Platinum II', 'Platinum III', 'Platinum IV', 'Platinum V',
+            'Diamond I', 'Diamond II', 'Diamond III', 'Diamond IV', 'Diamond V'],
+        'programmers': ['Level 0', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
+        'leetcode': ['Easy', 'Medium', 'Hard']
+    };
+
+    const difficultySelect = document.getElementById(`${platformLower}-difficulty`);
+    if (difficultySelect && defaultDifficulties[platformLower]) {
+        difficultySelect.innerHTML = '';
+        defaultDifficulties[platformLower].forEach(difficulty => {
+            const option = document.createElement('option');
+            option.value = difficulty;
+            option.textContent = difficulty;
+            difficultySelect.appendChild(option);
         });
     }
+
+    // 태그는 빈 상태로 두기
+    const tagsSelect = document.getElementById(`${platformLower}-tags`);
+    if (tagsSelect) {
+        tagsSelect.innerHTML = '<option value="" disabled>문제 데이터를 불러올 수 없습니다</option>';
+    }
+
+    console.log(`${platform} 기본 옵션 설정 완료`);
 }
 
 // ==================== 스케줄 관련 함수들 ====================
 
 /**
+ * 자동 추천 토글 버튼 핸들러
+ */
+function toggleAutoRecommendation(buttonElement) {
+    const isActive = buttonElement.classList.contains('active');
+
+    if (isActive) {
+        buttonElement.classList.remove('active');
+        autoRecommendationEnabled = false;
+    } else {
+        buttonElement.classList.add('active');
+        autoRecommendationEnabled = true;
+    }
+
+    toggleScheduleSettings();
+}
+
+/**
  * 자동 추천 스케줄 설정 토글
  */
 function toggleScheduleSettings() {
-    const autoToggle = document.getElementById('auto-recommendation-enabled');
     const timeSettings = document.getElementById('schedule-time-settings');
     const daysSettings = document.getElementById('schedule-days-settings');
 
-    if (autoToggle.checked) {
+    if (autoRecommendationEnabled) {
         timeSettings.classList.remove('disabled');
         daysSettings.classList.remove('disabled');
     } else {
         timeSettings.classList.add('disabled');
         daysSettings.classList.add('disabled');
+    }
+}
+
+/**
+ * 요일 토글 버튼 핸들러
+ */
+function toggleDay(buttonElement) {
+    const day = buttonElement.getAttribute('data-day');
+    const isActive = buttonElement.classList.contains('active');
+
+    if (isActive) {
+        buttonElement.classList.remove('active');
+        selectedDays = selectedDays.filter(d => d !== day);
+    } else {
+        buttonElement.classList.add('active');
+        selectedDays.push(day);
     }
 }
 
@@ -458,8 +687,8 @@ function executeManualRecommendation() {
         })
         .then(data => {
             hideLoading();
-            if (data.success) {
-                alert(`수동 추천이 완료되었습니다!\n${data.data.message}`);
+            if (data.status === 'success') {
+                alert(`${data.data.message}`);
                 // 선택된 날짜들 초기화
                 selectedDates = [];
                 updateSelectedDatesDisplay();
@@ -511,7 +740,7 @@ function saveSettings() {
         })
         .then(data => {
             hideLoading();
-            if (data.success) {
+            if (data.status === 'success') {
                 alert('설정이 성공적으로 저장되었습니다!');
             } else {
                 alert('설정 저장에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
@@ -528,14 +757,7 @@ function saveSettings() {
  * 현재 설정 수집
  */
 function collectCurrentSettings() {
-    const autoEnabled = document.getElementById('auto-recommendation-enabled').checked;
     const recommendationTime = parseInt(document.getElementById('recommendation-time').value);
-
-    // 선택된 요일 수집
-    const selectedDays = [];
-    document.querySelectorAll('.day-checkbox:checked').forEach(checkbox => {
-        selectedDays.push(checkbox.value);
-    });
 
     // 플랫폼 설정 수집
     const platformSettingsArray = [];
@@ -569,7 +791,7 @@ function collectCurrentSettings() {
     return {
         teamId: currentTeamId,
         platformSettings: platformSettingsArray,
-        autoRecommendationEnabled: autoEnabled,
+        autoRecommendationEnabled: autoRecommendationEnabled,
         recommendationAt: recommendationTime,
         recommendDays: selectedDays
     };
@@ -603,9 +825,9 @@ function validateSettings(settings) {
 }
 
 /**
- * 설정 초기화
+ * 현재 화면의 설정 초기화
  */
-function resetSettings() {
+function resetCurrentSettings() {
     if (!currentTeamId) {
         alert('팀을 먼저 선택해주세요.');
         return;
@@ -630,7 +852,7 @@ function resetSettings() {
             hideLoading();
             if (data.success) {
                 alert('설정이 초기화되었습니다.');
-                resetCurrentSettings();
+                resetUISettings(); // UI 초기화
             } else {
                 alert('설정 초기화에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
             }
@@ -643,24 +865,30 @@ function resetSettings() {
 }
 
 /**
- * 현재 화면의 설정 초기화
+ * UI 설정 초기화
  */
-function resetCurrentSettings() {
-    // 플랫폼 토글 초기화
-    document.querySelectorAll('.platform-toggle').forEach(toggle => {
-        toggle.checked = false;
-        toggle.dispatchEvent(new Event('change'));
+function resetUISettings() {
+    // 플랫폼 버튼 초기화
+    document.querySelectorAll('.platform-toggle-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // 플랫폼 카드 초기화
+    document.querySelectorAll('.platform-card').forEach(card => {
+        card.classList.remove('enabled');
     });
 
     // 자동 추천 비활성화
     const autoToggle = document.getElementById('auto-recommendation-enabled');
-    autoToggle.checked = false;
+    autoToggle.classList.remove('active');
+    autoRecommendationEnabled = false;
     toggleScheduleSettings();
 
     // 요일 선택 초기화
-    document.querySelectorAll('.day-checkbox').forEach(checkbox => {
-        checkbox.checked = false;
+    document.querySelectorAll('.day-btn').forEach(btn => {
+        btn.classList.remove('active');
     });
+    selectedDays = [];
 
     // 추천 시간 초기화
     document.getElementById('recommendation-time').value = 9;
