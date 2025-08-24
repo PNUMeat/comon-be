@@ -41,7 +41,7 @@ public class AdminRecommendationApiController {
     }
 
     @DeleteMapping("/settings/{teamId}")
-    public ResponseEntity<?> resetRecommendationSettings(@PathVariable Long teamId) {
+    public ResponseEntity<?> resetTeamRecommendationSettings(@PathVariable Long teamId) {
         recommendationService.resetRecommendationSettings(teamId);
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_RESET_SUCCESS.getStatusCode())

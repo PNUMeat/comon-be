@@ -67,4 +67,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Modifying
     @Query("DELETE FROM Article a WHERE a.member.id = :memberId AND a.team.teamId = :teamId")
     void deleteByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
+
+    boolean existsByTeamAndSelectedDateAndArticleCategory(Team team, LocalDate selectedDate, ArticleCategory articleCategory);
 }
