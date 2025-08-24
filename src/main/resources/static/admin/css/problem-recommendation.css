@@ -1,0 +1,658 @@
+/* problem-recommendation.css */
+
+/* 사이드바 스타일 */
+.sidebar {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 2px 0 15px rgba(0,0,0,.1);
+}
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,0.9);
+    border-radius: 8px;
+    margin: 5px 0;
+    padding: 12px 20px;
+    transition: all 0.3s;
+    border: none;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,.2);
+}
+
+.sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* 브랜드 로고 */
+.brand-logo {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 20px;
+    display: block;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+.brand-logo:hover {
+    color: white;
+    text-decoration: none;
+}
+
+/* 팀 선택 드롭다운 */
+#team-select {
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+    padding: 12px 16px;
+}
+
+#team-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* 플랫폼 카드 */
+.platform-card {
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: white;
+    height: 100%;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.platform-card:hover {
+    border-color: #0d6efd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
+}
+
+.platform-card.active {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f8fff8, #e8f5e8);
+}
+
+.platform-card.enabled {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f0f8f0, #e0f0e0);
+}
+
+.platform-logo {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.platform-img {
+    max-width: 50px;
+    max-height: 50px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.platform-card:hover .platform-img {
+    transform: scale(1.1);
+}
+
+.platform-card h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* 플랫폼 토글 스위치 */
+.platform-toggle {
+    transform: scale(1.3);
+    accent-color: #28a745;
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    margin-left: 5px;
+}
+
+/* 플랫폼 상세 설정 */
+.platform-detail-settings {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 25px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.platform-setting {
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 1px 5px rgba(0,0,0,.05);
+}
+
+.platform-setting:last-child {
+    margin-bottom: 0;
+}
+
+.platform-setting h6 {
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 다중 선택 셀렉트 박스 */
+.form-select[multiple] {
+    min-height: 130px;
+    background: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.form-select[multiple]:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-select[multiple] option {
+    padding: 10px 12px;
+    margin: 3px 0;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.form-select[multiple] option:checked {
+    background: linear-gradient(135deg, #0d6efd, #0056b3);
+    color: white;
+    font-weight: 500;
+}
+
+.form-select[multiple] option:hover {
+    background: #f8f9fa;
+}
+
+/* 스케줄 설정 스타일 */
+.form-check-input {
+    transform: scale(1.2);
+    margin-right: 10px;
+}
+
+.day-checkbox {
+    accent-color: #0d6efd;
+    transform: scale(1.1);
+}
+
+.form-check {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.form-check:hover {
+    background: #e9ecef;
+}
+
+.form-check input:checked + label {
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+/* 스케줄 비활성화 상태 */
+#schedule-time-settings.disabled,
+#schedule-days-settings.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(0.5);
+    transition: all 0.3s ease;
+}
+
+/* 날짜 선택 관련 */
+.selected-dates {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+    margin-top: 15px;
+}
+
+.selected-dates h6 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.date-tag {
+    background: linear-gradient(135deg, #0d6efd, #0056b3);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    margin: 4px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(13, 110, 253, 0.2);
+}
+
+.date-tag:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.date-tag .remove-date {
+    background: none;
+    border: none;
+    color: white;
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+    padding: 2px 5px;
+    border-radius: 50%;
+}
+
+.date-tag .remove-date:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 버튼 스타일 */
+.btn-register-all {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 14px 35px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+}
+
+.btn-register-all:hover {
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+}
+
+.btn-register-all:disabled {
+    background: #6c757d;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.btn-clear-all {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 14px 35px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+}
+
+.btn-clear-all:hover {
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+}
+
+.btn-outline-secondary {
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-1px);
+}
+
+.btn-outline-danger {
+    transition: all 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+    transform: translateY(-1px);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    border: none;
+    color: #212529;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+    color: #212529;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
+}
+
+/* 카드 공통 스타일 */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 3px 15px rgba(0,0,0,.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,.12);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px 12px 0 0 !important;
+    font-weight: 600;
+    padding: 15px 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* 로그아웃 버튼 */
+.logout-btn {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    color: rgba(255,255,255,0.9) !important;
+    border-radius: 8px;
+    margin: 5px 0;
+    padding: 12px 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background: rgba(220, 53, 69, 0.2);
+    color: #ff6b6b !important;
+    transform: translateX(5px);
+}
+
+.logout-btn i {
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* 입력 필드 개선 */
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* 로딩 오버레이 */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#loading-overlay .bg-white {
+    border-radius: 15px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+    padding: 30px;
+}
+
+.spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* 성공/에러 메시지 */
+.status-success {
+    color: #28a745;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.status-success i {
+    margin-right: 5px;
+}
+
+.status-error {
+    color: #dc3545;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.status-error i {
+    margin-right: 5px;
+}
+
+/* 알림 메시지 */
+.alert {
+    border: none;
+    border-radius: 10px;
+    padding: 15px 20px;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1, #b8daff);
+    color: #0c5460;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+}
+
+/* 숨김/표시 애니메이션 */
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+    }
+
+    .brand-logo {
+        font-size: 1.2rem;
+        padding: 15px;
+    }
+
+    .platform-card {
+        margin-bottom: 15px;
+        min-height: 180px;
+    }
+
+    .platform-detail-settings {
+        padding: 15px;
+        margin-top: 15px;
+    }
+
+    .platform-setting {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .btn-register-all,
+    .btn-clear-all {
+        padding: 12px 25px;
+        font-size: 1rem;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .date-tag {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        margin: 2px;
+    }
+
+    .form-select[multiple] {
+        min-height: 100px;
+    }
+
+    .form-check {
+        margin-bottom: 8px;
+    }
+
+    .selected-dates {
+        padding: 15px;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .form-control,
+    .form-select {
+        padding: 10px 14px;
+    }
+}
+
+@media (max-width: 576px) {
+    .platform-card {
+        min-height: 160px;
+    }
+
+    .platform-card h6 {
+        font-size: 0.9rem;
+    }
+
+    .platform-img {
+        max-width: 40px;
+        max-height: 40px;
+    }
+
+    .date-tag {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+
+    .btn-register-all,
+    .btn-clear-all {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .form-select[multiple] {
+        min-height: 90px;
+    }
+}
+
+/* 스크롤바 커스터마이징 */
+.form-select[multiple]::-webkit-scrollbar {
+    width: 8px;
+}
+
+.form-select[multiple]::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.form-select[multiple]::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.form-select[multiple]::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
