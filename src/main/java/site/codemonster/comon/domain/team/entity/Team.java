@@ -1,5 +1,9 @@
 package site.codemonster.comon.domain.team.entity;
 
+import java.time.DayOfWeek;
+import java.util.EnumSet;
+import java.util.Set;
+import lombok.Setter;
 import site.codemonster.comon.domain.team.dto.request.TeamInfoEditRequest;
 import site.codemonster.comon.domain.team.enums.Topic;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
