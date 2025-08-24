@@ -1,5 +1,6 @@
-package site.codemonster.comon.domain.problem.entity;
+package site.codemonster.comon.domain.recommendation.entity;
 
+import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.global.entityListeners.TimeStamp;
 import jakarta.persistence.*;

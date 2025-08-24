@@ -1,6 +1,9 @@
 package site.codemonster.comon.domain.team.entity;
 
 import java.time.DayOfWeek;
+import java.util.EnumSet;
+import java.util.Set;
+import lombok.Setter;
 import site.codemonster.comon.domain.team.dto.request.TeamInfoEditRequest;
 import site.codemonster.comon.domain.team.enums.Topic;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
@@ -37,14 +40,6 @@ public class Team extends TimeStamp {
     private int streakDays = 0;
 
     private String teamAnnouncement="";
-
-    private Integer recommendDays;
-
-    private Integer dailyProblemCount;
-
-    private Boolean autoRecommendationEnabled = false;
-
-    private Integer recommendationAt = 9;
 
     @OneToOne(mappedBy = "team", fetch = FetchType.LAZY)
     private TeamRecruit teamRecruit;
@@ -96,19 +91,5 @@ public class Team extends TimeStamp {
 
     public void addTeamRecruit(TeamRecruit teamRecruit){
         this.teamRecruit = teamRecruit;
-    }
-
-    public boolean isRecommendationDay(DayOfWeek dayOfWeek) {
-        int dayBit = 1 << (dayOfWeek.getValue() - 1);
-        return (this.recommendDays & dayBit) != 0;
-    }
-
-    public void setRecommendationDay(DayOfWeek dayOfWeek, boolean enabled) {
-        int dayBit = 1 << (dayOfWeek.getValue() - 1);
-        if (enabled) {
-            this.recommendDays |= dayBit;
-        } else {
-            this.recommendDays &= ~dayBit;
-        }
     }
 }
