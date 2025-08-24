@@ -68,7 +68,8 @@ public class MemberProfileInterceptor implements HandlerInterceptor {
     }
 
     private boolean passInterceptorUrl(HttpServletRequest request) {
-        return request.getRequestURI().contains("api/v1/test/no-auth")
+        return request.getRequestURI().contains("api/v1/teams/all")
+                || request.getRequestURI().contains("api/v1/test/no-auth")
                 || request.getRequestURI().contains("api/v1/test/auth")
                 || request.getRequestURI().contains("api/v1/teams/combined")
                 || request.getRequestURI().contains("team-page")

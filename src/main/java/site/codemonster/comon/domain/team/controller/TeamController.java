@@ -88,6 +88,19 @@ public class TeamController {
                 .body(ApiResponse.successResponseWithData(teamAllResponses));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<?>> getAllTeamsForAdmin() {
+        List<Team> teams = teamService.getAllTeams();
+
+        List<TeamSimpleResponse> teamResponses = teams.stream()
+                .map(TeamSimpleResponse::of)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponseWithData(teamResponses));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<?>> getAllTeamsByKeyword(
             @RequestParam(name = "keyword") String keyword,
