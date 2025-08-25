@@ -4,7 +4,7 @@ import site.codemonster.comon.domain.auth.entity.RefreshToken;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
 import site.codemonster.comon.domain.auth.service.RefreshTokenService;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
-import site.codemonster.comon.global.util.cookie.CookieUtils;
+import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

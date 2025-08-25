@@ -7,11 +7,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
+import site.codemonster.comon.domain.recommendation.service.PlatformRecommendationService;
 import site.codemonster.comon.domain.recommendation.service.TeamRecommendationService;
 import site.codemonster.comon.domain.recommendation.dto.request.ManualRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.request.TeamRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.response.ManualRecommendationResponse;
-import site.codemonster.comon.domain.recommendation.dto.response.TeamRecommendationSettingsResponse;
+import site.codemonster.comon.domain.team.entity.Team;
+import site.codemonster.comon.domain.team.service.TeamService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 
 @RestController
@@ -19,11 +22,17 @@ import site.codemonster.comon.global.error.dto.response.ApiResponse;
 @RequiredArgsConstructor
 public class AdminRecommendationApiController {
 
-    private final TeamRecommendationService recommendationService;
+    private final TeamRecommendationService teamRecommendationService;
+    private final PlatformRecommendationService platformRecommendationService;
+    private final TeamService teamService;
 
     @PostMapping("/settings")
-    public ResponseEntity<?> saveTeamRecommendationSettings(@RequestBody @Valid TeamRecommendationRequest request) {
-        recommendationService.saveRecommendationSettings(request);
+    public ResponseEntity<?> saveTeamRecommendationSetting(@RequestBody @Valid TeamRecommendationRequest request) {
+        Team team = teamService.getTeamByTeamId(request.teamId());
+        TeamRecommendation teamRecommendation = teamRecommendationService.getOrCreateTeamRecommendation(team);
+
+        teamRecommendationService.saveRecommendationSettings(teamRecommendation, request);
+        platformRecommendationService.savePlatformRecommendations(teamRecommendation, request.platformSettings());
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -31,18 +40,20 @@ public class AdminRecommendationApiController {
     }
 
     @GetMapping("/settings/{teamId}")
-    public ResponseEntity<?> getTeamRecommendationSettings(@PathVariable Long teamId) {
-        TeamRecommendationSettingsResponse settings =
-                recommendationService.getRecommendationSettings(teamId);
+    public ResponseEntity<?> getTeamRecommendationSetting(@PathVariable Long teamId) {
+        Team team = teamService.getTeamByTeamId(teamId);
+        TeamRecommendation teamRecommendation = teamRecommendationService.getOrCreateTeamRecommendation(team);
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_GET_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(settings, RECOMMENDATION_SETTINGS_GET_SUCCESS.getMessage()));
+                .body(ApiResponse.successResponse(teamRecommendationService.getRecommendationSettings(teamRecommendation), RECOMMENDATION_SETTINGS_GET_SUCCESS.getMessage()));
     }
 
     @DeleteMapping("/settings/{teamId}")
-    public ResponseEntity<?> resetTeamRecommendationSettings(@PathVariable Long teamId) {
-        recommendationService.resetRecommendationSettings(teamId);
+    public ResponseEntity<?> resetTeamRecommendationSetting(@PathVariable Long teamId) {
+        Team team = teamService.getTeamByTeamId(teamId);
+
+        teamRecommendationService.resetRecommendationSettings(team);
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_RESET_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -52,7 +63,7 @@ public class AdminRecommendationApiController {
     @PostMapping("/manual")
     public ResponseEntity<?> executeManualRecommendation(@RequestBody @Valid ManualRecommendationRequest request) {
         ManualRecommendationResponse result =
-                recommendationService.executeManualRecommendation(request);
+                teamRecommendationService.executeManualRecommendation(request);
 
         return ResponseEntity.status(MANUAL_RECOMMENDATION_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)

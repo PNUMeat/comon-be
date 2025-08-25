@@ -1,6 +1,7 @@
 package site.codemonster.comon.domain.recommendation.dto.response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import site.codemonster.comon.domain.recommendation.entity.PlatformRecommendation;
 import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
 
 import java.time.DayOfWeek;
@@ -17,9 +18,10 @@ public record TeamRecommendationSettingsResponse(
         Integer totalProblemCount
 ) {
 
-    public static TeamRecommendationSettingsResponse of(TeamRecommendation teamRecommendation, ObjectMapper objectMapper) {
-        List<PlatformRecommendationResponse> platformSettings = teamRecommendation.getPlatformRecommendations()
-                .stream()
+    public static TeamRecommendationSettingsResponse of(TeamRecommendation teamRecommendation,
+                                                        List<PlatformRecommendation> platformRecommendations,
+                                                        ObjectMapper objectMapper) {
+        List<PlatformRecommendationResponse> platformSettings = platformRecommendations.stream()
                 .map(platform -> PlatformRecommendationResponse.of(platform, objectMapper))
                 .toList();
 

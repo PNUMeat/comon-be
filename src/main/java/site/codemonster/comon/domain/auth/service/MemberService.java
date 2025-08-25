@@ -61,6 +61,11 @@ public class MemberService {
                 .orElseThrow(MemberNotFoundException::new);
     }
 
+    public Member getMemberById(Long memberId){
+        return memberRepository.findById(memberId)
+                .orElseThrow(MemberNotFoundException::new);
+    }
+
     @Transactional
     public void deleteMember(Long memberId) {
         List<Long> teamRecruitIds = teamRecruitRepository.findIdsByMemberId(memberId);

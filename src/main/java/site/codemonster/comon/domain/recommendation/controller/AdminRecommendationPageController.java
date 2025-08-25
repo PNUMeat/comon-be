@@ -18,9 +18,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class AdminRecommendationPageController {
 
-    /**
-     * 문제 추천 설정 페이지
-     */
+    // 관리자 페이지 - 문제 추천 설정 페이지
     @GetMapping({"", "/settings"})
     public String recommendationSettings(Model model, HttpSession session) {
         addAdminInfoToModel(model, session);
@@ -30,9 +28,6 @@ public class AdminRecommendationPageController {
         return "admin/problem-recommendation";
     }
 
-    /**
-     * 모든 페이지에 관리자 정보 추가
-     */
     private void addAdminInfoToModel(Model model, HttpSession session) {
         AdminMember adminMember = (AdminMember) session.getAttribute(AdminAuthPageController.ADMIN_SESSION_KEY);
         if (adminMember != null) {

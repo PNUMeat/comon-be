@@ -1,15 +1,15 @@
 package site.codemonster.comon.domain.recommendation.entity;
 
 import site.codemonster.comon.domain.team.entity.Team;
+import site.codemonster.comon.domain.recommendation.dto.request.TeamRecommendationRequest;
 import site.codemonster.comon.global.entityListeners.TimeStamp;
+import site.codemonster.comon.global.util.dateUtils.DateUtils;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -42,9 +42,6 @@ public class TeamRecommendation extends TimeStamp {
     @Column(nullable = false)
     private Integer totalProblemCount = 0;
 
-    @OneToMany(mappedBy = "teamRecommendation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlatformRecommendation> platformRecommendations = new ArrayList<>();
-
     protected TeamRecommendation() {}
 
     @Builder
@@ -56,48 +53,25 @@ public class TeamRecommendation extends TimeStamp {
         this.totalProblemCount = totalProblemCount;
     }
 
-    public void setRecommendationDay(DayOfWeek dayOfWeek, boolean enabled) {
-        int dayBit = 1 << (dayOfWeek.getValue() - 1);
-        if (enabled) {
-            this.recommendDays |= dayBit;
-        } else {
-            this.recommendDays &= ~dayBit;
-        }
-    }
-
     public void setRecommendationDays(Set<DayOfWeek> days) {
-        this.recommendDays = 0; // 초기화
-        if (days != null) {
-            days.forEach(day -> setRecommendationDay(day, true));
-        }
+        this.recommendDays = DateUtils.convertDaysToBitMask(days);
     }
 
     public Set<DayOfWeek> getRecommendationDays() {
-        Set<DayOfWeek> days = EnumSet.noneOf(DayOfWeek.class);
-        for (DayOfWeek day : DayOfWeek.values()) {
-            int dayBit = 1 << (day.getValue() - 1);
-            if ((this.recommendDays & dayBit) != 0) {
-                days.add(day);
-            }
-        }
-        return days;
+        return DateUtils.convertBitMaskToDays(this.recommendDays);
     }
 
-    public void resetRecommendationSetting() {
-        this.autoRecommendationEnabled = false;
-        this.recommendationAt = 9;
-        this.recommendDays = 0;
-        this.totalProblemCount = 0;
-        this.platformRecommendations.clear();
+    public void updateInitialSettings(TeamRecommendationRequest request) {
+        this.autoRecommendationEnabled = request.autoRecommendationEnabled();
+        this.recommendationAt = request.recommendationAt();
+        this.totalProblemCount = calculateTotalProblemCount(request.platformSettings());
+        this.setRecommendationDays(request.recommendDays());
     }
 
-    public void addPlatformRecommendation(PlatformRecommendation platformRecommendation) {
-        this.platformRecommendations.add(platformRecommendation);
-        platformRecommendation.setTeamRecommendation(this);
-    }
-
-    public void replacePlatformRecommendations(List<PlatformRecommendation> newPlatformRecommendations) {
-        this.platformRecommendations.clear();
-        newPlatformRecommendations.forEach(this::addPlatformRecommendation);
+    private Integer calculateTotalProblemCount(List<TeamRecommendationRequest.PlatformRecommendationSetting> settings) {
+        return settings.stream()
+                .filter(TeamRecommendationRequest.PlatformRecommendationSetting::enabled)
+                .mapToInt(TeamRecommendationRequest.PlatformRecommendationSetting::problemCount)
+                .sum();
     }
 }
