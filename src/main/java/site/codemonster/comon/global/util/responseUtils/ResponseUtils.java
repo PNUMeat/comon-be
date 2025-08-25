@@ -38,4 +38,21 @@ public class ResponseUtils {
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         }
     }
+
+    public static String createRecommendationResponseMessage(int totalRecommended, StringBuilder failureMessageBuilder) {
+        if (totalRecommended > 0) {
+            String successMessage = String.format("총 %d개의 문제가 추천 완료되었습니다.\n", totalRecommended);
+            if (failureMessageBuilder.length() > 0) {
+                return successMessage + "그러나 일부 날짜는 실패했습니다:\n" + failureMessageBuilder.toString();
+            } else {
+                return successMessage;
+            }
+        } else {
+            if (failureMessageBuilder.length() > 0) {
+                return "수동 추천에 실패했습니다. \n원인: " + failureMessageBuilder.toString();
+            } else {
+                return "수동 추천에 실패했습니다. (추천할 문제가 없거나, 설정이 올바르지 않습니다.)";
+            }
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package site.codemonster.comon.global.util.cookie;
+package site.codemonster.comon.global.util.cookieUtils;
 
 
 import jakarta.servlet.http.Cookie;

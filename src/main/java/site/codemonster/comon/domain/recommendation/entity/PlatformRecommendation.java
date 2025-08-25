@@ -48,14 +48,4 @@ public class PlatformRecommendation extends TimeStamp {
         this.problemCount = problemCount;
         this.enabled = enabled;
     }
-
-    /**
-     * 플랫폼 추천 설정 업데이트
-     */
-    public void updateSettings(String difficulties, String tags, Integer problemCount, Boolean enabled) {
-        this.difficulties = difficulties;
-        this.tags = tags;
-        this.problemCount = problemCount;
-        this.enabled = enabled;
-    }
 }
