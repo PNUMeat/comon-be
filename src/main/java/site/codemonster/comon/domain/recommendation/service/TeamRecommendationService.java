@@ -1,6 +1,5 @@
 package site.codemonster.comon.domain.recommendation.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -130,7 +129,7 @@ public class TeamRecommendationService {
                 .build();
     }
 
-    private List<Problem> recommendProblemsForTeam(Team team, List<PlatformRecommendation> platformRecommendations) {
+    public List<Problem> recommendProblemsForTeam(Team team, List<PlatformRecommendation> platformRecommendations) {
         List<PlatformRecommendation> enabledPlatforms = platformRecommendations.stream()
                 .filter(PlatformRecommendation::getEnabled)
                 .toList();
@@ -159,7 +158,6 @@ public class TeamRecommendationService {
     private List<Problem> recommendProblemsByPlatform(Team team, Platform platform, int count,
                                                       List<String> difficulties, List<String> tags) {
         Set<Long> recommendedProblemIds = recommendationHistoryService.getRecommendedProblemIds(team, platform);
-
         List<Problem> allProblemsForPlatform = problemService.getProblemsByPlatform(platform);
 
         List<Problem> availableProblems = allProblemsForPlatform.stream()
@@ -168,19 +166,27 @@ public class TeamRecommendationService {
 
         List<Problem> filteredProblems = availableProblems.stream()
                 .filter(p -> {
-                    boolean difficultyMatch = (difficulties == null || difficulties.isEmpty()) || difficulties.contains(p.getDifficulty());
-                    boolean tagsMatch = false;
-                    if (tags == null || tags.isEmpty()) {
-                        tagsMatch = true;
-                    } else if (p.getTags() != null) {
-                        String[] problemTags = p.getTags().split(",");
-                        for (String problemTag : problemTags) {
-                            if (tags.contains(problemTag.trim())) {
-                                tagsMatch = true;
-                                break;
-                            }
+                    // 난이도 필터링 (OR 조건)
+                    boolean difficultyMatch = (difficulties == null || difficulties.isEmpty())
+                            || difficulties.contains(p.getDifficulty());
+
+                    // 태그 필터링 (OR 조건) - 개선된 로직
+                    boolean tagsMatch = true; // 기본값을 true로 변경
+                    if (tags != null && !tags.isEmpty()) {
+                        if (p.getTags() == null || p.getTags().trim().isEmpty()) {
+                            tagsMatch = false;
+                        } else {
+                            Set<String> problemTagsSet = Arrays.stream(p.getTags().split(","))
+                                    .map(String::trim)
+                                    .filter(tag -> !tag.isEmpty())
+                                    .collect(Collectors.toSet());
+
+                            // 선택한 태그 중 하나라도 문제에 있으면 매치
+                            tagsMatch = tags.stream()
+                                    .anyMatch(problemTagsSet::contains);
                         }
                     }
+
                     return difficultyMatch && tagsMatch;
                 })
                 .collect(Collectors.toList());
@@ -193,5 +199,9 @@ public class TeamRecommendationService {
         return filteredProblems.stream()
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    public List<TeamRecommendation> getSchedulingActiveTeamRecommendations() {
+        return teamRecommendationRepository.findByAutoRecommendationEnabledTrue();
     }
 }

@@ -243,41 +243,58 @@
     }
 }
 
-/* 다중 선택 셀렉트 박스 */
+/* ========== 다중 선택 셀렉트 박스 스타일 (개선된 버전) ========== */
 .form-select[multiple] {
-    min-height: 130px;
+    min-height: 140px;
+    max-height: 200px;
     background: #ffffff;
     border: 2px solid #e9ecef;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow-y: auto;
 }
 
 .form-select[multiple]:focus {
     border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    outline: none;
 }
 
 .form-select[multiple] option {
-    padding: 10px 12px;
-    margin: 3px 0;
-    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 2px 0;
+    border-radius: 8px;
     transition: all 0.2s ease;
-}
-
-.form-select[multiple] option:checked {
-    background: linear-gradient(135deg, #0d6efd, #0056b3);
-    color: white;
+    cursor: pointer;
     font-weight: 500;
+    border: none;
 }
 
 .form-select[multiple] option:hover {
-    background: #f8f9fa;
+    background: #f8f9fa !important;
+    color: #495057;
+}
+
+.form-select[multiple] option:checked {
+    background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+    transform: scale(1.02);
+}
+
+.form-select[multiple] option:focus {
+    outline: 2px solid rgba(13, 110, 253, 0.5);
+    outline-offset: -2px;
 }
 
 /* 로딩 상태 셀렉트 */
 .form-select[multiple].loading {
     background: #f8f9fa;
     opacity: 0.7;
+    position: relative;
 }
 
 .form-select[multiple].loading::after {
@@ -288,20 +305,21 @@
     transform: translate(-50%, -50%);
     color: #6c757d;
     font-size: 0.9rem;
+    pointer-events: none;
 }
 
 /* 플랫폼별 색상 구분 */
 .platform-setting#baekjoon-setting .form-select[multiple] option:checked {
-    background: linear-gradient(135deg, #00C851, #00A441);
+    background: linear-gradient(135deg, #198754, #146c43) !important;
 }
 
 .platform-setting#programmers-setting .form-select[multiple] option:checked {
-    background: linear-gradient(135deg, #ff6b6b, #ff5252);
+    background: linear-gradient(135deg, #dc3545, #b02a37) !important;
 }
 
 .platform-setting#leetcode-setting .form-select[multiple] option:checked {
-    background: linear-gradient(135deg, #feca57, #f39c12);
-    color: #333;
+    background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+    color: #333 !important;
 }
 
 /* 스케줄 비활성화 상태 */
@@ -513,6 +531,14 @@
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
+/* 도움말 텍스트 스타일 */
+.form-text {
+    margin-top: 5px;
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
 /* 로딩 오버레이 */
 #loading-overlay {
     position: fixed;
@@ -651,7 +677,7 @@
     }
 
     .form-select[multiple] {
-        min-height: 100px;
+        min-height: 120px;
     }
 
     .day-btn {
@@ -698,7 +724,7 @@
     }
 
     .form-select[multiple] {
-        min-height: 90px;
+        min-height: 100px;
     }
 }
 
@@ -719,4 +745,102 @@
 
 .form-select[multiple]::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+/* 커스텀 다중 선택 컨테이너 */
+.custom-multi-select {
+    min-height: 140px;
+    max-height: 200px;
+    background: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 8px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+.custom-multi-select:focus-within {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* 체크박스 완전히 숨김 */
+.custom-multi-select .form-check-input {
+    display: none;
+}
+
+/* 칸 전체를 버튼처럼 만들기 */
+.custom-multi-select .form-check {
+    margin: 2px 0;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    user-select: none;
+}
+
+.custom-multi-select .form-check:hover {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.custom-multi-select .form-check-label {
+    cursor: pointer;
+    user-select: none;
+    width: 100%;
+    font-weight: 500;
+    pointer-events: none;
+}
+
+/* 선택된 상태 스타일 */
+.custom-multi-select .form-check.selected {
+    background: linear-gradient(135deg, #0d6efd, #0056b3);
+    color: white;
+    font-weight: 600;
+    transform: scale(1.02);
+    border-color: #0d6efd;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.custom-multi-select .form-check.selected:hover {
+    background: linear-gradient(135deg, #0b5ed7, #004085);
+}
+
+/* 플랫폼별 색상 */
+#baekjoon-difficulty-container .form-check.selected,
+#baekjoon-tags-container .form-check.selected {
+    background: linear-gradient(135deg, #198754, #146c43);
+    border-color: #198754;
+    box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);
+}
+
+#baekjoon-difficulty-container .form-check.selected:hover,
+#baekjoon-tags-container .form-check.selected:hover {
+    background: linear-gradient(135deg, #157347, #0f5132);
+}
+
+#programmers-difficulty-container .form-check.selected,
+#programmers-tags-container .form-check.selected {
+    background: linear-gradient(135deg, #dc3545, #b02a37);
+    border-color: #dc3545;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+#programmers-difficulty-container .form-check.selected:hover,
+#programmers-tags-container .form-check.selected:hover {
+    background: linear-gradient(135deg, #bb2d3b, #842029);
+}
+
+#leetcode-difficulty-container .form-check.selected,
+#leetcode-tags-container .form-check.selected {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: #333;
+    border-color: #ffc107;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+#leetcode-difficulty-container .form-check.selected:hover,
+#leetcode-tags-container .form-check.selected:hover {
+    background: linear-gradient(135deg, #ffca2c, #f0ad4e);
 }

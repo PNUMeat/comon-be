@@ -106,9 +106,11 @@ function handleTeamChange() {
         enableTeamDependentElements();
         showSettingsCards();
 
-        // ★★★ 팀 선택 시 팀 설정과 플랫폼 옵션을 모두 자동으로 불러옴 ★★★
-        loadTeamSettings();
-        loadPlatformOptions();
+        // ★★★ 순서 변경: 플랫폼 옵션 먼저 로드하고, 완료 후 팀 설정 적용 ★★★
+        loadPlatformOptions().then(() => {
+            // 옵션 로드 완료 후 팀 설정 적용
+            loadTeamSettings();
+        });
     } else {
         currentTeamId = null;
         disableTeamDependentElements();
@@ -197,6 +199,9 @@ function loadTeamSettings() {
 /**
  * 불러온 팀 설정 적용
  */
+/**
+ * 불러온 팀 설정 적용
+ */
 function applyTeamSettings(settings) {
     // 자동 추천 설정
     const autoToggle = document.getElementById('auto-recommendation-enabled');
@@ -229,13 +234,11 @@ function applyTeamSettings(settings) {
         });
     }
 
-    // ★★★ 플랫폼 설정 적용 로직 (새로 추가) ★★★
-    // 전역 변수 초기화
+    // 플랫폼 설정 초기화
     Object.keys(platformSettings).forEach(platform => {
         platformSettings[platform] = { enabled: false, difficulties: [], tags: [], problemCount: 2 };
     });
 
-    // 모든 플랫폼 카드와 상세 설정을 초기화 (비활성화)
     document.querySelectorAll('.platform-toggle-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.platform-card').forEach(card => card.classList.remove('enabled'));
     document.querySelectorAll('.platform-setting').forEach(setting => setting.style.display = 'none');
@@ -248,36 +251,40 @@ function applyTeamSettings(settings) {
 
             // 전역 상태 업데이트
             platformSettings[platform].enabled = isEnabled;
-            platformSettings[platform].difficulties = loadedSetting.difficulties;
-            platformSettings[platform].tags = loadedSetting.tags;
-            platformSettings[platform].problemCount = loadedSetting.problemCount;
+            platformSettings[platform].difficulties = loadedSetting.difficulties || [];
+            platformSettings[platform].tags = loadedSetting.tags || [];
+            platformSettings[platform].problemCount = loadedSetting.problemCount || 2;
 
-            // UI 업데이트
             if (isEnabled) {
                 const card = document.querySelector(`.platform-card[data-platform="${platform}"]`);
                 const toggleBtn = document.getElementById(`toggle-${platformLower}`);
                 const countInput = document.getElementById(`${platformLower}-count`);
-                const difficultySelect = document.getElementById(`${platformLower}-difficulty`);
-                const tagsSelect = document.getElementById(`${platformLower}-tags`);
+                const difficultyContainer = document.getElementById(`${platformLower}-difficulty-container`);
+                const tagsContainer = document.getElementById(`${platformLower}-tags-container`);
 
                 if (card) card.classList.add('enabled');
                 if (toggleBtn) toggleBtn.classList.add('active');
-                if (countInput) countInput.value = loadedSetting.problemCount;
+                if (countInput) countInput.value = loadedSetting.problemCount || 2;
 
-                // 난이도 드롭다운 값 설정
-                if (difficultySelect && loadedSetting.difficulties) {
-                    Array.from(difficultySelect.options).forEach(option => {
-                        if (loadedSetting.difficulties.includes(option.value)) {
-                            option.selected = true;
+                // 체크박스 선택 적용 부분
+                if (difficultyContainer && loadedSetting.difficulties && loadedSetting.difficulties.length > 0) {
+                    loadedSetting.difficulties.forEach(difficulty => {
+                        const checkboxDiv = difficultyContainer.querySelector(`input[value="${difficulty}"]`)?.closest('.form-check');
+                        if (checkboxDiv) {
+                            const checkbox = checkboxDiv.querySelector('input[type="checkbox"]');
+                            checkbox.checked = true;
+                            checkboxDiv.classList.add('selected');
                         }
                     });
                 }
 
-                // 태그 드롭다운 값 설정
-                if (tagsSelect && loadedSetting.tags) {
-                    Array.from(tagsSelect.options).forEach(option => {
-                        if (loadedSetting.tags.includes(option.value)) {
-                            option.selected = true;
+                if (tagsContainer && loadedSetting.tags && loadedSetting.tags.length > 0) {
+                    loadedSetting.tags.forEach(tag => {
+                        const checkboxDiv = tagsContainer.querySelector(`input[value="${tag}"]`)?.closest('.form-check');
+                        if (checkboxDiv) {
+                            const checkbox = checkboxDiv.querySelector('input[type="checkbox"]');
+                            checkbox.checked = true;
+                            checkboxDiv.classList.add('selected');
                         }
                     });
                 }
@@ -372,24 +379,23 @@ function updatePlatformDetailsVisibility() {
 }
 
 /**
- * 플랫폼 옵션 로드 (난이도, 태그) - 동적으로 로드
+ * 플랫폼 옵션 로드 (난이도, 태그) - Promise 반환
  */
 function loadPlatformOptions() {
     const platforms = ['BAEKJOON', 'PROGRAMMERS', 'LEETCODE'];
 
-    platforms.forEach(platform => {
-        loadPlatformData(platform);
-    });
+    const promises = platforms.map(platform => loadPlatformData(platform));
+
+    return Promise.all(promises);
 }
 
 /**
- * 특정 플랫폼의 문제 데이터를 로드하고 난이도/태그 옵션 생성
+ * 특정 플랫폼의 문제 데이터를 로드하고 난이도/태그 옵션 생성 - Promise 반환
  */
 function loadPlatformData(platform) {
     console.log(`${platform} 플랫폼 데이터 로드 중...`);
 
-    // 문제 목록 API를 호출해서 해당 플랫폼의 문제들만 가져오기
-    fetch(`/admin/problems/api/list-by-platform?platform=${platform}`)
+    return fetch(`/admin/problems/api/list-by-platform?platform=${platform}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -402,7 +408,6 @@ function loadPlatformData(platform) {
         })
         .catch(error => {
             console.error(`${platform} 옵션 로드 실패:`, error);
-            // 에러 발생 시 기본 옵션만 표시
             populateDefaultOptions(platform);
         });
 }
@@ -413,66 +418,97 @@ function loadPlatformData(platform) {
 function populatePlatformOptions(platform, problems) {
     const platformLower = platform.toLowerCase();
 
-    // 난이도 옵션 생성
+    // ★★★ 난이도 옵션 생성 (빠진 부분 추가) ★★★
     let difficulties = [];
     if (problems && problems.length > 0) {
         difficulties = [...new Set(problems
             .map(p => p.difficulty)
-            .filter(d => d && d.trim()) // null, undefined, 빈 문자열 필터링
+            .filter(d => d && d.trim())
             .map(d => d.trim())
         )].sort();
     }
 
-    const difficultySelect = document.getElementById(`${platformLower}-difficulty`);
-    if (difficultySelect) {
-        difficultySelect.innerHTML = '';
+    const difficultyContainer = document.getElementById(`${platformLower}-difficulty-container`);
+    if (difficultyContainer) {
+        difficultyContainer.innerHTML = '';
         if (difficulties.length > 0) {
             difficulties.forEach(difficulty => {
-                const option = document.createElement('option');
-                option.value = difficulty;
-                option.textContent = difficulty;
-                difficultySelect.appendChild(option);
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'form-check';
+                checkboxDiv.innerHTML = `
+                    <input class="form-check-input" type="checkbox" 
+                           value="${difficulty}" 
+                           id="${platformLower}-diff-${difficulty.replace(/[^a-zA-Z0-9]/g, '')}">
+                    <label class="form-check-label" 
+                           for="${platformLower}-diff-${difficulty.replace(/[^a-zA-Z0-9]/g, '')}">
+                        ${difficulty}
+                    </label>
+                `;
+
+                // 칸 클릭 이벤트 추가
+                checkboxDiv.addEventListener('click', function() {
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+
+                    if (checkbox.checked) {
+                        this.classList.add('selected');
+                    } else {
+                        this.classList.remove('selected');
+                    }
+                });
+
+                difficultyContainer.appendChild(checkboxDiv);
             });
         } else {
-            const option = document.createElement('option');
-            option.value = "";
-            option.textContent = "난이도 없음";
-            option.disabled = true;
-            difficultySelect.appendChild(option);
+            difficultyContainer.innerHTML = '<div class="text-muted text-center p-3">난이도 없음</div>';
         }
-        console.log(`${platform} 난이도 옵션:`, difficulties);
     }
 
-    // 태그 옵션 생성
+    // ★★★ 태그 옵션 생성 (빠진 부분 추가) ★★★
     let allTags = [];
     if (problems && problems.length > 0) {
         allTags = problems
             .map(p => p.tags)
-            .filter(t => t && t.trim()) // null, undefined, 빈 문자열 필터링
+            .filter(t => t && t.trim())
             .flatMap(t => t.split(',').map(tag => tag.trim()))
             .filter(tag => tag.length > 0);
     }
 
     const uniqueTags = [...new Set(allTags)].sort();
 
-    const tagsSelect = document.getElementById(`${platformLower}-tags`);
-    if (tagsSelect) {
-        tagsSelect.innerHTML = '';
+    const tagsContainer = document.getElementById(`${platformLower}-tags-container`);
+    if (tagsContainer) {
+        tagsContainer.innerHTML = '';
         if (uniqueTags.length > 0) {
             uniqueTags.forEach(tag => {
-                const option = document.createElement('option');
-                option.value = tag;
-                option.textContent = tag;
-                tagsSelect.appendChild(option);
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'form-check';
+                checkboxDiv.innerHTML = `
+                    <input class="form-check-input" type="checkbox" 
+                           value="${tag}" 
+                           id="${platformLower}-tag-${tag.replace(/[^a-zA-Z0-9]/g, '')}">
+                    <label class="form-check-label" 
+                           for="${platformLower}-tag-${tag.replace(/[^a-zA-Z0-9]/g, '')}">
+                        ${tag}
+                    </label>
+                `;
+
+                checkboxDiv.addEventListener('click', function() {
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    checkbox.checked = !checkbox.checked;
+
+                    if (checkbox.checked) {
+                        this.classList.add('selected');
+                    } else {
+                        this.classList.remove('selected');
+                    }
+                });
+
+                tagsContainer.appendChild(checkboxDiv);
             });
         } else {
-            const option = document.createElement('option');
-            option.value = "";
-            option.textContent = "태그 없음";
-            option.disabled = true;
-            tagsSelect.appendChild(option);
+            tagsContainer.innerHTML = '<div class="text-muted text-center p-3">태그 없음</div>';
         }
-        console.log(`${platform} 태그 옵션:`, uniqueTags.slice(0, 10), `... 총 ${uniqueTags.length}개`);
     }
 }
 
@@ -759,22 +795,20 @@ function saveSettings() {
 function collectCurrentSettings() {
     const recommendationTime = parseInt(document.getElementById('recommendation-time').value);
 
-    // 플랫폼 설정 수집
     const platformSettingsArray = [];
     Object.keys(platformSettings).forEach(platform => {
         const setting = platformSettings[platform];
         if (setting.enabled) {
             const platformLower = platform.toLowerCase();
 
-            // 난이도 수집
-            const difficultySelect = document.getElementById(`${platformLower}-difficulty`);
-            const selectedDifficulties = Array.from(difficultySelect.selectedOptions).map(option => option.value);
+            // 체크박스에서 난이도 수집
+            const difficultyCheckboxes = document.querySelectorAll(`#${platformLower}-difficulty-container input[type="checkbox"]:checked`);
+            const selectedDifficulties = Array.from(difficultyCheckboxes).map(cb => cb.value);
 
-            // 태그 수집
-            const tagsSelect = document.getElementById(`${platformLower}-tags`);
-            const selectedTags = Array.from(tagsSelect.selectedOptions).map(option => option.value);
+            // 체크박스에서 태그 수집
+            const tagCheckboxes = document.querySelectorAll(`#${platformLower}-tags-container input[type="checkbox"]:checked`);
+            const selectedTags = Array.from(tagCheckboxes).map(cb => cb.value);
 
-            // 문제 수 수집
             const countInput = document.getElementById(`${platformLower}-count`);
             const problemCount = parseInt(countInput.value);
 
