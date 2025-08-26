@@ -1,7 +1,7 @@
 package site.codemonster.comon.domain.article.service;
 
 
-import site.codemonster.comon.domain.recommendation.factory.RecommendationArticleFactory;
+import site.codemonster.comon.domain.article.factory.RecommendationArticleFactory;
 import site.codemonster.comon.domain.article.dto.request.*;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;

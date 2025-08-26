@@ -1,4 +1,4 @@
-package site.codemonster.comon.domain.recommendation.factory;
+package site.codemonster.comon.domain.article.factory;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
