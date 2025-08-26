@@ -325,21 +325,35 @@
     background-color: #f8f9fa;
 }
 
-/* 페이지네이션 */
+/* 페이지네이션 - 수정된 부분 */
 .pagination .page-link {
     border: 1px solid #dee2e6;
     color: #0d6efd;
     padding: 8px 12px;
+    text-decoration: none;
+    background-color: white;
+    font-weight: 500;
 }
 
 .pagination .page-link:hover {
     background-color: #e9ecef;
-    border-color: #dee2e6;
+    border-color: #0d6efd;
+    color: #0d6efd;
+    text-decoration: none;
 }
 
 .pagination .page-item.active .page-link {
     background-color: #0d6efd;
     border-color: #0d6efd;
+    color: white !important; /* 강제로 흰색 텍스트 적용 */
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+}
+
+.pagination .page-item.active .page-link:hover {
+    background-color: #0b5ed7;
+    border-color: #0b5ed7;
+    color: white !important;
 }
 
 /* 로딩 및 빈 상태 */

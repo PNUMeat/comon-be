@@ -36,7 +36,7 @@ public class TeamRecommendationScheduler {
     @Value("${app.system-admin-id:1}")
     private Long adminId;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 0 * * * *")
     @Transactional
     public void executeAutoRecommendations() {
         LocalDateTime now = LocalDateTime.now();

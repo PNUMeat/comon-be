@@ -444,7 +444,7 @@ function updatePagination() {
     if (currentPage > 1) {
         paginationHtml += `
             <li class="page-item">
-                <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">이전</a>
+                <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">이전</a>
             </li>
         `;
     }
@@ -456,7 +456,7 @@ function updatePagination() {
     for (let i = startPage; i <= endPage; i++) {
         paginationHtml += `
             <li class="page-item ${i === currentPage ? 'active' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
             </li>
         `;
     }
@@ -465,7 +465,7 @@ function updatePagination() {
     if (currentPage < totalPages) {
         paginationHtml += `
             <li class="page-item">
-                <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">다음</a>
+                <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">다음</a>
             </li>
         `;
     }
@@ -474,15 +474,14 @@ function updatePagination() {
 }
 
 /**
- * 페이지 변경
+ * 페이지 변경 (스크롤 이동 제거)
  */
 function changePage(page) {
     currentPage = page;
     renderProblems();
     updatePagination();
 
-    // 스크롤을 맨 위로
-    document.querySelector('.main-content').scrollTop = 0;
+    // 스크롤 이동 코드 제거 - 페이지 변경 시 현재 위치 유지
 }
 
 /**
