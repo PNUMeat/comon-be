@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 - 문제 통계</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/admin/css/dashboard.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- 사이드바 -->
+        <div class="col-md-3 col-lg-2 px-0">
+            <div class="sidebar">
+                <a href="/admin/problems" class="brand-logo">
+                    <i class="fas fa-code-branch me-2"></i>
+                    코드몬스터 관리자
+                </a>
+
+                <nav class="nav flex-column px-3">
+                    <a class="nav-link active" href="/admin/problems/dashboard">
+                        <i class="fas fa-chart-bar"></i>
+                        대시보드
+                    </a>
+                    <a class="nav-link" href="/admin/problems/register">
+                        <i class="fas fa-plus-circle"></i>
+                        문제 등록
+                    </a>
+                    <a class="nav-link" href="/admin/problems/list">
+                        <i class="fas fa-list"></i>
+                        문제 목록
+                    </a>
+                    <a class="nav-link" href="/admin/recommendations/settings">
+                        <i class="fas fa-magic"></i>
+                        문제 추천 설정
+                    </a>
+                    <div class="dropdown-divider" style="border-color: rgba(255,255,255,0.1); margin: 20px 0;"></div>
+                    <form th:action="@{/admin/logout}" method="post" style="margin: 0;">
+                        <button type="submit" class="nav-link logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            로그아웃
+                        </button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="col-md-9 col-lg-10">
+            <div class="main-content p-4">
+                <!-- 헤더 -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-0 text-dark fw-bold">
+                            <i class="fas fa-chart-bar text-primary me-2"></i>
+                            문제 통계 대시보드
+                        </h1>
+                        <p class="text-muted mb-0">플랫폼별 등록된 문제 현황을 확인하세요</p>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            마지막 업데이트: <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm')}"></span>
+                        </small>
+                    </div>
+                </div>
+
+                <!-- 통계 카드들 -->
+                <div class="row g-4 mb-5">
+                    <!-- 전체 문제 수 -->
+                    <div class="col-xl-3 col-lg-6">
+                        <div class="stat-card">
+                            <div class="stat-header total-bg">
+                                <div class="stat-icon">
+                                    <i class="fas fa-globe"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h6>전체 문제</h6>
+                                    <h2 th:text="${totalProblems}">0</h2>
+                                </div>
+                            </div>
+                            <div class="stat-body">
+                                <p class="stat-description">모든 플랫폼의 총 문제 수</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 백준 -->
+                    <div class="col-xl-3 col-lg-6">
+                        <div class="stat-card">
+                            <div class="stat-header baekjoon-bg">
+                                <div class="stat-icon">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h6>백준</h6>
+                                    <h2 th:text="${statistics['BAEKJOON']}">0</h2>
+                                </div>
+                            </div>
+                            <div class="stat-body">
+                                <div class="progress-wrapper">
+                                    <div class="progress-bar baekjoon-bg"
+                                         th:style="'width: ' + ${baekjoonPercent} + '%'"></div>
+                                </div>
+                                <p class="stat-percentage" th:text="${#numbers.formatDecimal(baekjoonPercent, 1, 1)} + '%'">0%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 프로그래머스 -->
+                    <div class="col-xl-3 col-lg-6">
+                        <div class="stat-card">
+                            <div class="stat-header programmers-bg">
+                                <div class="stat-icon">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h6>프로그래머스</h6>
+                                    <h2 th:text="${statistics['PROGRAMMERS']}">0</h2>
+                                </div>
+                            </div>
+                            <div class="stat-body">
+                                <div class="progress-wrapper">
+                                    <div class="progress-bar programmers-bg"
+                                         th:style="'width: ' + ${programmersPercent} + '%'"></div>
+                                </div>
+                                <p class="stat-percentage" th:text="${#numbers.formatDecimal(programmersPercent, 1, 1)} + '%'">0%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 리트코드 -->
+                    <div class="col-xl-3 col-lg-6">
+                        <div class="stat-card">
+                            <div class="stat-header leetcode-bg">
+                                <div class="stat-icon">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h6>리트코드</h6>
+                                    <h2 th:text="${statistics['LEETCODE']}">0</h2>
+                                </div>
+                            </div>
+                            <div class="stat-body">
+                                <div class="progress-wrapper">
+                                    <div class="progress-bar leetcode-bg"
+                                         th:style="'width: ' + ${leetcodePercent} + '%'"></div>
+                                </div>
+                                <p class="stat-percentage" th:text="${#numbers.formatDecimal(leetcodePercent, 1, 1)} + '%'">0%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 도움말 카드 -->
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    관리자 가이드
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            플랫폼별 특징
+                                        </h6>
+                                        <ul class="mb-0">
+                                            <li><strong>백준:</strong> 문제번호만으로 자동 정보 수집</li>
+                                            <li><strong>프로그래머스:</strong> 수동으로 모든 정보 입력 필요</li>
+                                            <li><strong>리트코드:</strong> Slug/URL로 자동 정보 수집</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-success">
+                                            <i class="fas fa-lightbulb me-1"></i>
+                                            관리 팁
+                                        </h6>
+                                        <ul class="mb-0">
+                                            <li>일괄 등록 기능으로 여러 문제를 한번에 처리</li>
+                                            <li>중복 문제는 자동으로 감지됩니다</li>
+                                            <li>API 제한으로 연속 등록시 딜레이 발생 가능</li>
+                                            <li>문제 목록에서 상세한 플랫폼별 정보 확인 가능</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/admin/js/dashboard.js"></script>
+</body>
+</html>
