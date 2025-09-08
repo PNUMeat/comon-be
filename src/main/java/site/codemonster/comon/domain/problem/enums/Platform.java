@@ -9,14 +9,12 @@ public enum Platform {
     LEETCODE("리트코드", "https://leetcode.com/problems/");
 
     private final String name;
-    private final String baseUrl; // 추가
+    private final String baseUrl;
 
-    Platform(String name, String baseUrl) { // 생성자 수정
+    Platform(String name, String baseUrl) {
         this.name = name;
         this.baseUrl = baseUrl;
     }
-
-    // 기존 getName()은 @Getter로 자동 생성되므로 추가 메서드만 작성
 
     public static Platform fromName(String name) {
         for (Platform platform : Platform.values()) {
