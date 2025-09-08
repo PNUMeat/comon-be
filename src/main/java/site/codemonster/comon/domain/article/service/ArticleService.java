@@ -1,12 +1,14 @@
 package site.codemonster.comon.domain.article.service;
 
 
+import site.codemonster.comon.domain.article.factory.RecommendationArticleFactory;
 import site.codemonster.comon.domain.article.dto.request.*;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;
 import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.team.dto.response.TeamPageResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamService;
@@ -168,5 +170,27 @@ public class ArticleService {
                 .articleCategory(fromName(teamSubjectRequest.articleCategory()))
                 .selectedDate(selectedDate)
                 .build();
+    }
+
+    public String createRecommendationArticle(Team team, Member systemAdmin, List<Problem> problems, LocalDate date) {
+        RecommendationArticleFactory.RecommendationArticleContent content =
+                RecommendationArticleFactory.createContent(problems, date);
+
+        Article article = Article.builder()
+                .team(team)
+                .member(systemAdmin)
+                .articleTitle(content.title())
+                .articleBody(content.body())
+                .articleCategory(ArticleCategory.CODING_TEST)
+                .selectedDate(date)
+                .build();
+
+        articleRepository.save(article);
+        return content.title();
+    }
+
+    public boolean isRecommendationAlreadyExists(Team team, LocalDate date) {
+        return articleRepository.existsByTeamAndSelectedDateAndArticleCategory(
+                team, date, ArticleCategory.CODING_TEST);
     }
 }

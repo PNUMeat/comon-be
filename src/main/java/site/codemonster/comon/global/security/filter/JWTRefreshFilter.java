@@ -5,7 +5,7 @@ import site.codemonster.comon.domain.auth.repository.RefreshTokenRepository;
 import site.codemonster.comon.global.error.ErrorCode;
 import site.codemonster.comon.global.security.jwt.JWTInformation;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
-import site.codemonster.comon.global.util.cookie.CookieUtils;
+import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
 import site.codemonster.comon.global.util.responseUtils.ResponseUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

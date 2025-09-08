@@ -1,0 +1,482 @@
+/* problem-register.css */
+
+/* 사이드바 스타일 */
+.sidebar {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 2px 0 15px rgba(0,0,0,.1);
+}
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,0.9);
+    border-radius: 8px;
+    margin: 5px 0;
+    padding: 12px 20px;
+    transition: all 0.3s;
+    border: none;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,.2);
+}
+
+.sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* 메인 콘텐츠 */
+.main-content {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* 브랜드 로고 */
+.brand-logo {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 20px;
+    display: block;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+.brand-logo:hover {
+    color: white;
+    text-decoration: none;
+}
+
+/* 플랫폼 카드 */
+.platform-card {
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: white;
+    height: 100%;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.platform-card:hover {
+    border-color: #0d6efd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.15);
+}
+
+.platform-card.active {
+    border-color: #0d6efd;
+    background: linear-gradient(135deg, #f8f9ff, #e3f2fd);
+}
+
+.platform-logo {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.platform-img {
+    max-width: 50px;
+    max-height: 50px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.platform-card:hover .platform-img {
+    transform: scale(1.1);
+}
+
+.platform-card h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.platform-card small {
+    font-size: 0.85rem;
+}
+
+/* 폼 섹션 */
+.form-section {
+    display: none;
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 20px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+
+.form-section.active {
+    display: block;
+    animation: slideIn 0.3s ease;
+}
+
+.form-section h5 {
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 버튼 스타일 */
+.btn-check-info {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-check-info:hover {
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-register-all {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-register-all:hover {
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+}
+
+.btn-register-all:disabled {
+    background: #6c757d;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.btn-clear-all {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 12px 30px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-clear-all:hover {
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+}
+
+/* 문제 목록 */
+.problem-list {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    background: #f8f9fa;
+}
+
+.problem-item {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s ease;
+}
+
+.problem-item:last-child {
+    border-bottom: none;
+}
+
+.problem-item:hover {
+    background-color: #e9ecef;
+}
+
+/* 상태 표시 */
+.status-success {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-duplicate {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* 로딩 오버레이 스타일 */
+#loading-overlay {
+    backdrop-filter: blur(2px);
+}
+
+#loading-overlay .bg-white {
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+/* 입력 필드 개선 */
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* LeetCode URL 입력 필드 개선된 스타일 */
+#leetcode-url {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1rem;
+    padding: 12px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+#leetcode-url:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    background: #fffef7;
+}
+
+#leetcode-url::placeholder {
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* LeetCode 폼 섹션 특별 스타일 */
+#leetcode-form .form-label {
+    color: #856404;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+#leetcode-form .form-text {
+    color: #856404;
+    font-size: 0.875rem;
+    margin-top: 6px;
+    font-style: italic;
+}
+
+/* LeetCode 입력 그룹 개선 */
+#leetcode-form .row {
+    align-items: stretch;
+}
+
+#leetcode-form .col-md-8 {
+    display: flex;
+    flex-direction: column;
+}
+
+#leetcode-form .col-md-4 {
+    display: flex;
+    align-items: flex-end;
+}
+
+/* URL 입력 필드 컨테이너 */
+.leetcode-input-container {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* URL 아이콘 추가 */
+.leetcode-input-container::before {
+    content: '🔗';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+
+#leetcode-url.with-icon {
+    padding-left: 40px;
+}
+
+/* 카드 공통 스타일 */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0,0,0,.1);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+/* 로그아웃 버튼 스타일 */
+.logout-btn {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    color: rgba(255,255,255,0.9) !important;
+    border-radius: 8px;
+    margin: 5px 0;
+    padding: 12px 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background: rgba(220, 53, 69, 0.2);
+    color: #ff6b6b !important;
+    transform: translateX(5px);
+}
+
+.logout-btn i {
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* 스크롤바 커스터마이징 */
+.problem-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.problem-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.problem-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.problem-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+    }
+
+    .brand-logo {
+        font-size: 1.2rem;
+        padding: 15px;
+    }
+
+    .platform-card {
+        margin-bottom: 15px;
+        min-height: 150px;
+    }
+
+    .form-section {
+        padding: 20px;
+        margin-top: 15px;
+    }
+
+    .btn-register-all,
+    .btn-clear-all {
+        padding: 10px 20px;
+        font-size: 1rem;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .problem-list {
+        max-height: 300px;
+    }
+
+    /* 모바일에서 LeetCode URL 입력 필드 */
+    #leetcode-url {
+        font-size: 0.9rem;
+        padding: 10px 14px;
+    }
+
+    #leetcode-url::placeholder {
+        font-size: 0.8rem;
+    }
+
+    .leetcode-input-container::before {
+        left: 10px;
+        font-size: 1rem;
+    }
+
+    #leetcode-url.with-icon {
+        padding-left: 35px;
+    }
+}
+
+/* 작은 화면에서 추가 조정 */
+@media (max-width: 576px) {
+    .form-section {
+        padding: 15px;
+    }
+
+    .platform-card {
+        min-height: 130px;
+    }
+
+    .platform-card h6 {
+        font-size: 0.9rem;
+    }
+
+    .platform-card small {
+        font-size: 0.8rem;
+    }
+
+    #leetcode-url {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+
+    #leetcode-url::placeholder {
+        font-size: 0.75rem;
+    }
+}

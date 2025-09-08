@@ -8,7 +8,7 @@ import site.codemonster.comon.global.log.annotation.Trace;
 import site.codemonster.comon.global.security.annotation.LoginMember;
 import site.codemonster.comon.global.security.jwt.JWTInformation;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
-import site.codemonster.comon.global.util.cookie.CookieUtils;
+import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

@@ -52,7 +52,10 @@ public enum ErrorCode {
     IMAGE_FILE_TYPE_ERROR(HttpStatus.BAD_REQUEST,400,"이미지 파일 형식이 비어있습니다."),
 
     //GENERAL
-    DATETIME_PARSE_ERROR(HttpStatus.BAD_REQUEST, 400,"날짜 및 날짜 형식이 올바르지 않습니다.");
+    DATETIME_PARSE_ERROR(HttpStatus.BAD_REQUEST, 400,"날짜 및 날짜 형식이 올바르지 않습니다."),
+
+    // TEAM_RECOMMENDATION
+    TEAM_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "팀의 추천 설정이 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final int customStatusCode;

@@ -42,6 +42,8 @@ dependencies {
 	implementation platform('software.amazon.awssdk:bom:2.20.137')
 	implementation 'software.amazon.awssdk:s3'
 	implementation 'software.amazon.awssdk:sts'
+
+	implementation 'io.prometheus:prometheus-metrics-core:1.0.0'
 }
 
 tasks.named('test') {
