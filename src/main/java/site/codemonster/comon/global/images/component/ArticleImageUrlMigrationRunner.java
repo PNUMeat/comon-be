@@ -95,8 +95,19 @@ public class ArticleImageUrlMigrationRunner implements CommandLineRunner {
 
     /**
      * ArticleImage의 imageUrl을 업데이트합니다.
+     * (실제 업데이트를 위해서는 ArticleImage 엔티티에 setter 또는 update 메서드 필요)
      */
     private void updateImageUrl(ArticleImage articleImage, String objectKey) {
-        articleImage.updateImageUrl(objectKey);
+        // ArticleImage 엔티티에 updateImageUrl 메서드를 추가해야 합니다.
+        // articleImage.updateImageUrl(objectKey);
+
+        // 또는 리플렉션을 사용한 임시 방법 (권장하지 않음)
+        try {
+            var field = ArticleImage.class.getDeclaredField("imageUrl");
+            field.setAccessible(true);
+            field.set(articleImage, objectKey);
+        } catch (Exception e) {
+            log.error("❌ 이미지 URL 업데이트 실패 - 이미지 ID: {}", articleImage.getArticleImageId(), e);
+        }
     }
 }
