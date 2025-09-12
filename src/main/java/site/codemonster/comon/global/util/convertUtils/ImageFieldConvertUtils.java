@@ -46,17 +46,6 @@ public class ImageFieldConvertUtils {
     }
 
     /**
-     * S3 URL인지 확인합니다.
-     */
-    public boolean isS3Url(String imageUrl) {
-        if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            return false;
-        }
-
-        return S3_URL_PATTERN.matcher(imageUrl.trim()).matches();
-    }
-
-    /**
      * 마이그레이션 통계를 로깅합니다.
      */
     public void logMigrationStats(String entityType, int totalCount, int migratedCount, int alreadyMigratedCount) {
