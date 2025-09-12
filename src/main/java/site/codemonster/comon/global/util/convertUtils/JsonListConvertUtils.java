@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
-public class ConvertUtils {
+public class JsonListConvertUtils {
     private final ObjectMapper objectMapper;
 
     public List<String> parseJsonToList(String json) {

@@ -1,6 +1,5 @@
 package site.codemonster.comon.domain.recommendation.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,7 @@ import site.codemonster.comon.domain.recommendation.repository.PlatformRecommend
 
 import java.util.List;
 import java.util.stream.Collectors;
-import site.codemonster.comon.global.util.convertUtils.ConvertUtils;
+import site.codemonster.comon.global.util.convertUtils.JsonListConvertUtils;
 
 @Slf4j
 @Service
@@ -21,7 +20,7 @@ import site.codemonster.comon.global.util.convertUtils.ConvertUtils;
 public class PlatformRecommendationService {
 
     private final PlatformRecommendationRepository platformRecommendationRepository;
-    private final ConvertUtils convertUtils;
+    private final JsonListConvertUtils convertUtils;
 
     public PlatformRecommendation createPlatformRecommendation(TeamRecommendationRequest.PlatformRecommendationSetting setting,
                                                                TeamRecommendation teamRecommendation) {
