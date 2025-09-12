@@ -1,4 +1,4 @@
-package site.codemonster.comon.global.images.component;
+package site.codemonster.comon.global.images.migration;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,6 @@ import java.util.List;
 
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruitImage;
 import site.codemonster.comon.domain.teamRecruit.repository.TeamRecruitImageRepository;
-import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
 
 @Slf4j
 @Component
@@ -20,7 +19,7 @@ import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
 public class TeamRecruitImageUrlMigrationRunner implements CommandLineRunner {
 
     private final TeamRecruitImageRepository teamRecruitImageRepository;
-    private final ImageFieldConvertUtils imageFieldConvertUtils;
+    private final ImageMigrationUtils imageFieldConvertUtils;
 
     @Transactional
     @Override

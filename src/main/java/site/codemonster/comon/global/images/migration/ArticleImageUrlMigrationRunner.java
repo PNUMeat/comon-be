@@ -1,4 +1,4 @@
-package site.codemonster.comon.global.images.component;
+package site.codemonster.comon.global.images.migration;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
