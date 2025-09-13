@@ -67,7 +67,8 @@ public class SecurityConfiguration {
                             "/api/v1/recruitments",
                             "/api/v1/recruitments/{recruitId}",
                             "/admin/**",
-                            "/api/v1/teams/all"
+                            "/api/v1/teams/all",
+                            "/actuator/health"
                     ).permitAll()
                     .anyRequest().authenticated())
 
