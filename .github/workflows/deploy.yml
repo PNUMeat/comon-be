@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - test-develop
+      - feature/#20-CICD
 
 jobs:
   deploy:
@@ -68,3 +69,42 @@ jobs:
           script_stop: true
           script: |
             bash ~/deploy.sh ${{ steps.login-ecr.outputs.registry }}/codemonster:${{env.date}}
+
+      - name: 헬스체크 실행
+        run: |
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.DOMAIN }}/actuator/health || true)
+            if [ "$STATUS" == "200" ]; then
+              echo "HEALTH_STATUS=success" >> $GITHUB_ENV
+              exit 0
+            fi
+            echo "헬스체크 실패, 재시도... ($i)"
+            sleep 5
+          done
+          echo "HEALTH_STATUS=failure" >> $GITHUB_ENV
+          exit 1
+
+      - name: 디스코드 성공 알림
+        if: env.HEALTH_STATUS == 'success'
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "🚀 배포 성공!"
+          description: |
+            **브랜치:** ${{ github.ref_name }}
+            **커밋:** ${{ github.event.head_commit.message }}
+            **이미지 태그:** ${{env.date}}
+            **헬스체크:** ✅ 통과
+            color: 0x00ff00
+
+      - name: 디스코드 실패 알림
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "💥 배포 실패!"
+          description: |
+            **브랜치:** ${{ github.ref_name }}
+            **커밋:** ${{ github.event.head_commit.message }}
+            **실패 단계:** ${{ job.status }}
+            color: 0xff0000
