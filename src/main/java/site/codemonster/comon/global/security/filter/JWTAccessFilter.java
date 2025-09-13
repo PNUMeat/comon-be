@@ -106,6 +106,7 @@ public class JWTAccessFilter extends OncePerRequestFilter {
                 || (request.getRequestURI().contains("api/v1/recruitments") && request.getMethod().equals("GET"))
                 || requestURI.contains("api/v1/teams/search")
                 || requestURI.startsWith("/admin/")
+                || requestURI.equals("/actuator/health")
                 || requestURI.equals("/admin");
     }
 }

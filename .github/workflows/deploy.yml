@@ -1,0 +1,107 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - test-develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Github Repository 파일 불러오기
+        uses: actions/checkout@v4
+
+      - name: JDK 21버전 설치
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Gradle 캐싱
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: .properties 생성
+        run: |
+          echo "${{ secrets.APPLICATION_MONITOR_PROPERTIES }}" > ./src/main/resources/application-monitor.properties
+          echo "${{ secrets.APPLICATION_SECRET_PROPERTIES }}" > ./src/main/resources/application-secret.properties
+
+      - name: 빌드하기
+        run: ./gradlew clean build -x test
+
+      - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-northeast-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: ECR에 로그인하기
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Docker tag를 위한 날짜 설정
+        run: echo "date=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+
+      - name: Docker 이미지 생성
+        run: docker build --platform linux/amd64 -t codemonster .
+
+      - name: Docker 이미지에 Tag 붙이기
+        run: docker tag codemonster ${{ steps.login-ecr.outputs.registry }}/codemonster:${{env.date}}
+
+      - name: ECR에 Docker 이미지 Push하기
+        run: docker push ${{ steps.login-ecr.outputs.registry }}/codemonster:${{env.date}}
+
+      - name: SSH로 EC2에 접속하기
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            bash ~/deploy.sh ${{ steps.login-ecr.outputs.registry }}/codemonster:${{env.date}}
+
+      - name: 헬스체크 실행
+        run: |
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.DOMAIN }}/actuator/health || true)
+            if [ "$STATUS" == "200" ]; then
+              echo "HEALTH_STATUS=success" >> $GITHUB_ENV
+              exit 0
+            fi
+            echo "헬스체크 실패, 재시도... ($i)"
+            sleep 5
+          done
+          echo "HEALTH_STATUS=failure" >> $GITHUB_ENV
+          exit 1
+
+      - name: 디스코드 성공 알림
+        if: env.HEALTH_STATUS == 'success'
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "🚀 배포 성공!"
+          description: |
+            **브랜치:** ${{ github.ref_name }}
+            **커밋:** ${{ github.event.head_commit.message }}
+            **이미지 태그:** ${{env.date}}
+            **헬스체크:** ✅ 통과
+
+      - name: 디스코드 실패 알림
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "💥 배포 실패!"
+          description: |
+            **브랜치:** ${{ github.ref_name }}
+            **커밋:** ${{ github.event.head_commit.message }}
+            **실패 단계:** ${{ job.status }}
