@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Order(2) // ArticleImageMigration 다음에 실행
+@Order(2)
 public class ArticleBodyImageMigration implements CommandLineRunner {
 
     private final ArticleImageRepository articleImageRepository;
@@ -36,15 +36,15 @@ public class ArticleBodyImageMigration implements CommandLineRunner {
         List<ArticleImage> articleImages = articleImageRepository.findAll();
         log.info("📊 마이그레이션 대상 {} 개수: {}", entityType, articleImages.size());
 
-        int placeholderReplacedCount = 0;    // 경우 1: ? 치환
-        int oldBucketReplacedCount = 0;      // 경우 2: 구버전 버킷 URL 치환
-        int alreadyUpdatedCount = 0;         // 경우 3: 이미 업데이트됨
-        int orphanedImageCount = 0;          // 경우 4: 사용되지 않는 이미지
+        int placeholderReplacedCount = 0;    // 경우 1 : ? 치환
+        int oldBucketReplacedCount = 0;      // 경우 2 : 구버전 버킷 URL 치환
+        int alreadyUpdatedCount = 0;         // 경우 3 : 이미 업데이트됨
+        int orphanedImageCount = 0;          // 경우 4 : 사용되지 않는 이미지
 
         for (ArticleImage articleImage : articleImages) {
             Article article = articleImage.getArticle();
             String originalBody = article.getArticleBody();
-            String imageObjectKey = articleImage.getImageUrl(); // 객체 키 (예: article/dee6026b-6fd6-4d1c-bd42-25894b3b846c.png)
+            String imageObjectKey = articleImage.getImageUrl();
             String fullImageUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", s3Bucket, s3Region, imageObjectKey);
             String updatedBody = originalBody;
 
