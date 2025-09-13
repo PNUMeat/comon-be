@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - test-develop
-      - feature/#20-CICD
 
 jobs:
   deploy:
@@ -95,7 +94,6 @@ jobs:
             **커밋:** ${{ github.event.head_commit.message }}
             **이미지 태그:** ${{env.date}}
             **헬스체크:** ✅ 통과
-            color: 0x00ff00
 
       - name: 디스코드 실패 알림
         if: failure()
@@ -107,4 +105,3 @@ jobs:
             **브랜치:** ${{ github.ref_name }}
             **커밋:** ${{ github.event.head_commit.message }}
             **실패 단계:** ${{ job.status }}
-            color: 0xff0000
