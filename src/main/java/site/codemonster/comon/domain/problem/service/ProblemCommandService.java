@@ -1,7 +1,6 @@
 package site.codemonster.comon.domain.problem.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.problem.collector.LeetcodeCollector;
@@ -22,17 +21,18 @@ import static site.codemonster.comon.global.error.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class ProblemService {
+@Transactional
+public class ProblemCommandService {
 
     private final ProblemRepository problemRepository;
     private final ProblemCollectorFactory collectorFactory;
     private final LeetcodeCollector leetcodeCollector;
+    private final ProblemQueryService problemQueryService;
 
     public ProblemInfoResponse checkProblem(String problemInput, Platform platform) {
         String problemId = extractProblemId(problemInput, platform);
 
-        if (checkDuplicateProblem(platform, problemId)) {
+        if (problemQueryService.checkDuplicateProblem(platform, problemId)) {
             return createDuplicateResponse(platform, problemId, problemInput);
         }
 
@@ -43,11 +43,57 @@ public class ProblemService {
         Platform platform = request.getPlatform();
         String problemId = request.getPlatformProblemId();
 
-        if (checkDuplicateProblem(platform, problemId)) {
+        if (problemQueryService.checkDuplicateProblem(platform, problemId)) {
             return createDuplicateResponse(platform, problemId, null);
         }
 
         return collectProblemInfoFromRequest(request);
+    }
+
+    public List<Problem> registerProblems(List<ProblemInfoRequest> requests) {
+        if (requests == null || requests.isEmpty()) {
+            throw new ProblemBatchRegisterException(PROBLEM_BATCH_REGISTER_EMPTY_ERROR);
+        }
+
+        List<Problem> savedProblems = new ArrayList<>();
+
+        for (ProblemInfoRequest request : requests) {
+            if (problemQueryService.checkDuplicateProblem(request.getPlatform(), request.getPlatformProblemId())) {
+                continue;
+            }
+
+            Problem savedProblem = saveProblem(request);
+            savedProblems.add(savedProblem);
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ProblemBatchRegisterException(PROBLEM_REGISTER_INTERRUPTED_ERROR);
+            }
+        }
+
+        if (savedProblems.isEmpty()) {
+            throw new ProblemBatchRegisterException(PROBLEM_ALL_DUPLICATED_ERROR);
+        }
+
+        return savedProblems;
+    }
+
+    public Problem updateProblem(Long problemId, Map<String, String> updateData) {
+        if (updateData == null || updateData.isEmpty()) {
+            throw new ProblemValidationException(PROBLEM_UPDATE_DATA_EMPTY_ERROR);
+        }
+
+        Problem problem = problemQueryService.findProblemById(problemId);
+        updateProblemFields(problem, updateData);
+
+        return problemRepository.save(problem);
+    }
+
+    public void deleteProblem(Long problemId) {
+        Problem problem = problemQueryService.findProblemById(problemId);
+        problemRepository.delete(problem);
     }
 
     private String extractProblemId(String problemInput, Platform platform) {
@@ -109,49 +155,6 @@ public class ProblemService {
                 .build();
     }
 
-    public boolean checkDuplicateProblem(Platform platform, String problemId) {
-        return problemRepository.existsByPlatformAndPlatformProblemId(platform, problemId);
-    }
-
-    public Map<Platform, Long> getProblemStatistics() {
-        return Map.of(
-                Platform.BAEKJOON, problemRepository.countByPlatform(Platform.BAEKJOON),
-                Platform.LEETCODE, problemRepository.countByPlatform(Platform.LEETCODE),
-                Platform.PROGRAMMERS, problemRepository.countByPlatform(Platform.PROGRAMMERS)
-        );
-    }
-
-    @Transactional
-    public List<Problem> registerProblems(List<ProblemInfoRequest> requests) {
-        if (requests == null || requests.isEmpty()) {
-            throw new ProblemBatchRegisterException(PROBLEM_BATCH_REGISTER_EMPTY_ERROR);
-        }
-
-        List<Problem> savedProblems = new ArrayList<>();
-
-        for (ProblemInfoRequest request : requests) {
-            if (checkDuplicateProblem(request.getPlatform(), request.getPlatformProblemId())) {
-                continue;
-            }
-
-            Problem savedProblem = saveProblem(request);
-            savedProblems.add(savedProblem);
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new ProblemBatchRegisterException(PROBLEM_REGISTER_INTERRUPTED_ERROR);
-            }
-        }
-
-        if (savedProblems.isEmpty()) {
-            throw new ProblemBatchRegisterException(PROBLEM_ALL_DUPLICATED_ERROR);
-        }
-
-        return savedProblems;
-    }
-
     private Problem saveProblem(ProblemInfoRequest request) {
         validateProblemRequest(request);
 
@@ -179,33 +182,6 @@ public class ProblemService {
         }
     }
 
-    public List<Problem> getAllProblems() {
-        return problemRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"));
-    }
-
-    @Transactional
-    public Problem updateProblem(Long problemId, Map<String, String> updateData) {
-        if (updateData == null || updateData.isEmpty()) {
-            throw new ProblemValidationException(PROBLEM_UPDATE_DATA_EMPTY_ERROR);
-        }
-
-        Problem problem = findProblemById(problemId);
-        updateProblemFields(problem, updateData);
-
-        return problemRepository.save(problem);
-    }
-
-    @Transactional
-    public void deleteProblem(Long problemId) {
-        Problem problem = findProblemById(problemId);
-        problemRepository.delete(problem);
-    }
-
-    private Problem findProblemById(Long problemId) {
-        return problemRepository.findById(problemId)
-                .orElseThrow(ProblemNotFoundException::new);
-    }
-
     private void updateProblemFields(Problem problem, Map<String, String> updateData) {
         updateData.forEach((key, value) -> {
             switch (key) {
@@ -221,12 +197,5 @@ public class ProblemService {
                 default -> throw new ProblemValidationException(PROBLEM_UNSUPPORTED_FIELD_ERROR);
             }
         });
-    }
-
-    public List<Problem> getProblemsByPlatform(Platform platform) {
-        if (platform == null) {
-            throw new ProblemValidationException(PROBLEM_PLATFORM_REQUIRED_ERROR);
-        }
-        return problemRepository.findByPlatform(platform);
     }
 }

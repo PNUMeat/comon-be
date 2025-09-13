@@ -11,7 +11,7 @@ import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.enums.Platform;
-import site.codemonster.comon.domain.problem.service.ProblemService;
+import site.codemonster.comon.domain.problem.service.ProblemQueryService;
 import site.codemonster.comon.domain.recommendation.dto.request.ManualRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.request.TeamRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.response.ManualRecommendationResponse;
@@ -41,7 +41,7 @@ public class TeamRecommendationService {
     private final TeamRecommendationRepository teamRecommendationRepository;
     private final PlatformRecommendationService platformRecommendationService;
     private final MemberService memberService;
-    private final ProblemService problemService;
+    private final ProblemQueryService problemQueryService;
     private final ObjectMapper objectMapper;
     private final ConvertUtils convertUtils;
 
@@ -158,7 +158,7 @@ public class TeamRecommendationService {
     private List<Problem> recommendProblemsByPlatform(Team team, Platform platform, int count,
                                                       List<String> difficulties, List<String> tags) {
         Set<Long> recommendedProblemIds = recommendationHistoryService.getRecommendedProblemIds(team, platform);
-        List<Problem> allProblemsForPlatform = problemService.getProblemsByPlatform(platform);
+        List<Problem> allProblemsForPlatform = problemQueryService.getProblemsByPlatform(platform);
 
         List<Problem> availableProblems = allProblemsForPlatform.stream()
                 .filter(p -> !recommendedProblemIds.contains(p.getProblemId()))
