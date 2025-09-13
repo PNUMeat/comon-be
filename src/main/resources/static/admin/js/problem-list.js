@@ -103,10 +103,14 @@ function loadProblems() {
         })
         .then(data => {
             console.log('문제 목록 로드 성공:', data);
-            allProblems = data;
-            initializeFilters();
-            applyFilters();
-            hideLoading();
+            if (data.status === 'success') {
+                allProblems = data.data || [];
+                initializeFilters();
+                applyFilters();
+                hideLoading();
+            } else {
+                throw new Error(data.message || '문제 목록을 불러올 수 없습니다');
+            }
         })
         .catch(error => {
             console.error('문제 목록 로드 실패:', error);
@@ -584,19 +588,23 @@ function saveProblem() {
             return response.json();
         })
         .then(data => {
-            alert('문제가 성공적으로 수정되었습니다.');
+            if (data.status === 'success') {
+                alert('문제가 성공적으로 수정되었습니다.');
 
-            // 로컬 데이터 업데이트
-            const problemIndex = allProblems.findIndex(p => p.problemId == problemId);
-            if (problemIndex !== -1) {
-                allProblems[problemIndex] = { ...allProblems[problemIndex], ...updateData };
+                // 로컬 데이터 업데이트 - data.data가 수정된 Problem 엔티티
+                const problemIndex = allProblems.findIndex(p => p.problemId == problemId);
+                if (problemIndex !== -1) {
+                    allProblems[problemIndex] = { ...allProblems[problemIndex], ...updateData };
+                }
+
+                // 필터 다시 적용
+                applyFilters();
+
+                // 모달 닫기
+                bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+            } else {
+                alert('문제 수정에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
             }
-
-            // 필터 다시 적용
-            applyFilters();
-
-            // 모달 닫기
-            bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
         })
         .catch(error => {
             console.error('문제 수정 실패:', error);
@@ -626,13 +634,17 @@ function deleteProblem(problemId) {
             return response.json();
         })
         .then(data => {
-            alert('문제가 성공적으로 삭제되었습니다.');
+            if (data.status === 'success') {
+                alert('문제가 성공적으로 삭제되었습니다.');
 
-            // 로컬 데이터에서 제거
-            allProblems = allProblems.filter(p => p.problemId != problemId);
+                // 로컬 데이터에서 제거
+                allProblems = allProblems.filter(p => p.problemId != problemId);
 
-            // 필터 다시 적용
-            applyFilters();
+                // 필터 다시 적용
+                applyFilters();
+            } else {
+                alert('문제 삭제에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
+            }
         })
         .catch(error => {
             console.error('문제 삭제 실패:', error);

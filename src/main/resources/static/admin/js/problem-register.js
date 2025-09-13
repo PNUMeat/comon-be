@@ -183,18 +183,7 @@ function checkProgrammers() {
         })
         .then(data => {
             hideLoading();
-            if (data.success) {
-                if (data.isDuplicate) {
-                    alert(`이미 등록된 문제입니다: ${data.platform} ${data.platformProblemId}`);
-                    clearProgrammersInputs();
-                } else {
-                    addProblemToList(data);
-                    clearProgrammersInputs();
-                    alert('프로그래머스 문제가 성공적으로 추가되었습니다.');
-                }
-            } else {
-                alert('오류: ' + (data.errorMessage || '알 수 없는 오류'));
-            }
+            handleProblemCheckResponse(data, 'programmers-problem-id');
         })
         .catch(error => {
             console.error('프로그래머스 문제 확인 실패:', error);
@@ -235,22 +224,7 @@ function checkLeetcode() {
         })
         .then(data => {
             hideLoading();
-            console.log('리트코드 응답:', data);
-
-            if (data.success) {
-                if (data.isDuplicate) {
-                    // 중복된 문제인 경우
-                    alert(`이미 등록된 문제입니다: ${data.platform} ${data.platformProblemId}`);
-                    document.getElementById('leetcode-url').value = '';
-                } else {
-                    // 새로운 문제인 경우
-                    addProblemToList(data);
-                    document.getElementById('leetcode-url').value = '';
-                    alert(`문제가 성공적으로 추가되었습니다: ${data.title}`);
-                }
-            } else {
-                alert('오류: ' + (data.errorMessage || '알 수 없는 오류'));
-            }
+            handleProblemCheckResponse(data, 'leetcode-url');
         })
         .catch(error => {
             console.error('리트코드 문제 확인 실패:', error);
@@ -263,17 +237,17 @@ function checkLeetcode() {
  * 문제 확인 응답 처리 (공통 함수)
  */
 function handleProblemCheckResponse(data, inputId) {
-    if (data.success) {
-        if (data.isDuplicate) {
-            alert(`이미 등록된 문제입니다: ${data.platform} ${data.platformProblemId}`);
+    if (data.status === 'success') {
+        if (data.data.isDuplicate === true || data.data.title === '(중복된 문제)') {
+            alert(`이미 등록된 문제입니다: ${data.data.platform} ${data.data.platformProblemId}`);
             document.getElementById(inputId).value = '';
         } else {
-            addProblemToList(data);
+            addProblemToList(data.data);
             document.getElementById(inputId).value = '';
-            alert(`문제가 성공적으로 추가되었습니다: ${data.title}`);
+            alert(`문제가 성공적으로 추가되었습니다: ${data.data.title}`);
         }
     } else {
-        alert('오류: ' + (data.errorMessage || '알 수 없는 오류'));
+        alert('오류: ' + (data.message || '알 수 없는 오류'));
     }
 }
 
@@ -283,6 +257,9 @@ function handleProblemCheckResponse(data, inputId) {
  * 문제 목록에 추가
  */
 function addProblemToList(problemData) {
+    console.log('addProblemToList 호출됨, 받은 데이터:', problemData);
+    console.log('isDuplicate 값:', problemData.isDuplicate);
+
     // 서버에서 중복으로 표시된 문제는 추가하지 않음
     if (problemData.isDuplicate) {
         console.log('중복된 문제이므로 목록에 추가하지 않습니다:', problemData);
@@ -443,8 +420,8 @@ function registerAllProblems() {
             hideLoading();
             console.log('등록 결과:', data);
 
-            if (data.success) {
-                alert(`${data.count || validProblems.length}개 문제가 성공적으로 등록되었습니다!`);
+            if (data.status === 'success') {
+                alert(`${data.data.count || validProblems.length}개 문제가 성공적으로 등록되었습니다!`);
                 // 성공시 목록 비우기
                 problemList = [];
                 problemIdCounter = 0;

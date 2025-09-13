@@ -12,10 +12,13 @@ import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.repository.ProblemRepository;
+import site.codemonster.comon.global.error.problem.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static site.codemonster.comon.global.error.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -55,35 +58,35 @@ public class ProblemService {
     }
 
     private ProblemInfoResponse collectProblemInfo(String problemInput, Platform platform) {
+        ProblemCollector collector = collectorFactory.getCollector(platform);
+
+        if (!collector.isValidProblem(problemInput)) {
+            throw new ProblemInvalidInputException();
+        }
+
+        ProblemInfoRequest collectorRequest = ProblemInfoRequest.builder()
+                .platform(platform)
+                .platformProblemId(problemInput)
+                .build();
+
         try {
-            ProblemCollector collector = collectorFactory.getCollector(platform);
-
-            if (!collector.isValidProblem(problemInput)) {
-                throw new IllegalArgumentException("유효하지 않은 문제입니다: " + problemInput);
-            }
-
-            ProblemInfoRequest collectorRequest = ProblemInfoRequest.builder()
-                    .platform(platform)
-                    .platformProblemId(problemInput)
-                    .build();
-
             return collector.collectProblemInfo(collectorRequest);
         } catch (Exception e) {
-            throw new RuntimeException(platform.getName() + " 문제 정보를 수집할 수 없습니다: " + e.getMessage(), e);
+            throw new ProblemCollectionException();
         }
     }
 
     private ProblemInfoResponse collectProblemInfoFromRequest(ProblemInfoRequest request) {
+        ProblemCollector collector = collectorFactory.getCollector(request.getPlatform());
+
+        if (!collector.isValidProblem(request.getPlatformProblemId())) {
+            throw new ProblemInvalidInputException();
+        }
+
         try {
-            ProblemCollector collector = collectorFactory.getCollector(request.getPlatform());
-
-            if (!collector.isValidProblem(request.getPlatformProblemId())) {
-                throw new IllegalArgumentException("유효하지 않은 문제번호입니다: " + request.getPlatformProblemId());
-            }
-
             return collector.collectProblemInfo(request);
         } catch (Exception e) {
-            throw new RuntimeException(request.getPlatform().getName() + " 문제 정보를 수집할 수 없습니다: " + e.getMessage(), e);
+            throw new ProblemCollectionException();
         }
     }
 
@@ -119,7 +122,11 @@ public class ProblemService {
     }
 
     @Transactional
-    public List<Problem> registerProblems(List<ProblemInfoRequest> requests) throws InterruptedException {
+    public List<Problem> registerProblems(List<ProblemInfoRequest> requests) {
+        if (requests == null || requests.isEmpty()) {
+            throw new ProblemBatchRegisterException(PROBLEM_BATCH_REGISTER_EMPTY_ERROR);
+        }
+
         List<Problem> savedProblems = new ArrayList<>();
 
         for (ProblemInfoRequest request : requests) {
@@ -129,12 +136,25 @@ public class ProblemService {
 
             Problem savedProblem = saveProblem(request);
             savedProblems.add(savedProblem);
-            Thread.sleep(100);
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ProblemBatchRegisterException(PROBLEM_REGISTER_INTERRUPTED_ERROR);
+            }
         }
+
+        if (savedProblems.isEmpty()) {
+            throw new ProblemBatchRegisterException(PROBLEM_ALL_DUPLICATED_ERROR);
+        }
+
         return savedProblems;
     }
 
     private Problem saveProblem(ProblemInfoRequest request) {
+        validateProblemRequest(request);
+
         Problem problem = Problem.builder()
                 .platform(request.getPlatform())
                 .platformProblemId(request.getPlatformProblemId())
@@ -147,12 +167,28 @@ public class ProblemService {
         return problemRepository.save(problem);
     }
 
+    private void validateProblemRequest(ProblemInfoRequest request) {
+        if (request.getPlatform() == null) {
+            throw new ProblemValidationException(PROBLEM_PLATFORM_REQUIRED_ERROR);
+        }
+        if (request.getPlatformProblemId() == null || request.getPlatformProblemId().trim().isEmpty()) {
+            throw new ProblemValidationException(PROBLEM_ID_REQUIRED_ERROR);
+        }
+        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new ProblemValidationException(PROBLEM_TITLE_REQUIRED_ERROR);
+        }
+    }
+
     public List<Problem> getAllProblems() {
         return problemRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"));
     }
 
     @Transactional
     public Problem updateProblem(Long problemId, Map<String, String> updateData) {
+        if (updateData == null || updateData.isEmpty()) {
+            throw new ProblemValidationException(PROBLEM_UPDATE_DATA_EMPTY_ERROR);
+        }
+
         Problem problem = findProblemById(problemId);
         updateProblemFields(problem, updateData);
 
@@ -167,21 +203,30 @@ public class ProblemService {
 
     private Problem findProblemById(Long problemId) {
         return problemRepository.findById(problemId)
-                .orElseThrow(() -> new RuntimeException("문제를 찾을 수 없습니다: " + problemId));
+                .orElseThrow(ProblemNotFoundException::new);
     }
 
     private void updateProblemFields(Problem problem, Map<String, String> updateData) {
         updateData.forEach((key, value) -> {
             switch (key) {
-                case "title" -> problem.setTitle(value);
-                case "difficulty" -> problem.setDifficulty(value);
-                case "tags" -> problem.setTags(value);
-                case "url" -> problem.setUrl(value);
+                case "title" -> {
+                    if (value == null || value.trim().isEmpty()) {
+                        throw new ProblemValidationException(PROBLEM_TITLE_REQUIRED_ERROR);
+                    }
+                    problem.setTitle(value.trim());
+                }
+                case "difficulty" -> problem.setDifficulty(value != null ? value.trim() : null);
+                case "tags" -> problem.setTags(value != null ? value.trim() : null);
+                case "url" -> problem.setUrl(value != null ? value.trim() : null);
+                default -> throw new ProblemValidationException(PROBLEM_UNSUPPORTED_FIELD_ERROR);
             }
         });
     }
 
     public List<Problem> getProblemsByPlatform(Platform platform) {
+        if (platform == null) {
+            throw new ProblemValidationException(PROBLEM_PLATFORM_REQUIRED_ERROR);
+        }
         return problemRepository.findByPlatform(platform);
     }
 }

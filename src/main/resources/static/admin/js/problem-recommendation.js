@@ -404,7 +404,12 @@ function loadPlatformData(platform) {
         })
         .then(data => {
             console.log(`${platform} 플랫폼 데이터 로드 성공:`, data);
-            populatePlatformOptions(platform, data);
+            if (data.status === 'success') {
+                populatePlatformOptions(platform, data.data || []);
+            } else {
+                console.error(`${platform} 옵션 로드 실패:`, data.message);
+                populateDefaultOptions(platform);
+            }
         })
         .catch(error => {
             console.error(`${platform} 옵션 로드 실패:`, error);
@@ -724,7 +729,7 @@ function executeManualRecommendation() {
         .then(data => {
             hideLoading();
             if (data.status === 'success') {
-                alert(`${data.data.message}`);
+                alert(`${data.data.message || '수동 추천이 완료되었습니다'}`);
                 // 선택된 날짜들 초기화
                 selectedDates = [];
                 updateSelectedDatesDisplay();
@@ -884,7 +889,7 @@ function resetCurrentSettings() {
         })
         .then(data => {
             hideLoading();
-            if (data.success) {
+            if (data.status === 'success') {
                 alert('설정이 초기화되었습니다.');
                 resetUISettings(); // UI 초기화
             } else {
