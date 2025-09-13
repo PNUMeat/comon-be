@@ -3,7 +3,6 @@ package site.codemonster.comon.domain.problem.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.codemonster.comon.domain.problem.collector.LeetcodeCollector;
 import site.codemonster.comon.domain.problem.collector.ProblemCollector;
 import site.codemonster.comon.domain.problem.collector.ProblemCollectorFactory;
 import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
@@ -26,17 +25,14 @@ public class ProblemCommandService {
 
     private final ProblemRepository problemRepository;
     private final ProblemCollectorFactory collectorFactory;
-    private final LeetcodeCollector leetcodeCollector;
     private final ProblemQueryService problemQueryService;
 
-    public ProblemInfoResponse checkProblem(String problemInput, Platform platform) {
-        String problemId = extractProblemId(problemInput, platform);
-
+    public ProblemInfoResponse checkProblem(String problemId, Platform platform) {
         if (problemQueryService.checkDuplicateProblem(platform, problemId)) {
-            return createDuplicateResponse(platform, problemId, problemInput);
+            return createDuplicateResponse(platform, problemId, problemId);
         }
 
-        return collectProblemInfo(problemInput, platform);
+        return collectProblemInfo(problemId, platform);
     }
 
     public ProblemInfoResponse checkProblem(ProblemInfoRequest request) {
@@ -94,13 +90,6 @@ public class ProblemCommandService {
     public void deleteProblem(Long problemId) {
         Problem problem = problemQueryService.findProblemById(problemId);
         problemRepository.delete(problem);
-    }
-
-    private String extractProblemId(String problemInput, Platform platform) {
-        if (platform == Platform.LEETCODE) {
-            return leetcodeCollector.extractSlugFromUrl(problemInput, true);
-        }
-        return problemInput;
     }
 
     private ProblemInfoResponse collectProblemInfo(String problemInput, Platform platform) {

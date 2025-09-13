@@ -89,7 +89,7 @@ public class AdminProblemApiController {
     }
 
     @GetMapping("/api/list-by-platform")
-    public ResponseEntity<?> getProblemListByPlatform(@RequestParam(required = false) String platform) {
+    public ResponseEntity<?> getProblemListByPlatform(@RequestParam String platform) {
         List<Problem> problems = problemQueryService.getProblemsByPlatform(Platform.valueOf(platform.toUpperCase()));
 
         return ResponseEntity.status(PROBLEM_LIST_GET_SUCCESS.getStatusCode())

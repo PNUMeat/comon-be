@@ -8,12 +8,9 @@ import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.repository.ProblemRepository;
 import site.codemonster.comon.global.error.problem.ProblemNotFoundException;
-import site.codemonster.comon.global.error.problem.ProblemValidationException;
 
 import java.util.List;
 import java.util.Map;
-
-import static site.codemonster.comon.global.error.ErrorCode.PROBLEM_PLATFORM_REQUIRED_ERROR;
 
 @Service
 @RequiredArgsConstructor
@@ -39,9 +36,6 @@ public class ProblemQueryService {
     }
 
     public List<Problem> getProblemsByPlatform(Platform platform) {
-        if (platform == null) {
-            throw new ProblemValidationException(PROBLEM_PLATFORM_REQUIRED_ERROR);
-        }
         return problemRepository.findByPlatform(platform);
     }
 
