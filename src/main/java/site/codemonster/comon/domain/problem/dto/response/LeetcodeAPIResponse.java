@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.problem.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class LeetcodeAPIResponse {
     @lombok.Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Question {
         private String title;
         private String difficulty;
