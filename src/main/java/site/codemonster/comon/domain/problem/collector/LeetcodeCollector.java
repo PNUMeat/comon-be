@@ -52,14 +52,13 @@ public class LeetcodeCollector implements ProblemCollector {
     @Override
     public boolean isValidProblemId(String leetcodeUrl) {
         if (leetcodeUrl == null || leetcodeUrl.trim().isEmpty()) {
-            return true;
+            return false;
         }
 
         String trimmedUrl = leetcodeUrl.trim();
-
-        return !trimmedUrl.startsWith(LEETCODE_PROBLEM_URL_PREFIX) ||
-                !trimmedUrl.contains("/problems/") ||
-                extractSlugFromUrl(trimmedUrl, false) == null;
+        return trimmedUrl.startsWith(LEETCODE_PROBLEM_URL_PREFIX) &&
+                trimmedUrl.contains("/problems/") &&
+                extractSlugFromUrl(trimmedUrl, false) != null;
     }
 
     public String extractSlugFromUrl(String url, boolean throwException) {

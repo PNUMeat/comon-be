@@ -53,14 +53,14 @@ public class BaekjoonCollector implements ProblemCollector {
     @Override
     public boolean isValidProblemId(String problemId) {
         if (problemId == null || problemId.trim().isEmpty()) {
-            return true;
+            return false;
         }
 
         try {
             int id = Integer.parseInt(problemId.trim());
             return id < MIN_PROBLEM_ID || id > MAX_PROBLEM_ID;
         } catch (NumberFormatException e) {
-            return true;
+            return false;
         }
     }
 
