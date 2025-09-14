@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
 import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
 import site.codemonster.comon.domain.problem.enums.Platform;
-import site.codemonster.comon.global.error.problem.ProblemInvalidInputException;
 import site.codemonster.comon.global.error.problem.ProblemValidationException;
 
 import java.util.Set;
@@ -18,8 +17,8 @@ public class ProgrammersCollector implements ProblemCollector {
             "Level 0", "Level 1", "Level 2", "Level 3", "Level 4", "Level 5"
     );
 
-    private static final int MIN_PROBLEM_ID = 1;
-    private static final int MAX_PROBLEM_ID = 999999;
+    private static final int MIN_PROBLEM_ID = 10000;
+    private static final int MAX_PROBLEM_ID = 99999;
     private static final int MAX_TITLE_LENGTH = 50;
     private static final int MAX_TAGS_LENGTH = 50;
 
@@ -54,11 +53,6 @@ public class ProgrammersCollector implements ProblemCollector {
     }
 
     private void validateRequest(ProblemInfoRequest request) {
-        // 플랫폼 문제 ID 검증
-        if (isValidProblemId(request.getPlatformProblemId())) {
-            throw new ProblemInvalidInputException();
-        }
-
         // 제목 검증
         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
             throw new ProblemValidationException(PROBLEM_TITLE_REQUIRED_ERROR);

@@ -20,8 +20,8 @@ public class BaekjoonCollector implements ProblemCollector {
             "Unknown", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ruby"
     );
 
-    private static final int MIN_PROBLEM_ID = 1;
-    private static final int MAX_PROBLEM_ID = 999999;
+    private static final int MIN_PROBLEM_ID = 1000;
+    private static final int MAX_PROBLEM_ID = 99999;
 
     private final RestTemplate restTemplate;
 
@@ -32,7 +32,7 @@ public class BaekjoonCollector implements ProblemCollector {
     public ProblemInfoResponse collectProblemInfo(ProblemInfoRequest request) {
         String problemId = request.getPlatformProblemId();
 
-        if (isValidProblemId(problemId)) {
+        if (!isValidProblemId(problemId)) {
             throw new ProblemInvalidInputException();
         }
 
@@ -58,7 +58,7 @@ public class BaekjoonCollector implements ProblemCollector {
 
         try {
             int id = Integer.parseInt(problemId.trim());
-            return id < MIN_PROBLEM_ID || id > MAX_PROBLEM_ID;
+            return id >= MIN_PROBLEM_ID && id <= MAX_PROBLEM_ID;
         } catch (NumberFormatException e) {
             return false;
         }
