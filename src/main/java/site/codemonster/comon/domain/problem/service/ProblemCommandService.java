@@ -54,23 +54,8 @@ public class ProblemCommandService {
         List<Problem> savedProblems = new ArrayList<>();
 
         for (ProblemInfoRequest request : requests) {
-            if (problemQueryService.checkDuplicateProblem(request.getPlatform(), request.getPlatformProblemId())) {
-                continue;
-            }
-
             Problem savedProblem = saveProblem(request);
             savedProblems.add(savedProblem);
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new ProblemBatchRegisterException(PROBLEM_REGISTER_INTERRUPTED_ERROR);
-            }
-        }
-
-        if (savedProblems.isEmpty()) {
-            throw new ProblemBatchRegisterException(PROBLEM_ALL_DUPLICATED_ERROR);
         }
 
         return savedProblems;

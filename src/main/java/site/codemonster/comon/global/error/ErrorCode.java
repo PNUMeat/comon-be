@@ -63,7 +63,6 @@ public enum ErrorCode {
     PROBLEM_COLLECTION_ERROR(HttpStatus.BAD_REQUEST, 400, "문제 정보를 수집할 수 없습니다."),
     PROBLEM_UPDATE_DATA_EMPTY_ERROR(HttpStatus.BAD_REQUEST, 400, "수정할 데이터가 없습니다."),
     PROBLEM_BATCH_REGISTER_EMPTY_ERROR(HttpStatus.BAD_REQUEST, 400, "등록할 문제 목록이 비어있습니다."),
-    PROBLEM_ALL_DUPLICATED_ERROR(HttpStatus.BAD_REQUEST, 400, "모든 문제가 이미 등록되어 있습니다."),
     PROBLEM_REGISTER_INTERRUPTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "문제 등록 중 인터럽트가 발생했습니다."),
     PROBLEM_PLATFORM_REQUIRED_ERROR(HttpStatus.BAD_REQUEST, 400, "플랫폼 정보가 필요합니다."),
     PROBLEM_TITLE_REQUIRED_ERROR(HttpStatus.BAD_REQUEST, 400, "문제 제목이 필요합니다."),
