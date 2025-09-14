@@ -30,7 +30,7 @@ public class LeetcodeCollector implements ProblemCollector {
     public ProblemInfoResponse collectProblemInfo(ProblemInfoRequest request) {
         String url = request.getPlatformProblemId();
 
-        if (isValidProblemId(url)) {
+        if (!isValidProblemId(url)) {
             throw new ProblemInvalidInputException();
         }
 
@@ -58,7 +58,6 @@ public class LeetcodeCollector implements ProblemCollector {
         String trimmedUrl = leetcodeUrl.trim();
 
         return trimmedUrl.startsWith(LEETCODE_PROBLEM_URL_PREFIX) &&
-                trimmedUrl.contains("/problems/") &&
                 extractSlugFromUrl(trimmedUrl, false) != null;
     }
 
