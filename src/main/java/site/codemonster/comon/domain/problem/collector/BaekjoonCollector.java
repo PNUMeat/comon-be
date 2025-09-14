@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
 import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
 import site.codemonster.comon.domain.problem.dto.response.SolvedAcAPIResponse;
@@ -23,7 +23,7 @@ public class BaekjoonCollector implements ProblemCollector {
     private static final int MIN_PROBLEM_ID = 1000;
     private static final int MAX_PROBLEM_ID = 99999;
 
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
 
     @Value("${problem.collection.baekjoon.problem-url}")
     private String solvedAcProblemApiUrl;
@@ -67,7 +67,11 @@ public class BaekjoonCollector implements ProblemCollector {
     private SolvedAcAPIResponse fetchProblemInfoByAPI(String problemId) {
         String apiUrl = solvedAcProblemApiUrl + "?problemId=" + problemId;
 
-        SolvedAcAPIResponse response = restTemplate.getForObject(apiUrl, SolvedAcAPIResponse.class);
+        SolvedAcAPIResponse response = restClient.get()
+                .uri(apiUrl)
+                .header("User-Agent", "Mozilla/5.0 (compatible; ProblemCollector/1.0)")
+                .retrieve()
+                .body(SolvedAcAPIResponse.class);
 
         if (response == null || response.getProblemId() == null || response.getTitleKo() == null || response.getTitleKo().trim().isEmpty()) {
             throw new ProblemNotFoundException();

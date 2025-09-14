@@ -3,26 +3,25 @@ package site.codemonster.comon.domain.problem.collector;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
+import site.codemonster.comon.domain.problem.dto.response.LeetcodeAPIResponse;
 import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
 import site.codemonster.comon.domain.problem.enums.LeetcodeQueryType;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.global.error.problem.ProblemInvalidInputException;
-import site.codemonster.comon.global.error.problem.ProblemNotFoundException;
 
 import java.util.Map;
+import site.codemonster.comon.global.error.problem.ProblemNotFoundException;
 
 @Component
 @RequiredArgsConstructor
 public class LeetcodeCollector implements ProblemCollector {
 
     private static final String LEETCODE_PROBLEM_URL_PREFIX = "https://leetcode.com/problems/";
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
     @Value("${problem.collection.leetcode.graphql-url:https://leetcode.com/graphql}")
     private String leetcodeGraphqlUrl;
 
@@ -35,13 +34,13 @@ public class LeetcodeCollector implements ProblemCollector {
         }
 
         String slug = extractSlugFromUrl(url, true);
-        Map<String, Object> problemInfo = fetchProblemInfoByGraphQL(slug);
+        LeetcodeAPIResponse problemInfo = fetchProblemInfoByGraphQL(slug);
 
         return ProblemInfoResponse.builder()
                 .platform(Platform.LEETCODE)
                 .platformProblemId(slug)
-                .title((String) problemInfo.get("title"))
-                .difficulty((String) problemInfo.get("difficulty"))
+                .title(problemInfo.getTitle())
+                .difficulty(problemInfo.getDifficulty())
                 .url(url)
                 .tags(formatTags(problemInfo))
                 .isDuplicate(false)
@@ -103,35 +102,28 @@ public class LeetcodeCollector implements ProblemCollector {
         return null;
     }
 
-    private Map<String, Object> fetchProblemInfoByGraphQL(String slug) {
+    private LeetcodeAPIResponse fetchProblemInfoByGraphQL(String slug) {
         String query = LeetcodeQueryType.PROBLEM_DETAIL.formatQuery(slug);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("User-Agent", "Mozilla/5.0 (compatible; ProblemCollector/1.0)");
-
         Map<String, Object> requestBody = Map.of("query", query);
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> response = restTemplate.postForObject(leetcodeGraphqlUrl, request, Map.class);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> data = (Map<String, Object>) response.get("data");
-        @SuppressWarnings("unchecked")
-        Map<String, Object> question = (Map<String, Object>) data.get("question");
+        LeetcodeAPIResponse response = restClient.post()
+                .uri(leetcodeGraphqlUrl)
+                .header("User-Agent", "Mozilla/5.0 (compatible; ProblemCollector/1.0)")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(requestBody)
+                .retrieve()
+                .body(LeetcodeAPIResponse.class);
 
-        if (question == null || question.get("title") == null || question.get("difficulty") == null) {
+        if (response == null || response.getTitle() == null || response.getDifficulty() == null) {
             throw new ProblemNotFoundException();
         }
 
-        return question;
+        return response;
     }
 
-    private String formatTags(Map<String, Object> problemInfo) {
+    private String formatTags(LeetcodeAPIResponse response) {
         try {
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> topicTags =
-                    (List<Map<String, Object>>) problemInfo.get("topicTags");
+            List<Map<String, Object>> topicTags = response.getTopicTags();
 
             if (topicTags == null || topicTags.isEmpty()) {
                 return "";
