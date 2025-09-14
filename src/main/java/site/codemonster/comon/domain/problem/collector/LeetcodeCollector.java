@@ -30,7 +30,7 @@ public class LeetcodeCollector implements ProblemCollector {
     public ProblemInfoResponse collectProblemInfo(ProblemInfoRequest request) {
         String url = request.getPlatformProblemId();
 
-        if (!isValidProblemId(url)) {
+        if (!isValidProblem(url)) {
             throw new ProblemInvalidInputException();
         }
 
@@ -50,7 +50,7 @@ public class LeetcodeCollector implements ProblemCollector {
     }
 
     @Override
-    public boolean isValidProblemId(String leetcodeUrl) {
+    public boolean isValidProblem(String leetcodeUrl) {
         if (leetcodeUrl == null || leetcodeUrl.trim().isEmpty()) {
             return false;
         }

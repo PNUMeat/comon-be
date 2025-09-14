@@ -39,7 +39,7 @@ public class ProgrammersCollector implements ProblemCollector {
     }
 
     @Override
-    public boolean isValidProblemId(String problemId) {
+    public boolean isValidProblem(String problemId) {
         if (problemId == null || problemId.trim().isEmpty()) {
             return false;
         }

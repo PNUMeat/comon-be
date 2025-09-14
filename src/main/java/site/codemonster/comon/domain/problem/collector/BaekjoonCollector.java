@@ -32,7 +32,7 @@ public class BaekjoonCollector implements ProblemCollector {
     public ProblemInfoResponse collectProblemInfo(ProblemInfoRequest request) {
         String problemId = request.getPlatformProblemId();
 
-        if (!isValidProblemId(problemId)) {
+        if (!isValidProblem(problemId)) {
             throw new ProblemInvalidInputException();
         }
 
@@ -51,7 +51,7 @@ public class BaekjoonCollector implements ProblemCollector {
     }
 
     @Override
-    public boolean isValidProblemId(String problemId) {
+    public boolean isValidProblem(String problemId) {
         if (problemId == null || problemId.trim().isEmpty()) {
             return false;
         }

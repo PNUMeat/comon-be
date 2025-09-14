@@ -110,7 +110,7 @@ public class ProblemCommandService {
     private ProblemInfoResponse collectProblemInfoFromRequest(ProblemInfoRequest request) {
         ProblemCollector collector = collectorFactory.getCollector(request.getPlatform());
 
-        if (!collector.isValidProblemId(request.getPlatformProblemId())) {
+        if (!collector.isValidProblem(request.getPlatformProblemId())) {
             throw new ProblemInvalidInputException();
         }
 
