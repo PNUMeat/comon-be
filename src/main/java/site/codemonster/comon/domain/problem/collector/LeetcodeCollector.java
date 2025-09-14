@@ -56,6 +56,7 @@ public class LeetcodeCollector implements ProblemCollector {
         }
 
         String trimmedUrl = leetcodeUrl.trim();
+
         return trimmedUrl.startsWith(LEETCODE_PROBLEM_URL_PREFIX) &&
                 trimmedUrl.contains("/problems/") &&
                 extractSlugFromUrl(trimmedUrl, false) != null;
