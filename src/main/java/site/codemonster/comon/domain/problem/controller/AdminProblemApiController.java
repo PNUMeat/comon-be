@@ -27,8 +27,8 @@ public class AdminProblemApiController {
     private final ProblemCommandService problemCommandService;
     private final ProblemQueryService problemQueryService;
 
-    @PostMapping("/check/baekjoon")
-    public ResponseEntity<?> checkBaekjoonProblem(@RequestParam String problemId) {
+    @PostMapping("/get/baekjoon")
+    public ResponseEntity<?> getBaekjoonProblemInfo(@RequestParam String problemId) {
         ProblemInfoResponse response = problemCommandService.checkProblem(problemId, Platform.BAEKJOON);
 
         return ResponseEntity.status(PROBLEM_CHECK_SUCCESS.getStatusCode())
@@ -36,8 +36,8 @@ public class AdminProblemApiController {
                 .body(ApiResponse.successResponse(response, PROBLEM_CHECK_SUCCESS.getMessage()));
     }
 
-    @PostMapping("/check/programmers")
-    public ResponseEntity<?> checkProgrammersProblem(@RequestBody @Valid ProblemInfoRequest request) {
+    @PostMapping("/get/programmers")
+    public ResponseEntity<?> getProgrammersProblemInfo(@RequestBody @Valid ProblemInfoRequest request) {
         if (request.getPlatform() == null) request.setPlatform(Platform.PROGRAMMERS);
 
         ProblemInfoResponse response = problemCommandService.checkProblem(request);
@@ -47,8 +47,8 @@ public class AdminProblemApiController {
                 .body(ApiResponse.successResponse(response, PROBLEM_CHECK_SUCCESS.getMessage()));
     }
 
-    @PostMapping("/check/leetcode")
-    public ResponseEntity<?> checkLeetcodeProblem(@RequestParam String url) {
+    @PostMapping("/get/leetcode")
+    public ResponseEntity<?> getLeetcodeProblemInfo(@RequestParam String url) {
         ProblemInfoResponse response = problemCommandService.checkProblem(url, Platform.LEETCODE);
 
         return ResponseEntity.status(PROBLEM_CHECK_SUCCESS.getStatusCode())
@@ -56,7 +56,7 @@ public class AdminProblemApiController {
                 .body(ApiResponse.successResponse(response, PROBLEM_CHECK_SUCCESS.getMessage()));
     }
 
-    @PostMapping("/register/batch")
+    @PostMapping("/register")
     public ResponseEntity<?> registerProblems(@RequestBody @Valid ProblemBatchRequest batchRequest) {
         List<Problem> savedProblems = problemCommandService.registerProblems(batchRequest.getProblems());
 
@@ -79,7 +79,7 @@ public class AdminProblemApiController {
                 .body(ApiResponse.successResponse(statistics, PROBLEM_STATISTICS_GET_SUCCESS.getMessage()));
     }
 
-    @GetMapping("/api/list")
+    @GetMapping("/problem-list")
     public ResponseEntity<?> getProblemList() {
         List<Problem> problems = problemQueryService.getAllProblems();
 
@@ -88,7 +88,7 @@ public class AdminProblemApiController {
                 .body(ApiResponse.successResponse(problems, PROBLEM_LIST_GET_SUCCESS.getMessage()));
     }
 
-    @GetMapping("/api/list-by-platform")
+    @GetMapping("/list-by-platform")
     public ResponseEntity<?> getProblemListByPlatform(@RequestParam String platform) {
         List<Problem> problems = problemQueryService.getProblemsByPlatform(Platform.valueOf(platform.toUpperCase()));
 
@@ -97,7 +97,7 @@ public class AdminProblemApiController {
                 .body(ApiResponse.successResponse(problems, PROBLEM_LIST_GET_SUCCESS.getMessage()));
     }
 
-    @PutMapping("/api/{problemId}")
+    @PutMapping("/{problemId}")
     public ResponseEntity<?> updateProblem(@PathVariable Long problemId, @RequestBody Map<String, String> updateData) {
         Problem updatedProblem = problemCommandService.updateProblem(problemId, updateData);
 
@@ -106,7 +106,7 @@ public class AdminProblemApiController {
                 .body(ApiResponse.successResponse(updatedProblem, PROBLEM_UPDATE_SUCCESS.getMessage()));
     }
 
-    @DeleteMapping("/api/{problemId}")
+    @DeleteMapping("/{problemId}")
     public ResponseEntity<?> deleteProblem(@PathVariable Long problemId) {
         problemCommandService.deleteProblem(problemId);
 

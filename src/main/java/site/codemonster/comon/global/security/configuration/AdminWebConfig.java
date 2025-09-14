@@ -28,7 +28,7 @@ public class AdminWebConfig implements WebMvcConfigurer {
                         "/admin/images/**",
 
                         // API
-                        "/admin/problems/api/**"
+                        "/admin/problems/**"
                 )
                 .order(0);
     }

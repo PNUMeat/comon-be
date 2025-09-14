@@ -395,7 +395,7 @@ function loadPlatformOptions() {
 function loadPlatformData(platform) {
     console.log(`${platform} 플랫폼 데이터 로드 중...`);
 
-    return fetch(`/admin/problems/api/list-by-platform?platform=${platform}`)
+    return fetch(`/admin/problems/list-by-platform?platform=${platform}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

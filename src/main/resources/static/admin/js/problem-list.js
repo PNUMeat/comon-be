@@ -94,7 +94,7 @@ function loadProblems() {
     showLoading();
 
     // 실제 API 호출
-    fetch('/admin/problems/api/list')
+    fetch('/admin/problems/problem-list')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -574,7 +574,7 @@ function saveProblem() {
     };
 
     // API 호출
-    fetch(`/admin/problems/api/${problemId}`, {
+    fetch(`/admin/problems/${problemId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -624,7 +624,7 @@ function deleteProblem(problemId) {
     }
 
     // API 호출
-    fetch(`/admin/problems/api/${problemId}`, {
+    fetch(`/admin/problems/${problemId}`, {
         method: 'DELETE'
     })
         .then(response => {

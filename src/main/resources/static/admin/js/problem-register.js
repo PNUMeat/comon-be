@@ -129,7 +129,7 @@ function checkBaekjoon() {
     console.log('백준 문제 확인:', problemId);
     showLoading('백준 문제 정보를 가져오는 중...');
 
-    fetch('/admin/problems/check/baekjoon', {
+    fetch('/admin/problems/get/baekjoon', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'problemId=' + encodeURIComponent(problemId)
@@ -170,7 +170,7 @@ function checkProgrammers() {
     console.log('프로그래머스 문제 확인:', data);
     showLoading('프로그래머스 문제를 처리하는 중...');
 
-    fetch('/admin/problems/check/programmers', {
+    fetch('/admin/problems/get/programmers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -211,7 +211,7 @@ function checkLeetcode() {
     console.log('리트코드 문제 확인:', url);
     showLoading('리트코드 문제 정보를 가져오는 중...');
 
-    fetch('/admin/problems/check/leetcode', {
+    fetch('/admin/problems/get/leetcode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `url=${encodeURIComponent(url)}`
@@ -405,7 +405,7 @@ function registerAllProblems() {
         registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>등록 중...';
     }
 
-    fetch('/admin/problems/register/batch', {
+    fetch('/admin/problems/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData)
