@@ -7,5 +7,5 @@ public interface ProblemCollector {
 
     ProblemInfoResponse collectProblemInfo(ProblemInfoRequest request);
 
-    boolean isValidProblem(String problemId);
+    boolean isValidProblemId(String problemId);
 }

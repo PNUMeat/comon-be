@@ -95,7 +95,7 @@ public class ProblemCommandService {
     private ProblemInfoResponse collectProblemInfo(String problemInput, Platform platform) {
         ProblemCollector collector = collectorFactory.getCollector(platform);
 
-        if (!collector.isValidProblem(problemInput)) {
+        if (collector.isValidProblemId(problemInput)) {
             throw new ProblemInvalidInputException();
         }
 
@@ -114,7 +114,7 @@ public class ProblemCommandService {
     private ProblemInfoResponse collectProblemInfoFromRequest(ProblemInfoRequest request) {
         ProblemCollector collector = collectorFactory.getCollector(request.getPlatform());
 
-        if (!collector.isValidProblem(request.getPlatformProblemId())) {
+        if (collector.isValidProblemId(request.getPlatformProblemId())) {
             throw new ProblemInvalidInputException();
         }
 

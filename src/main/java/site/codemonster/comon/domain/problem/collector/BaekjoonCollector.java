@@ -2,7 +2,6 @@ package site.codemonster.comon.domain.problem.collector;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -10,8 +9,9 @@ import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
 import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
 import site.codemonster.comon.domain.problem.dto.response.SolvedAcAPIResponse;
 import site.codemonster.comon.domain.problem.enums.Platform;
+import site.codemonster.comon.global.error.problem.ProblemInvalidInputException;
+import site.codemonster.comon.global.error.problem.ProblemNotFoundException;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class BaekjoonCollector implements ProblemCollector {
@@ -19,6 +19,9 @@ public class BaekjoonCollector implements ProblemCollector {
     private static final List<String> BAEKJOON_LEVELS = List.of(
             "Unknown", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ruby"
     );
+
+    private static final int MIN_PROBLEM_ID = 1;
+    private static final int MAX_PROBLEM_ID = 999999;
 
     private final RestTemplate restTemplate;
 
@@ -29,61 +32,65 @@ public class BaekjoonCollector implements ProblemCollector {
     public ProblemInfoResponse collectProblemInfo(ProblemInfoRequest request) {
         String problemId = request.getPlatformProblemId();
 
-        try {
-            SolvedAcAPIResponse problemInfo = fetchProblemInfoByAPI(problemId);
-
-            return ProblemInfoResponse.builder()
-                    .platform(Platform.BAEKJOON)
-                    .platformProblemId(problemId)
-                    .title(problemInfo.getTitleKo())
-                    .difficulty(convertToDifficulty(problemInfo.getLevel()))
-                    .url("https://www.acmicpc.net/problem/" + problemId)
-                    .tags(problemInfo.getTagsAsString())
-                    .isDuplicate(false)
-                    .success(true)
-                    .build();
-
-        } catch (Exception e) {
-            log.error("백준 문제 정보 수집 실패: {}", e.getMessage());
-            throw new RuntimeException("백준 문제 정보를 찾을 수 없습니다: " + problemId, e);
+        if (isValidProblemId(problemId)) {
+            throw new ProblemInvalidInputException();
         }
+
+        SolvedAcAPIResponse problemInfo = fetchProblemInfoByAPI(problemId);
+
+        return ProblemInfoResponse.builder()
+                .platform(Platform.BAEKJOON)
+                .platformProblemId(problemId)
+                .title(problemInfo.getTitleKo())
+                .difficulty(convertToDifficulty(problemInfo.getLevel()))
+                .url("https://www.acmicpc.net/problem/" + problemId)
+                .tags(problemInfo.getTagsAsString())
+                .isDuplicate(false)
+                .success(true)
+                .build();
     }
 
     @Override
-    public boolean isValidProblem(String problemId) {
+    public boolean isValidProblemId(String problemId) {
         if (problemId == null || problemId.trim().isEmpty()) {
-            return false;
+            return true;
         }
 
         try {
             int id = Integer.parseInt(problemId.trim());
-            return id > 0 && id <= 999999;
+            return id < MIN_PROBLEM_ID || id > MAX_PROBLEM_ID;
         } catch (NumberFormatException e) {
-            return false;
+            return true;
         }
     }
 
     private SolvedAcAPIResponse fetchProblemInfoByAPI(String problemId) {
         String apiUrl = solvedAcProblemApiUrl + "?problemId=" + problemId;
-        log.info("solved.ac API 호출: {}", apiUrl);
 
         SolvedAcAPIResponse response = restTemplate.getForObject(apiUrl, SolvedAcAPIResponse.class);
 
-        if (response == null || response.getProblemId() == null) {
-            throw new RuntimeException("문제를 찾을 수 없습니다: " + problemId);
+        if (response == null || response.getProblemId() == null || response.getTitleKo() == null || response.getTitleKo().trim().isEmpty()) {
+            throw new ProblemNotFoundException();
         }
 
         return response;
     }
 
     private String convertToDifficulty(Integer level) {
-        if (level == null) return BAEKJOON_LEVELS.get(0);
-        if (level >= 1 && level <= 5) return BAEKJOON_LEVELS.get(1);
-        if (level >= 6 && level <= 10) return BAEKJOON_LEVELS.get(2);
-        if (level >= 11 && level <= 15) return BAEKJOON_LEVELS.get(3);
-        if (level >= 16 && level <= 20) return BAEKJOON_LEVELS.get(4);
-        if (level >= 21 && level <= 25) return BAEKJOON_LEVELS.get(5);
-        if (level >= 26 && level <= 30) return BAEKJOON_LEVELS.get(6);
-        return BAEKJOON_LEVELS.get(0);
+        if (level == null || level < 1) {
+            return BAEKJOON_LEVELS.get(0); // Unknown
+        }
+
+        int tierIndex = Math.min((level - 1) / 5 + 1, BAEKJOON_LEVELS.size() - 1);
+        int subTier = ((level - 1) % 5) + 1;
+
+        String problemTier = BAEKJOON_LEVELS.get(tierIndex);
+
+        // Unknown이 아닌 경우에만 세부 등급 추가
+        if (tierIndex > 0) {
+            return problemTier + " " + (6 - subTier);
+        }
+
+        return problemTier;
     }
 }

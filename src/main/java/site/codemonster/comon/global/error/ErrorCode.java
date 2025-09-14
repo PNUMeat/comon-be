@@ -68,7 +68,12 @@ public enum ErrorCode {
     PROBLEM_PLATFORM_REQUIRED_ERROR(HttpStatus.BAD_REQUEST, 400, "플랫폼 정보가 필요합니다."),
     PROBLEM_TITLE_REQUIRED_ERROR(HttpStatus.BAD_REQUEST, 400, "문제 제목이 필요합니다."),
     PROBLEM_ID_REQUIRED_ERROR(HttpStatus.BAD_REQUEST, 400, "문제 ID가 필요합니다."),
-    PROBLEM_UNSUPPORTED_FIELD_ERROR(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 필드입니다.");
+    PROBLEM_UNSUPPORTED_FIELD_ERROR(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 필드입니다."),
+    PROBLEM_DIFFICULTY_REQUIRED_ERROR(HttpStatus.BAD_REQUEST, 400, "난이도를 선택해주세요."),
+    PROBLEM_DIFFICULTY_INVALID_ERROR(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 난이도입니다."),
+    PROBLEM_TITLE_TOO_LONG_ERROR(HttpStatus.BAD_REQUEST, 400, "제목이 너무 깁니다. (최대 50자)"),
+    PROBLEM_TAGS_TOO_LONG_ERROR(HttpStatus.BAD_REQUEST, 400, "태그가 너무 깁니다. (최대 50자)"),
+    PROBLEM_VALIDATION_ERROR(HttpStatus.BAD_REQUEST, 400, "문제 정보 검증에 실패했습니다.");
 
     private final HttpStatus status;
     private final int customStatusCode;
