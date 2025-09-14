@@ -1,38 +1,48 @@
 package site.codemonster.comon.domain.problem.dto.response;
 
 import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class LeetcodeAPIResponse {
-    private Map<String, Object> data;
+    private Data data;
 
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getQuestion() {
-        if (data == null) return null;
-        return (Map<String, Object>) data.get("question");
+    @lombok.Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Data {
+        private Question question;
+    }
+
+    @lombok.Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Question {
+        private String title;
+        private String difficulty;
+        private List<TopicTag> topicTags;
+    }
+
+    @lombok.Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TopicTag {
+        private String name;
     }
 
     public String getTitle() {
-        Map<String, Object> question = getQuestion();
-        return question != null ? (String) question.get("title") : null;
+        return (data != null && data.question != null) ? data.question.title : null;
     }
 
     public String getDifficulty() {
-        Map<String, Object> question = getQuestion();
-        return question != null ? (String) question.get("difficulty") : null;
+        return (data != null && data.question != null) ? data.question.difficulty : null;
     }
 
-    @SuppressWarnings("unchecked")
-    public List<Map<String, Object>> getTopicTags() {
-        Map<String, Object> question = getQuestion();
-        return question != null ? (List<Map<String, Object>>) question.get("topicTags") : null;
+    public List<TopicTag> getTopicTags() {
+        return (data != null && data.question != null) ? data.question.topicTags : null;
     }
 }

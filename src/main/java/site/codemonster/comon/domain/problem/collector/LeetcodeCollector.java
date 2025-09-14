@@ -122,21 +122,16 @@ public class LeetcodeCollector implements ProblemCollector {
     }
 
     private String formatTags(LeetcodeAPIResponse response) {
-        try {
-            List<Map<String, Object>> topicTags = response.getTopicTags();
+        List<LeetcodeAPIResponse.TopicTag> topicTags = response.getTopicTags();
 
-            if (topicTags == null || topicTags.isEmpty()) {
-                return "";
-            }
-
-            return topicTags.stream()
-                    .map(tag -> (String) tag.get("name"))
-                    .filter(name -> name != null && !name.trim().isEmpty())
-                    .reduce((a, b) -> a + "," + b)
-                    .orElse("");
-
-        } catch (Exception e) {
+        if (topicTags == null || topicTags.isEmpty()) {
             return "";
         }
+
+        return topicTags.stream()
+                .map(LeetcodeAPIResponse.TopicTag::getName)
+                .filter(name -> name != null && !name.trim().isEmpty())
+                .reduce((a, b) -> a + "," + b)
+                .orElse("");
     }
 }
