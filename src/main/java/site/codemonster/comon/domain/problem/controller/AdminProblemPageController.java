@@ -11,7 +11,7 @@ import site.codemonster.comon.domain.adminAuth.controller.AdminAuthPageControlle
 import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
 import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
 import site.codemonster.comon.domain.problem.enums.Platform;
-import site.codemonster.comon.domain.problem.service.ProblemService;
+import site.codemonster.comon.domain.problem.service.ProblemQueryService;
 
 @Slf4j
 @Controller
@@ -19,7 +19,7 @@ import site.codemonster.comon.domain.problem.service.ProblemService;
 @RequiredArgsConstructor
 public class AdminProblemPageController {
 
-    private final ProblemService problemService;
+    private final ProblemQueryService problemQueryService;
 
     // 관리자 메인 페이지
     @GetMapping
@@ -33,7 +33,7 @@ public class AdminProblemPageController {
         addAdminInfoToModel(model, session);
 
         // 플랫폼별 문제 통계
-        Map<Platform, Long> statistics = problemService.getProblemStatistics();
+        Map<Platform, Long> statistics = problemQueryService.getProblemStatistics();
         model.addAttribute("statistics", statistics);
 
         // 전체 문제 수

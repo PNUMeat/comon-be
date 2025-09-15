@@ -1,44 +1,41 @@
 package site.codemonster.comon.domain.problem.collector;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
 import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
 import site.codemonster.comon.domain.problem.enums.Platform;
+import site.codemonster.comon.global.error.problem.ProblemValidationException;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
-@Slf4j
+import static site.codemonster.comon.global.error.ErrorCode.*;
+
 @Component
 public class ProgrammersCollector implements ProblemCollector {
 
-    private static final List<String> PROGRAMMERS_LEVELS = Arrays.asList(
+    private static final Set<String> VALID_PROGRAMMERS_LEVELS = Set.of(
             "Level 0", "Level 1", "Level 2", "Level 3", "Level 4", "Level 5"
     );
+
+    private static final int MIN_PROBLEM_ID = 10000;
+    private static final int MAX_PROBLEM_ID = 99999;
+    private static final int MAX_TITLE_LENGTH = 50;
+    private static final int MAX_TAGS_LENGTH = 50;
 
     @Override
     public ProblemInfoResponse collectProblemInfo(ProblemInfoRequest request) {
         validateRequest(request);
 
-        try {
-            String url = "https://school.programmers.co.kr/learn/courses/30/lessons/" + request.getPlatformProblemId();
-
-            return ProblemInfoResponse.builder()
-                    .platform(Platform.PROGRAMMERS)
-                    .platformProblemId(request.getPlatformProblemId())
-                    .title(request.getTitle())
-                    .difficulty(request.getDifficulty())
-                    .url(url)
-                    .tags(request.getTags() != null ? request.getTags() : "")
-                    .isDuplicate(false)
-                    .success(true)
-                    .build();
-
-        } catch (Exception e) {
-            log.error("프로그래머스 문제 정보 처리 실패: {}", e.getMessage());
-            throw new RuntimeException("프로그래머스 문제 정보 처리에 실패했습니다", e);
-        }
+        return ProblemInfoResponse.builder()
+                .platform(Platform.PROGRAMMERS)
+                .platformProblemId(request.getPlatformProblemId())
+                .title(request.getTitle().trim())
+                .difficulty(request.getDifficulty())
+                .url(buildProgrammersUrl(request.getPlatformProblemId()))
+                .tags(request.getTags() != null ? request.getTags().trim() : "")
+                .isDuplicate(false)
+                .success(true)
+                .build();
     }
 
     @Override
@@ -49,39 +46,40 @@ public class ProgrammersCollector implements ProblemCollector {
 
         try {
             int id = Integer.parseInt(problemId.trim());
-            return id > 0 && id <= 999999;
+            return id >= MIN_PROBLEM_ID && id <= MAX_PROBLEM_ID;
         } catch (NumberFormatException e) {
             return false;
         }
     }
 
     private void validateRequest(ProblemInfoRequest request) {
-        if (request.getPlatformProblemId() == null || request.getPlatformProblemId().trim().isEmpty()) {
-            throw new IllegalArgumentException("문제번호를 입력해주세요.");
-        }
-
+        // 제목 검증
         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
-            throw new IllegalArgumentException("문제 제목을 입력해주세요.");
+            throw new ProblemValidationException(PROBLEM_TITLE_REQUIRED_ERROR);
         }
 
+        // 제목 길이 검증
+        if (request.getTitle().length() > MAX_TITLE_LENGTH) {
+            throw new ProblemValidationException(PROBLEM_TITLE_TOO_LONG_ERROR);
+        }
+
+        // 난이도 검증
         if (request.getDifficulty() == null || request.getDifficulty().trim().isEmpty()) {
-            throw new IllegalArgumentException("난이도를 선택해주세요.");
+            throw new ProblemValidationException(PROBLEM_DIFFICULTY_REQUIRED_ERROR);
         }
 
-        if (!PROGRAMMERS_LEVELS.contains(request.getDifficulty())) {
-            throw new IllegalArgumentException("유효하지 않은 난이도입니다: " + request.getDifficulty());
+        // 난이도 값이 유효한지 확인
+        if (!VALID_PROGRAMMERS_LEVELS.contains(request.getDifficulty())) {
+            throw new ProblemValidationException(PROBLEM_DIFFICULTY_INVALID_ERROR);
         }
 
-        if (!isValidProblem(request.getPlatformProblemId())) {
-            throw new IllegalArgumentException("유효하지 않은 문제번호입니다: " + request.getPlatformProblemId());
+        // 태그 검증
+        if (request.getTags() != null && request.getTags().length() > MAX_TAGS_LENGTH) {
+            throw new ProblemValidationException(PROBLEM_TAGS_TOO_LONG_ERROR);
         }
+    }
 
-        if (request.getTitle().length() > 100) {
-            throw new IllegalArgumentException("제목이 너무 깁니다. (최대 100자)");
-        }
-
-        if (request.getTags() != null && request.getTags().length() > 200) {
-            throw new IllegalArgumentException("태그가 너무 깁니다. (최대 200자)");
-        }
+    private String buildProgrammersUrl(String problemId) {
+        return "https://school.programmers.co.kr/learn/courses/30/lessons/" + problemId;
     }
 }
