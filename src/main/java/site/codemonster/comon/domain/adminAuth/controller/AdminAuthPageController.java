@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.adminAuth.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,14 +14,14 @@ import site.codemonster.comon.domain.adminAuth.dto.AdminLoginRequest;
 import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
 import site.codemonster.comon.domain.adminAuth.service.AdminService;
 
+import static site.codemonster.comon.domain.adminAuth.util.SessionConst.*;
+
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminAuthPageController {
 
     private final AdminService adminService;
-
-    public static final String ADMIN_SESSION_KEY = "adminMember";
 
     @Value("${admin.session.timeout:7200}")
     private int sessionTimeout;
@@ -43,7 +44,6 @@ public class AdminAuthPageController {
     public String login(@Valid @ModelAttribute("loginRequest") AdminLoginRequest request,
                         BindingResult bindingResult,
                         HttpSession session,
-                        RedirectAttributes redirectAttributes,
                         Model model) {
 
         if (bindingResult.hasErrors()) {
@@ -66,7 +66,11 @@ public class AdminAuthPageController {
     }
 
     @PostMapping("/logout")
-    public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
+    public String logout(HttpServletRequest request, RedirectAttributes redirectAttributes) {
+
+        HttpSession session = request.getSession(false); // 세션이 없다면 생성하지 않음
+        if (session == null) return "redirect:/admin/login";
+
         session.invalidate();
         redirectAttributes.addFlashAttribute("message", "로그아웃되었습니다.");
         return "redirect:/admin/login";

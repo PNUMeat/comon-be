@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import site.codemonster.comon.domain.adminAuth.controller.AdminAuthPageController;
+import site.codemonster.comon.domain.adminAuth.util.SessionConst;
 import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
 
 @Component
@@ -24,7 +24,7 @@ public class AdminPageInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        AdminMember adminMember = (AdminMember) session.getAttribute(AdminAuthPageController.ADMIN_SESSION_KEY);
+        AdminMember adminMember = (AdminMember) session.getAttribute(SessionConst.ADMIN_SESSION_KEY);
         if (adminMember == null) {
             redirectToLogin(response);
             return false;
