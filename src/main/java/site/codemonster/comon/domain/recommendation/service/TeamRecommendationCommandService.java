@@ -34,11 +34,11 @@ public class TeamRecommendationCommandService {
     private final TeamService teamService;
     private final ArticleService articleService;
     private final RecommendationHistoryService recommendationHistoryService;
-    private final TeamRecommendationRepository teamRecommendationRepository;
     private final PlatformRecommendationService platformRecommendationService;
     private final TeamRecommendationQueryService teamRecommendationQueryService;
     private final MemberService memberService;
     private final ProblemQueryService problemQueryService;
+    private final TeamRecommendationRepository teamRecommendationRepository;
     private final ConvertUtils convertUtils;
 
     @Value("${app.system-admin-id:1}")
@@ -63,7 +63,7 @@ public class TeamRecommendationCommandService {
 
     @Transactional
     public void saveTeamRecommendationSettings(TeamRecommendation teamRecommendation, TeamRecommendationRequest request) {
-        teamRecommendation.updateInitialSettings(request);
+        teamRecommendation.updateTeamRecommendationSettings(request);
         teamRecommendationRepository.save(teamRecommendation);
     }
 

@@ -31,7 +31,7 @@ public class AdminRecommendationApiController {
     @PostMapping("/settings")
     public ResponseEntity<?> saveTeamRecommendationSetting(@RequestBody @Valid TeamRecommendationRequest request) {
         Team team = teamService.getTeamByTeamId(request.teamId());
-        TeamRecommendation teamRecommendation = teamRecommendationCommandService.getOrCreateTeamRecommendation(team);
+        TeamRecommendation teamRecommendation = teamRecommendationQueryService.getTeamRecommendationByTeamOrThrow(team);
 
         teamRecommendationCommandService.saveTeamRecommendationSettings(teamRecommendation, request);
         platformRecommendationService.createPlatformRecommendations(teamRecommendation, request.platformSettings());
@@ -63,8 +63,7 @@ public class AdminRecommendationApiController {
 
     @PostMapping("/manual")
     public ResponseEntity<?> executeManualRecommendation(@RequestBody @Valid ManualRecommendationRequest request) {
-        ManualRecommendationResponse result =
-                teamRecommendationCommandService.executeManualRecommendation(request);
+        ManualRecommendationResponse result = teamRecommendationCommandService.executeManualRecommendation(request);
 
         return ResponseEntity.status(MANUAL_RECOMMENDATION_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)

@@ -11,6 +11,7 @@ import site.codemonster.comon.domain.recommendation.entity.PlatformRecommendatio
 import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
 import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationRepository;
 import site.codemonster.comon.domain.team.entity.Team;
+import site.codemonster.comon.global.error.recommendation.TeamRecommendationNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +23,10 @@ public class TeamRecommendationQueryService {
 
     public Optional<TeamRecommendation> getTeamRecommendationByTeam(Team team) {
         return teamRecommendationRepository.findTeamRecommendationByTeam(team);
+    }
+
+    public TeamRecommendation getTeamRecommendationByTeamOrThrow(Team team) {
+        return getTeamRecommendationByTeam(team).orElseThrow(TeamRecommendationNotFoundException::new);
     }
 
     public TeamRecommendationSettingsResponse getTeamRecommendationSettingsResponse(TeamRecommendation teamRecommendation) {
