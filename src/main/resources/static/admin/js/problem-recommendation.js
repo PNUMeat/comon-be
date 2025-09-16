@@ -879,7 +879,7 @@ function resetCurrentSettings() {
     showLoading('설정을 초기화하는 중...');
 
     fetch(`/admin/recommendations/settings/${currentTeamId}`, {
-        method: 'DELETE'
+        method: 'PUT'
     })
         .then(response => {
             if (!response.ok) {

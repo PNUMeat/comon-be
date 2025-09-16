@@ -68,6 +68,13 @@ public class TeamRecommendation extends TimeStamp {
         this.setRecommendationDays(request.recommendDays());
     }
 
+    public void reset() {
+        this.autoRecommendationEnabled = false;
+        this.recommendationAt = 9;
+        this.recommendDays = 0;
+        this.totalProblemCount = 0;
+    }
+
     private Integer calculateTotalProblemCount(List<TeamRecommendationRequest.PlatformRecommendationSetting> settings) {
         return settings.stream()
                 .filter(TeamRecommendationRequest.PlatformRecommendationSetting::enabled)
