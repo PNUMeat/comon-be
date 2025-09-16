@@ -34,7 +34,7 @@ public class AdminRecommendationApiController {
         TeamRecommendation teamRecommendation = teamRecommendationCommandService.getOrCreateTeamRecommendation(team);
 
         teamRecommendationCommandService.saveTeamRecommendationSettings(teamRecommendation, request);
-        platformRecommendationService.savePlatformRecommendations(teamRecommendation, request.platformSettings());
+        platformRecommendationService.createPlatformRecommendations(teamRecommendation, request.platformSettings());
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -54,7 +54,6 @@ public class AdminRecommendationApiController {
     @PutMapping("/settings/{teamId}")
     public ResponseEntity<?> resetTeamRecommendationSetting(@PathVariable Long teamId) {
         Team team = teamService.getTeamByTeamId(teamId);
-
         teamRecommendationCommandService.resetTeamRecommendationSettings(team);
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_RESET_SUCCESS.getStatusCode())

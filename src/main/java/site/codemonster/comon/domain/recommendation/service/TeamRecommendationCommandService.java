@@ -45,6 +45,23 @@ public class TeamRecommendationCommandService {
     private Long adminId;
 
     @Transactional
+    public TeamRecommendation createDefaultTeamRecommendation(Team team) {
+        TeamRecommendation newRecommendation = TeamRecommendation.builder()
+                .team(team)
+                .autoRecommendationEnabled(false)
+                .recommendationAt(9)
+                .totalProblemCount(0)
+                .build();
+        return teamRecommendationRepository.save(newRecommendation);
+    }
+
+    @Transactional
+    public TeamRecommendation getOrCreateTeamRecommendation(Team team) {
+        return teamRecommendationQueryService.getTeamRecommendationByTeam(team)
+                .orElseGet(() -> createDefaultTeamRecommendation(team));
+    }
+
+    @Transactional
     public void saveTeamRecommendationSettings(TeamRecommendation teamRecommendation, TeamRecommendationRequest request) {
         teamRecommendation.updateInitialSettings(request);
         teamRecommendationRepository.save(teamRecommendation);
@@ -98,27 +115,6 @@ public class TeamRecommendationCommandService {
 
         String responseMessage = ResponseUtils.createRecommendationResponseMessage(totalRecommended, failMessageBuilder);
         return ManualRecommendationResponse.of(totalRecommended, createdArticleTitles, responseMessage);
-    }
-
-    @Transactional
-    public TeamRecommendation getOrCreateTeamRecommendation(Team team) {
-        return teamRecommendationQueryService.getTeamRecommendationByTeam(team)
-                .orElseGet(() -> createTeamRecommendation(team));
-    }
-
-    @Transactional
-    public TeamRecommendation createTeamRecommendation(Team team) {
-        TeamRecommendation newRecommendation = createDefaultTeamRecommendation(team);
-        return teamRecommendationRepository.save(newRecommendation);
-    }
-
-    private TeamRecommendation createDefaultTeamRecommendation(Team team) {
-        return TeamRecommendation.builder()
-                .team(team)
-                .autoRecommendationEnabled(false)
-                .recommendationAt(9)
-                .totalProblemCount(0)
-                .build();
     }
 
     public List<Problem> recommendProblemsForTeam(Team team, List<PlatformRecommendation> platformRecommendations) {
