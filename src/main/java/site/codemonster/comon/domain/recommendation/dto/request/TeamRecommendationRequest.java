@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import site.codemonster.comon.domain.problem.entity.ProblemStep;
 import site.codemonster.comon.domain.problem.enums.Platform;
 
 import java.time.DayOfWeek;
@@ -17,7 +18,7 @@ public record TeamRecommendationRequest(
         Long teamId,
 
         @NotNull(message = "플랫폼 설정은 필수입니다.")
-        @Size(min = 1, message = "최소 하나의 플랫폼 설정이 필요합니다.")
+        @Size(min = 1, max = 3, message = "최소 하나의 플랫폼 설정이 필요합니다.")
         @Valid
         List<PlatformRecommendationSetting> platformSettings,
 
@@ -34,9 +35,8 @@ public record TeamRecommendationRequest(
             @NotNull(message = "플랫폼은 필수입니다.")
             Platform platform,
 
-            List<String> difficulties,
-
-            List<String> tags,
+            @NotNull(message = "ProblemStep은 필수입니다.")
+            ProblemStep problemStep,
 
             @NotNull(message = "문제 개수는 필수입니다.")
             @Min(value = 1, message = "문제 개수는 1개 이상이어야 합니다.")

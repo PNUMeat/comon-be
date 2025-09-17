@@ -11,6 +11,7 @@
 <body>
 <div class="container-fluid">
     <div class="row">
+        <!-- 사이드바 -->
         <div class="col-md-3 col-lg-2 px-0">
             <div class="sidebar">
                 <a href="/admin/problems" class="brand-logo">
@@ -46,6 +47,7 @@
             </div>
         </div>
 
+        <!-- 메인 콘텐츠 -->
         <div class="col-md-9 col-lg-10">
             <div class="main-content p-4">
                 <div class="mb-4">
@@ -55,6 +57,7 @@
                     </h1>
                 </div>
 
+                <!-- 팀 선택 -->
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0"><i class="fas fa-users me-2"></i>팀 선택</h5>
@@ -77,6 +80,7 @@
                     </div>
                 </div>
 
+                <!-- 플랫폼별 추천 설정 -->
                 <div class="card mb-4" id="platform-settings-card" style="display: none;">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>플랫폼별 추천 설정</h5>
@@ -84,8 +88,9 @@
                     <div class="card-body">
                         <div class="alert alert-info mb-3">
                             <i class="fas fa-info-circle me-2"></i>
-                            <strong>다중 선택 안내:</strong> 난이도와 태그는 클릭으로 여러 개를 선택할 수 있습니다.
+                            <strong>안내:</strong> 각 플랫폼별로 추천할 ProblemStep과 문제 수를 설정하세요.
                         </div>
+
                         <div class="row g-3">
                             <div class="col-md-4" th:each="platform : ${platforms}">
                                 <div class="platform-card text-center p-3"
@@ -106,81 +111,68 @@
                             </div>
                         </div>
 
+                        <!-- 상세 설정 -->
                         <div class="platform-detail-settings mt-4" id="platform-details" style="display: none;">
+
+                            <!-- 백준 -->
                             <div class="platform-setting" id="baekjoon-setting" style="display: none;">
                                 <h6 class="text-primary mb-3"><i class="fas fa-trophy me-2"></i>백준 추천 설정</h6>
                                 <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label">난이도 <small class="text-primary">(클릭으로 다중 선택)</small></label>
-                                        <div class="custom-multi-select" id="baekjoon-difficulty-container">
-                                            <div class="loading-text text-muted">로딩 중...</div>
-                                        </div>
-                                        <small class="form-text text-muted">선택한 난이도 중 하나라도 해당하는 문제를 추천합니다</small>
+                                    <div class="col-md-6">
+                                        <label class="form-label">ProblemStep</label>
+                                        <select class="form-select" id="baekjoon-step">
+                                            <option value="STEP1">STEP1</option>
+                                            <option value="STEP2">STEP2</option>
+                                            <option value="STEP3">STEP3</option>
+                                            <option value="STEP4">STEP4</option>
+                                        </select>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">태그 <small class="text-primary">(클릭으로 다중 선택)</small></label>
-                                        <div class="custom-multi-select" id="baekjoon-tags-container">
-                                            <div class="loading-text text-muted">로딩 중...</div>
-                                        </div>
-                                        <small class="form-text text-muted">선택한 태그 중 하나라도 해당하는 문제를 추천합니다</small>
-                                    </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label class="form-label">문제 수</label>
                                         <input type="number" class="form-control" id="baekjoon-count"
                                                value="2" min="1" max="10">
-                                        <small class="form-text text-muted">1-10개까지 선택 가능</small>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- 프로그래머스 -->
                             <div class="platform-setting" id="programmers-setting" style="display: none;">
                                 <h6 class="text-success mb-3"><i class="fas fa-code me-2"></i>프로그래머스 추천 설정</h6>
                                 <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label">난이도 <small class="text-primary">(클릭으로 다중 선택)</small></label>
-                                        <div class="custom-multi-select" id="programmers-difficulty-container">
-                                            <div class="loading-text text-muted">로딩 중...</div>
-                                        </div>
-                                        <small class="form-text text-muted">선택한 난이도 중 하나라도 해당하는 문제를 추천합니다</small>
+                                    <div class="col-md-6">
+                                        <label class="form-label">ProblemStep</label>
+                                        <select class="form-select" id="programmers-step">
+                                            <option value="STEP1">STEP1</option>
+                                            <option value="STEP2">STEP2</option>
+                                            <option value="STEP3">STEP3</option>
+                                            <option value="STEP4">STEP4</option>
+                                        </select>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">태그 <small class="text-primary">(클릭으로 다중 선택)</small></label>
-                                        <div class="custom-multi-select" id="programmers-tags-container">
-                                            <div class="loading-text text-muted">로딩 중...</div>
-                                        </div>
-                                        <small class="form-text text-muted">선택한 태그 중 하나라도 해당하는 문제를 추천합니다</small>
-                                    </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label class="form-label">문제 수</label>
                                         <input type="number" class="form-control" id="programmers-count"
                                                value="2" min="1" max="10">
-                                        <small class="form-text text-muted">1-10개까지 선택 가능</small>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- 리트코드 -->
                             <div class="platform-setting" id="leetcode-setting" style="display: none;">
                                 <h6 class="text-warning mb-3"><i class="fas fa-bolt me-2"></i>리트코드 추천 설정</h6>
                                 <div class="row g-3">
-                                    <div class="col-md-4">
-                                        <label class="form-label">난이도 <small class="text-primary">(클릭으로 다중 선택)</small></label>
-                                        <div class="custom-multi-select" id="leetcode-difficulty-container">
-                                            <div class="loading-text text-muted">로딩 중...</div>
-                                        </div>
-                                        <small class="form-text text-muted">선택한 난이도 중 하나라도 해당하는 문제를 추천합니다</small>
+                                    <div class="col-md-6">
+                                        <label class="form-label">ProblemStep</label>
+                                        <select class="form-select" id="leetcode-step">
+                                            <option value="STEP1">STEP1</option>
+                                            <option value="STEP2">STEP2</option>
+                                            <option value="STEP3">STEP3</option>
+                                            <option value="STEP4">STEP4</option>
+                                        </select>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">태그 <small class="text-primary">(클릭으로 다중 선택)</small></label>
-                                        <div class="custom-multi-select" id="leetcode-tags-container">
-                                            <div class="loading-text text-muted">로딩 중...</div>
-                                        </div>
-                                        <small class="form-text text-muted">선택한 태그 중 하나라도 해당하는 문제를 추천합니다</small>
-                                    </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label class="form-label">문제 수</label>
                                         <input type="number" class="form-control" id="leetcode-count"
                                                value="2" min="1" max="10">
-                                        <small class="form-text text-muted">1-10개까지 선택 가능</small>
                                     </div>
                                 </div>
                             </div>
@@ -188,6 +180,7 @@
                     </div>
                 </div>
 
+                <!-- 자동 추천 스케줄 -->
                 <div class="card mb-4" id="schedule-settings-card" style="display: none;">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0"><i class="fas fa-clock me-2"></i>자동 추천 스케줄</h5>
@@ -249,6 +242,7 @@
                     </div>
                 </div>
 
+                <!-- 저장 버튼 -->
                 <div class="text-center mt-4 mb-4" id="save-buttons" style="display: none;">
                     <button type="button" class="btn btn-register-all me-3"
                             onclick="saveSettings()" id="save-btn">
@@ -260,6 +254,7 @@
                     </button>
                 </div>
 
+                <!-- 수동 추천 -->
                 <div class="card mb-4" id="manual-recommendation-card" style="display: none;">
                     <div class="card-header bg-warning text-dark">
                         <h5 class="mb-0"><i class="fas fa-hand-point-right me-2"></i>수동 추천</h5>
@@ -285,6 +280,7 @@
                     </div>
                 </div>
 
+                <!-- 가이드 -->
                 <div class="card border-info">
                     <div class="card-header bg-info text-white">
                         <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>추천 설정 가이드</h6>
@@ -292,8 +288,7 @@
                     <div class="card-body">
                         <ul class="mb-0">
                             <li><strong>팀 선택:</strong> 먼저 추천을 설정할 팀을 선택하세요</li>
-                            <li><strong>플랫폼 설정:</strong> 각 플랫폼별로 난이도, 태그, 문제 수를 설정 (다중 선택 지원)</li>
-                            <li><strong>다중 선택:</strong> 난이도와 태그는 클릭만으로 여러 개 선택 가능</li>
+                            <li><strong>플랫폼 설정:</strong> 각 플랫폼별로 ProblemStep과 문제 수를 설정</li>
                             <li><strong>자동 추천:</strong> 원하는 요일과 시간에 자동으로 문제 추천</li>
                             <li><strong>수동 추천:</strong> 특정 날짜에 즉시 문제 추천 실행</li>
                             <li><strong>중복 방지:</strong> 이미 추천된 문제는 다시 추천되지 않습니다</li>

@@ -32,6 +32,7 @@ public enum ErrorCode {
     EXCEED_MAX_MEMBERS(HttpStatus.BAD_REQUEST, 400, "현재 팀의 최대 인원을 넘었습니다."),
     ALREADY_TEAM_MANAGER(HttpStatus.BAD_REQUEST, 400, "이미 팀장 입니다."),
     NOT_TEAM_OWNER(HttpStatus.BAD_REQUEST,400,"팀의 방장이 아닙니다."),
+    TEAM_MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND,404,"팀에 팀장이 존재하지 않습니다."),
 
     //TEAM RECRUIT
     TEAM_RECRUIT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, 404,"팀 모집글이 존재하지 않습니다."),

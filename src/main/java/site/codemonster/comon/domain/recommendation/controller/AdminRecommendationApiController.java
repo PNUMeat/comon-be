@@ -27,18 +27,18 @@ public class AdminRecommendationApiController {
     private final PlatformRecommendationService platformRecommendationService;
     private final TeamService teamService;
 
-    @PostMapping("/settings")
-    public ResponseEntity<?> saveTeamRecommendationSetting(@RequestBody @Valid TeamRecommendationRequest request) {
-        Team team = teamService.getTeamByTeamId(request.teamId());
-        TeamRecommendation teamRecommendation = teamRecommendationService.getOrCreateTeamRecommendation(team);
-
-        teamRecommendationService.saveRecommendationSettings(teamRecommendation, request);
-        platformRecommendationService.savePlatformRecommendations(teamRecommendation, request.platformSettings());
-
-        return ResponseEntity.status(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getStatusCode())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithMessage(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getMessage()));
-    }
+//    @PostMapping("/settings")
+//    public ResponseEntity<?> saveTeamRecommendationSetting(@RequestBody @Valid TeamRecommendationRequest request) {
+//        Team team = teamService.getTeamByTeamId(request.teamId());
+//        TeamRecommendation teamRecommendation = teamRecommendationService.getOrCreateTeamRecommendation(team);
+//
+//        teamRecommendationService.saveRecommendationSettings(teamRecommendation, request);
+//        platformRecommendationService.savePlatformRecommendations(teamRecommendation, request.platformSettings());
+//
+//        return ResponseEntity.status(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getStatusCode())
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(ApiResponse.successResponseWithMessage(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getMessage()));
+//    }
 
     @GetMapping("/settings/{teamId}")
     public ResponseEntity<?> getTeamRecommendationSetting(@PathVariable Long teamId) {
