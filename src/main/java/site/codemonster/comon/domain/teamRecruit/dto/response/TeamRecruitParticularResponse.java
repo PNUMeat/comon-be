@@ -16,7 +16,6 @@ public record TeamRecruitParticularResponse(
         String teamRecruitTitle,
         String teamRecruitBody,
         String chatUrl,
-        String imageUrl,
         Boolean isRecruiting,
         String memberNickName,
         Boolean isAuthor,
@@ -43,11 +42,6 @@ public record TeamRecruitParticularResponse(
             }
         }
 
-        String imageUrl = null;
-        if(!teamRecruit.getImages().isEmpty()){
-            imageUrl = teamRecruit.getImages().get(0).getImageUrl();
-        }
-
         Long teamId = null;
         if(teamRecruit.getTeam() != null){
             teamId = teamRecruit.getTeam().getTeamId();
@@ -58,7 +52,6 @@ public record TeamRecruitParticularResponse(
                 teamRecruit.getTeamRecruitTitle(),
                 teamRecruit.getTeamRecruitBody(),
                 teamRecruit.getChatUrl(),
-                imageUrl,
                 teamRecruit.isRecruiting(),
                 teamRecruit.getMember().getMemberName(),
                 teamRecruit.isAuthor(member),
