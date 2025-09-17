@@ -11,8 +11,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static site.codemonster.comon.global.images.enums.ImageConstant.DEFAULT_TEAM_IMAGE_URL;
+import site.codemonster.comon.global.images.enums.ImageConstant;
 
 @Entity
 @Getter
@@ -23,7 +22,7 @@ public class Team extends TimeStamp {
 
     private String teamName;
 
-    private String teamIconUrl = DEFAULT_TEAM_IMAGE_URL;
+    private String teamIconUrl = ImageConstant.DEFAULT_TEAM.getObjectKey();
 
     private Topic teamTopic;
 

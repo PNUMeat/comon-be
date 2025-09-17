@@ -1,6 +1,16 @@
 package site.codemonster.comon.global.images.enums;
 
-public class ImageConstant {
-    public static final String DEFAULT_MEMBER_PROFILE_IMAGE_URL = "https://pnu-comon-s3-bucket.s3.ap-northeast-2.amazonaws.com/profile/default-image.png";
-    public static final String DEFAULT_TEAM_IMAGE_URL = "https://pnu-comon-s3-bucket.s3.ap-northeast-2.amazonaws.com/team/default-image.png";
+public enum ImageConstant {
+    DEFAULT_MEMBER_PROFILE("profile/default-image.png"),
+    DEFAULT_TEAM("team/default-image.png");
+
+    private final String objectKey;
+
+    ImageConstant(String objectKey) {
+        this.objectKey = objectKey;
+    }
+
+    public String getObjectKey() {
+        return objectKey;
+    }
 }
