@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-import static site.codemonster.comon.global.images.enums.ImageConstant.DEFAULT_MEMBER_PROFILE_IMAGE_URL;
+import site.codemonster.comon.global.images.enums.ImageConstant;
 
 @Entity
 @Getter
@@ -33,7 +32,7 @@ public class Member extends TimeStamp {
 
     private String memberName;
 
-    private String imageUrl = DEFAULT_MEMBER_PROFILE_IMAGE_URL;
+    private String imageUrl = ImageConstant.DEFAULT_MEMBER_PROFILE.getObjectKey();
 
     private String description;
 
@@ -74,6 +73,10 @@ public class Member extends TimeStamp {
         if (imageUrl != null) {
             this.imageUrl = imageUrl;
         }
+    }
+
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public boolean isMyUuid(String uuid){
