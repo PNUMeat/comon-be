@@ -13,7 +13,8 @@ import site.codemonster.comon.domain.recommendation.entity.PlatformRecommendatio
 import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
 import site.codemonster.comon.domain.recommendation.service.PlatformRecommendationService;
 import site.codemonster.comon.domain.recommendation.service.RecommendationHistoryService;
-import site.codemonster.comon.domain.recommendation.service.TeamRecommendationService;
+import site.codemonster.comon.domain.recommendation.service.TeamRecommendationCommandService;
+import site.codemonster.comon.domain.recommendation.service.TeamRecommendationQueryService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
@@ -27,7 +28,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class TeamRecommendationScheduler {
 
-    private final TeamRecommendationService teamRecommendationService;
+    private final TeamRecommendationCommandService teamRecommendationCommandService;
+    private final TeamRecommendationQueryService teamRecommendationQueryService;
     private final PlatformRecommendationService platformRecommendationService;
     private final ArticleService articleService;
     private final RecommendationHistoryService recommendationHistoryService;
@@ -45,7 +47,7 @@ public class TeamRecommendationScheduler {
         LocalDate today = now.toLocalDate();
 
         List<TeamRecommendation> activeTeamRecommendations =
-                teamRecommendationService.getSchedulingActiveTeamRecommendations();
+                teamRecommendationQueryService.getSchedulingActiveTeamRecommendations();
 
         log.info("자동 추천 실행 - 시간: {}시, 요일: {}, 대상 팀: {}개",
                 currentHour, currentDayOfWeek.name(), activeTeamRecommendations.size());
@@ -92,7 +94,7 @@ public class TeamRecommendationScheduler {
             List<PlatformRecommendation> platformRecommendations =
                     platformRecommendationService.findByTeamRecommendation(teamRecommendation);
 
-            List<Problem> recommendedProblems = teamRecommendationService.recommendProblemsForTeam(
+            List<Problem> recommendedProblems = teamRecommendationCommandService.recommendProblemsForTeam(
                     teamRecommendation.getTeam(), platformRecommendations);
 
             if (recommendedProblems.isEmpty()) {

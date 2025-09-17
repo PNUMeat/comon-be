@@ -1,6 +1,5 @@
 package site.codemonster.comon.domain.recommendation.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +14,6 @@ import site.codemonster.comon.domain.problem.service.ProblemQueryService;
 import site.codemonster.comon.domain.recommendation.dto.request.ManualRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.request.TeamRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.response.ManualRecommendationResponse;
-import site.codemonster.comon.domain.recommendation.dto.response.TeamRecommendationSettingsResponse;
 import site.codemonster.comon.domain.recommendation.entity.PlatformRecommendation;
 import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
 import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationRepository;
@@ -25,6 +23,7 @@ import site.codemonster.comon.domain.team.service.TeamService;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import site.codemonster.comon.global.util.convertUtils.ConvertUtils;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationNotFoundException;
 import site.codemonster.comon.global.util.convertUtils.JsonListConvertUtils;
 import site.codemonster.comon.global.util.responseUtils.ResponseUtils;
@@ -32,16 +31,17 @@ import site.codemonster.comon.global.util.responseUtils.ResponseUtils;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
-public class TeamRecommendationService {
+public class TeamRecommendationCommandService {
 
     private final TeamService teamService;
     private final ArticleService articleService;
     private final RecommendationHistoryService recommendationHistoryService;
-    private final TeamRecommendationRepository teamRecommendationRepository;
     private final PlatformRecommendationService platformRecommendationService;
+    private final TeamRecommendationQueryService teamRecommendationQueryService;
     private final MemberService memberService;
     private final ProblemQueryService problemQueryService;
+    private final TeamRecommendationRepository teamRecommendationRepository;
+    private final ConvertUtils convertUtils;
     private final ObjectMapper objectMapper;
     private final JsonListConvertUtils convertUtils;
 
@@ -49,27 +49,42 @@ public class TeamRecommendationService {
     private Long adminId;
 
     @Transactional
-    public void saveRecommendationSettings(TeamRecommendation teamRecommendation, TeamRecommendationRequest request) {
-        teamRecommendation.updateInitialSettings(request);
-        teamRecommendationRepository.save(teamRecommendation);
-    }
-
-    public TeamRecommendationSettingsResponse getRecommendationSettings(TeamRecommendation teamRecommendation) {
-        List<PlatformRecommendation> platformRecommendations =
-                platformRecommendationService.findByTeamRecommendation(teamRecommendation);
-        return TeamRecommendationSettingsResponse.of(teamRecommendation, platformRecommendations, objectMapper);
+    public TeamRecommendation createDefaultTeamRecommendation(Team team) {
+        TeamRecommendation newRecommendation = TeamRecommendation.builder()
+                .team(team)
+                .autoRecommendationEnabled(false)
+                .recommendationAt(9)
+                .totalProblemCount(0)
+                .build();
+        return teamRecommendationRepository.save(newRecommendation);
     }
 
     @Transactional
-    public void resetRecommendationSettings(Team team) {
-        teamRecommendationRepository.findByTeam(team)
-                .ifPresent(teamRecommendation -> {
-                    platformRecommendationService.deleteByTeamRecommendation(teamRecommendation);
-                    teamRecommendationRepository.delete(teamRecommendation);
-                });
+    public TeamRecommendation getOrCreateTeamRecommendation(Team team) {
+        return teamRecommendationQueryService.getTeamRecommendationByTeam(team)
+                .orElseGet(() -> createDefaultTeamRecommendation(team));
+    }
 
-        TeamRecommendation defaultTeamRecommendation = createDefaultTeamRecommendation(team);
-        teamRecommendationRepository.save(defaultTeamRecommendation);
+    @Transactional
+    public void saveTeamRecommendationSettings(TeamRecommendation teamRecommendation, TeamRecommendationRequest request) {
+        teamRecommendation.updateTeamRecommendationSettings(request);
+        teamRecommendationRepository.save(teamRecommendation);
+    }
+
+    @Transactional
+    public void resetTeamRecommendationSettings(Team team) {
+        Optional<TeamRecommendation> optionalTeamRecommendation = teamRecommendationQueryService.getTeamRecommendationByTeam(team);
+
+        if (optionalTeamRecommendation.isPresent()) {
+            TeamRecommendation teamRecommendation = optionalTeamRecommendation.get();
+            platformRecommendationService.deleteByTeamRecommendation(teamRecommendation);
+
+            teamRecommendation.reset();
+            teamRecommendationRepository.save(teamRecommendation);
+        } else {
+            TeamRecommendation defaultTeamRecommendation = createDefaultTeamRecommendation(team);
+            teamRecommendationRepository.save(defaultTeamRecommendation);
+        }
     }
 
     @Transactional
@@ -77,7 +92,7 @@ public class TeamRecommendationService {
         Team team = teamService.getTeamByTeamId(request.teamId());
         Member systemAdmin = memberService.getMemberById(adminId);
 
-        TeamRecommendation teamRecommendation = getTeamRecommendationByTeam(team);
+        TeamRecommendation teamRecommendation = getOrCreateTeamRecommendation(team);
         List<PlatformRecommendation> platformRecommendations = platformRecommendationService.findByTeamRecommendation(teamRecommendation);
 
         int totalRecommended = 0;
@@ -104,29 +119,6 @@ public class TeamRecommendationService {
 
         String responseMessage = ResponseUtils.createRecommendationResponseMessage(totalRecommended, failMessageBuilder);
         return ManualRecommendationResponse.of(totalRecommended, createdArticleTitles, responseMessage);
-    }
-
-    public TeamRecommendation getTeamRecommendationByTeam(Team team) {
-        return teamRecommendationRepository.findByTeam(team)
-                .orElseThrow(TeamRecommendationNotFoundException::new);
-    }
-
-    @Transactional
-    public TeamRecommendation getOrCreateTeamRecommendation(Team team) {
-        return teamRecommendationRepository.findByTeam(team)
-                .orElseGet(() -> {
-                    TeamRecommendation newRecommendation = createDefaultTeamRecommendation(team);
-                    return teamRecommendationRepository.save(newRecommendation);
-                });
-    }
-
-    private TeamRecommendation createDefaultTeamRecommendation(Team team) {
-        return TeamRecommendation.builder()
-                .team(team)
-                .autoRecommendationEnabled(false)
-                .recommendationAt(9)
-                .totalProblemCount(0)
-                .build();
     }
 
     public List<Problem> recommendProblemsForTeam(Team team, List<PlatformRecommendation> platformRecommendations) {
@@ -199,9 +191,5 @@ public class TeamRecommendationService {
         return filteredProblems.stream()
                 .limit(count)
                 .collect(Collectors.toList());
-    }
-
-    public List<TeamRecommendation> getSchedulingActiveTeamRecommendations() {
-        return teamRecommendationRepository.findByAutoRecommendationEnabledTrue();
     }
 }

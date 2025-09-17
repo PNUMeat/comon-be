@@ -12,4 +12,6 @@ public interface TeamRecommendationRepository extends JpaRepository<TeamRecommen
     Optional<TeamRecommendation> findByTeam(Team team);
 
     List<TeamRecommendation> findByAutoRecommendationEnabledTrue();
+
+    Optional<TeamRecommendation> findTeamRecommendationByTeam(Team team);
 }
