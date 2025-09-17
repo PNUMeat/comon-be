@@ -61,23 +61,6 @@ public class MemberService {
         return member;
     }
 
-    public MemberProfileResponse getMemberProfileResponse(Member member) {
-        return new MemberProfileResponse(
-                member.getMemberName(),
-                imageFieldConvertUtils.convertObjectKeyToImageUrl(member.getImageUrl()),
-                member.getDescription(),
-                member.getUuid()
-        );
-    }
-
-    public MemberInfoResponse getMemberInfoResponse(Member member, List<TeamAbstractResponse> teamAbstractResponse) {
-        return new MemberInfoResponse(
-                member.getMemberName(),
-                imageFieldConvertUtils.convertObjectKeyToImageUrl(member.getImageUrl()),
-                teamAbstractResponse
-        );
-    }
-
     public Member getMemberByUUID(String uuid){
         return memberRepository.findByUuid(uuid)
                 .orElseThrow(MemberNotFoundException::new);

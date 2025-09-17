@@ -2,7 +2,6 @@ package site.codemonster.comon.domain.team.service;
 
 import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
-import site.codemonster.comon.domain.auth.dto.response.MemberProfileResponse;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.domain.team.dto.request.TeamInfoEditRequest;
