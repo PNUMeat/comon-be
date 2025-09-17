@@ -6,7 +6,10 @@ import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.problem.collector.ProblemCollector;
 import site.codemonster.comon.domain.problem.collector.ProblemCollectorFactory;
 import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
+import site.codemonster.comon.domain.problem.dto.request.ProblemRequest;
+import site.codemonster.comon.domain.problem.dto.request.ProblemUpdateRequest;
 import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
+import site.codemonster.comon.domain.problem.dto.response.ProblemResponse;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.repository.ProblemRepository;
@@ -14,8 +17,6 @@ import site.codemonster.comon.global.error.problem.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import static site.codemonster.comon.global.error.ErrorCode.*;
 
 @Service
@@ -27,26 +28,18 @@ public class ProblemCommandService {
     private final ProblemCollectorFactory collectorFactory;
     private final ProblemQueryService problemQueryService;
 
-    public ProblemInfoResponse checkProblem(String problemId, Platform platform) {
-        if (problemQueryService.checkDuplicateProblem(platform, problemId)) {
-            return createDuplicateResponse(platform, problemId, problemId);
+    public ProblemInfoResponse checkProblem(ProblemRequest problemRequest, Platform platform) {
+        if (platform == Platform.PROGRAMMERS && problemRequest.title().isBlank())
+            throw new ProblemInvalidInputException();
+
+        if (problemQueryService.checkDuplicateProblem(platform, problemRequest.platformProblemId())) {
+            return createDuplicateResponse(platform, problemRequest, null);
         }
 
-        return collectProblemInfo(problemId, platform);
+        return collectProblemInfo(problemRequest, platform);
     }
 
-    public ProblemInfoResponse checkProblem(ProblemInfoRequest request) {
-        Platform platform = request.getPlatform();
-        String problemId = request.getPlatformProblemId();
-
-        if (problemQueryService.checkDuplicateProblem(platform, problemId)) {
-            return createDuplicateResponse(platform, problemId, null);
-        }
-
-        return collectProblemInfoFromRequest(request);
-    }
-
-    public List<Problem> registerProblems(List<ProblemInfoRequest> requests) {
+    public List<ProblemResponse> registerProblems(List<ProblemInfoRequest> requests) {
         if (requests == null || requests.isEmpty()) {
             throw new ProblemBatchRegisterException(PROBLEM_BATCH_REGISTER_EMPTY_ERROR);
         }
@@ -58,18 +51,14 @@ public class ProblemCommandService {
             savedProblems.add(savedProblem);
         }
 
-        return savedProblems;
+        return savedProblems.stream().map(ProblemResponse::new).toList();
     }
 
-    public Problem updateProblem(Long problemId, Map<String, String> updateData) {
-        if (updateData == null || updateData.isEmpty()) {
-            throw new ProblemValidationException(PROBLEM_UPDATE_DATA_EMPTY_ERROR);
-        }
+    public void updateProblem(Long problemId, ProblemUpdateRequest problemUpdateRequest) {
 
         Problem problem = problemQueryService.findProblemById(problemId);
-        updateProblemFields(problem, updateData);
 
-        return problemRepository.save(problem);
+        problem.updateProblem(problemUpdateRequest);
     }
 
     public void deleteProblem(Long problemId) {
@@ -77,13 +66,26 @@ public class ProblemCommandService {
         problemRepository.delete(problem);
     }
 
-    private ProblemInfoResponse collectProblemInfo(String problemInput, Platform platform) {
+    private ProblemInfoResponse collectProblemInfo(ProblemRequest problemRequest, Platform platform) {
         ProblemCollector collector = collectorFactory.getCollector(platform);
 
-        ProblemInfoRequest collectorRequest = ProblemInfoRequest.builder()
-                .platform(platform)
-                .platformProblemId(problemInput)
-                .build();
+        ProblemInfoRequest collectorRequest;
+
+        if (platform == Platform.PROGRAMMERS) {
+            collectorRequest = ProblemInfoRequest.builder()
+                    .platform(platform)
+                    .title(problemRequest.title())
+                    .platformProblemId(problemRequest.platformProblemId())
+                    .problemStep(problemRequest.problemStep())
+                    .build();
+        }
+        else {
+            collectorRequest = ProblemInfoRequest.builder()
+                    .platform(platform)
+                    .platformProblemId(problemRequest.platformProblemId())
+                    .problemStep(problemRequest.problemStep())
+                    .build();
+        }
 
         try {
             return collector.collectProblemInfo(collectorRequest);
@@ -92,34 +94,18 @@ public class ProblemCommandService {
         }
     }
 
-    private ProblemInfoResponse collectProblemInfoFromRequest(ProblemInfoRequest request) {
-        ProblemCollector collector = collectorFactory.getCollector(request.getPlatform());
-
-        if (!collector.isValidProblem(request.getPlatformProblemId())) {
-            throw new ProblemInvalidInputException();
-        }
-
-        try {
-            return collector.collectProblemInfo(request);
-        } catch (Exception e) {
-            throw new ProblemCollectionException();
-        }
-    }
-
-    private ProblemInfoResponse createDuplicateResponse(Platform platform, String problemId, String originalInput) {
+    private ProblemInfoResponse createDuplicateResponse(Platform platform, ProblemRequest problemRequest, String originalInput) {
         String url = switch (platform) {
-            case BAEKJOON -> "https://www.acmicpc.net/problem/" + problemId;
-            case PROGRAMMERS -> "https://school.programmers.co.kr/learn/courses/30/lessons/" + problemId;
+            case BAEKJOON -> "https://www.acmicpc.net/problem/" + problemRequest.platformProblemId();
+            case PROGRAMMERS -> "https://school.programmers.co.kr/learn/courses/30/lessons/" + problemRequest.platformProblemId();
             case LEETCODE -> originalInput;
         };
 
         return ProblemInfoResponse.builder()
                 .platform(platform)
-                .platformProblemId(problemId)
+                .platformProblemId(problemRequest.platformProblemId())
                 .title("(중복된 문제)")
-                .difficulty("")
                 .url(url)
-                .tags("")
                 .isDuplicate(true)
                 .success(true)
                 .build();
@@ -128,14 +114,7 @@ public class ProblemCommandService {
     private Problem saveProblem(ProblemInfoRequest request) {
         validateProblemRequest(request);
 
-        Problem problem = Problem.builder()
-                .platform(request.getPlatform())
-                .platformProblemId(request.getPlatformProblemId())
-                .title(request.getTitle())
-                .difficulty(request.getDifficulty())
-                .url(request.getUrl())
-                .tags(request.getTags())
-                .build();
+        Problem problem = new Problem(request);
 
         return problemRepository.save(problem);
     }
@@ -150,22 +129,5 @@ public class ProblemCommandService {
         if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
             throw new ProblemValidationException(PROBLEM_TITLE_REQUIRED_ERROR);
         }
-    }
-
-    private void updateProblemFields(Problem problem, Map<String, String> updateData) {
-        updateData.forEach((key, value) -> {
-            switch (key) {
-                case "title" -> {
-                    if (value == null || value.trim().isEmpty()) {
-                        throw new ProblemValidationException(PROBLEM_TITLE_REQUIRED_ERROR);
-                    }
-                    problem.setTitle(value.trim());
-                }
-                case "difficulty" -> problem.setDifficulty(value != null ? value.trim() : null);
-                case "tags" -> problem.setTags(value != null ? value.trim() : null);
-                case "url" -> problem.setUrl(value != null ? value.trim() : null);
-                default -> throw new ProblemValidationException(PROBLEM_UNSUPPORTED_FIELD_ERROR);
-            }
-        });
     }
 }

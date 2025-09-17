@@ -84,28 +84,32 @@ function updateActiveNavigation() {
 function clearInputs() {
     // 백준 입력 초기화
     const baekjoonInput = document.getElementById('baekjoon-problem-id');
+    const baekjoonStep = document.getElementById('baekjoon-problem-step');
     if (baekjoonInput) baekjoonInput.value = '';
+    if (baekjoonStep) baekjoonStep.value = '';
 
     // 프로그래머스 입력 초기화
     clearProgrammersInputs();
 
     // 리트코드 입력 초기화
     const leetcodeInput = document.getElementById('leetcode-url');
+    const leetcodeStep = document.getElementById('leetcode-problem-step');
     if (leetcodeInput) leetcodeInput.value = '';
+    if (leetcodeStep) leetcodeStep.value = '';
 }
 
 function clearProgrammersInputs() {
     const inputs = [
         'programmers-problem-id',
-        'programmers-title',
-        'programmers-difficulty',
-        'programmers-tags'
+        'programmers-title'
     ];
-
     inputs.forEach(id => {
         const element = document.getElementById(id);
         if (element) element.value = '';
     });
+
+    const programmersStep = document.getElementById('programmers-problem-step');
+    if (programmersStep) programmersStep.value = '';
 }
 
 // ==================== 플랫폼별 문제 확인 함수들 ====================
@@ -115,9 +119,10 @@ function clearProgrammersInputs() {
  */
 function checkBaekjoon() {
     const problemId = document.getElementById('baekjoon-problem-id').value.trim();
+    const problemStep = document.getElementById('baekjoon-problem-step').value;
 
-    if (!problemId) {
-        alert('문제번호를 입력해주세요.');
+    if (!problemId || !problemStep) {
+        alert('문제번호와 ProblemStep을 입력해주세요.');
         return;
     }
 
@@ -126,18 +131,19 @@ function checkBaekjoon() {
         return;
     }
 
-    console.log('백준 문제 확인:', problemId);
+    console.log('백준 문제 확인:', problemId, problemStep);
     showLoading('백준 문제 정보를 가져오는 중...');
 
     fetch('/admin/problems/get/baekjoon', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'problemId=' + encodeURIComponent(problemId)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            platformProblemId: problemId,
+            problemStep: problemStep
+        })
     })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
         })
         .then(data => {
@@ -152,18 +158,17 @@ function checkBaekjoon() {
 }
 
 /**
- * 프로그래머스 문제 확인 및 추가 (수동 입력)
+ * 프로그래머스 문제 확인 및 추가
  */
 function checkProgrammers() {
     const data = {
         platformProblemId: document.getElementById('programmers-problem-id').value.trim(),
         title: document.getElementById('programmers-title').value.trim(),
-        difficulty: document.getElementById('programmers-difficulty').value,
-        tags: document.getElementById('programmers-tags').value.trim()
+        problemStep: document.getElementById('programmers-problem-step').value
     };
 
-    if (!data.platformProblemId || !data.title || !data.difficulty) {
-        alert('모든 필수 정보를 입력해주세요.');
+    if (!data.platformProblemId || !data.title || !data.problemStep) {
+        alert('문제번호, 제목, ProblemStep을 입력해주세요.');
         return;
     }
 
@@ -176,9 +181,7 @@ function checkProgrammers() {
         body: JSON.stringify(data)
     })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
         })
         .then(data => {
@@ -197,9 +200,10 @@ function checkProgrammers() {
  */
 function checkLeetcode() {
     const url = document.getElementById('leetcode-url').value.trim();
+    const problemStep = document.getElementById('leetcode-problem-step').value;
 
-    if (!url) {
-        alert('LeetCode 문제 URL을 입력해주세요.');
+    if (!url || !problemStep) {
+        alert('문제 URL과 ProblemStep을 입력해주세요.');
         return;
     }
 
@@ -208,18 +212,19 @@ function checkLeetcode() {
         return;
     }
 
-    console.log('리트코드 문제 확인:', url);
+    console.log('리트코드 문제 확인:', url, problemStep);
     showLoading('리트코드 문제 정보를 가져오는 중...');
 
     fetch('/admin/problems/get/leetcode', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `url=${encodeURIComponent(url)}`
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            platformProblemId: url,
+            problemStep: problemStep
+        })
     })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
         })
         .then(data => {
@@ -253,25 +258,13 @@ function handleProblemCheckResponse(data, inputId) {
 
 // ==================== 문제 목록 관리 함수들 ====================
 
-/**
- * 문제 목록에 추가
- */
 function addProblemToList(problemData) {
-    console.log('addProblemToList 호출됨, 받은 데이터:', problemData);
-    console.log('isDuplicate 값:', problemData.isDuplicate);
+    if (problemData.isDuplicate) return;
 
-    // 서버에서 중복으로 표시된 문제는 추가하지 않음
-    if (problemData.isDuplicate) {
-        console.log('중복된 문제이므로 목록에 추가하지 않습니다:', problemData);
-        return;
-    }
-
-    // 로컬 목록에서도 중복 체크
     const exists = problemList.some(p =>
         p.platform === problemData.platform &&
         p.platformProblemId === problemData.platformProblemId
     );
-
     if (exists) {
         alert('이미 목록에 추가된 문제입니다.');
         return;
@@ -281,13 +274,8 @@ function addProblemToList(problemData) {
     problemList.push(problemData);
     renderProblemList();
     showProblemListCard();
-
-    console.log('문제 추가됨:', problemData);
 }
 
-/**
- * 문제 목록 렌더링
- */
 function renderProblemList() {
     const container = document.getElementById('problem-list');
     const countBadge = document.getElementById('problem-count');
@@ -298,79 +286,51 @@ function renderProblemList() {
         return;
     }
 
-    container.innerHTML = problemList.map(problem => {
-        const statusClass = problem.isDuplicate ? 'status-duplicate' : 'status-success';
-        const statusIcon = problem.isDuplicate ? 'fas fa-times-circle' : 'fas fa-check-circle';
-        const statusText = problem.isDuplicate ? '중복됨' : '확인';
-
-        return `
-            <div class="problem-item d-flex justify-content-between align-items-center">
-                <div class="flex-grow-1">
-                    <div class="d-flex align-items-center mb-1">
-                        <span class="badge bg-primary me-2">${problem.platform}</span>
-                        <strong>${problem.platformProblemId}</strong>
-                        <span class="ms-2">${problem.title}</span>
-                        <span class="${statusClass} ms-2">
-                            <i class="${statusIcon}"></i> ${statusText}
-                        </span>
-                    </div>
-                    <small class="text-muted">
-                        ${problem.difficulty || '난이도 미지정'} | ${problem.tags || '태그 없음'}
-                    </small>
+    container.innerHTML = problemList.map(problem => `
+        <div class="problem-item d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center mb-1">
+                    <span class="badge bg-primary me-2">${problem.platform}</span>
+                    <strong>${problem.platformProblemId}</strong>
+                    <span class="ms-2">${problem.title}</span>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-danger"
-                        onclick="removeProblem(${problem.id})">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <small class="text-muted">
+                    Step: ${problem.problemStep || '미지정'}
+                </small>
             </div>
-        `;
-    }).join('');
+            <button type="button" class="btn btn-sm btn-outline-danger"
+                    onclick="removeProblem(${problem.id})">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `).join('');
 
     countBadge.textContent = `${problemList.length}개`;
 }
 
-/**
- * 문제 제거
- */
 function removeProblem(id) {
-    if (!confirm('이 문제를 목록에서 제거하시겠습니까?')) {
-        return;
-    }
+    if (!confirm('이 문제를 목록에서 제거하시겠습니까?')) return;
 
     problemList = problemList.filter(p => p.id !== id);
     renderProblemList();
 
-    if (problemList.length === 0) {
-        hideProblemListCard();
-    }
-
-    alert('문제가 목록에서 제거되었습니다.');
+    if (problemList.length === 0) hideProblemListCard();
 }
 
 /**
  * 문제 목록 카드 표시/숨김
  */
 function showProblemListCard() {
-    const problemListCard = document.getElementById('problem-list-card');
-    const actionButtons = document.getElementById('action-buttons');
-
-    if (problemListCard) problemListCard.style.display = 'block';
-    if (actionButtons) actionButtons.style.display = 'block';
+    document.getElementById('problem-list-card').style.display = 'block';
+    document.getElementById('action-buttons').style.display = 'block';
 }
-
 function hideProblemListCard() {
-    const problemListCard = document.getElementById('problem-list-card');
-    const actionButtons = document.getElementById('action-buttons');
-
-    if (problemListCard) problemListCard.style.display = 'none';
-    if (actionButtons) actionButtons.style.display = 'none';
+    document.getElementById('problem-list-card').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'none';
 }
 
-// ==================== 등록 및 초기화 함수들 ====================
+// ==================== 등록 및 초기화 ====================
 
-/**
- * 모든 문제 등록
- */
 function registerAllProblems() {
     const validProblems = problemList.filter(p => !p.isDuplicate);
 
@@ -379,31 +339,15 @@ function registerAllProblems() {
         return;
     }
 
-    if (!confirm(`${validProblems.length}개의 문제를 등록하시겠습니까?`)) {
-        return;
-    }
+    if (!confirm(`${validProblems.length}개의 문제를 등록하시겠습니까?`)) return;
 
-    const requestData = {
-        problems: validProblems.map(p => ({
-            platform: p.platform,
-            platformProblemId: p.platformProblemId,
-            title: p.title,
-            difficulty: p.difficulty,
-            url: p.url,
-            tags: p.tags || ''
-        }))
-    };
+    const requestData = { problems: validProblems };
 
-    console.log('등록할 데이터:', requestData);
     showLoading('문제들을 등록하는 중...');
-
-    // 등록 버튼 비활성화
     const registerBtn = document.getElementById('register-btn');
-    const originalContent = registerBtn ? registerBtn.innerHTML : '';
-    if (registerBtn) {
-        registerBtn.disabled = true;
-        registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>등록 중...';
-    }
+    const originalContent = registerBtn.innerHTML;
+    registerBtn.disabled = true;
+    registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>등록 중...';
 
     fetch('/admin/problems/register', {
         method: 'POST',
@@ -411,18 +355,13 @@ function registerAllProblems() {
         body: JSON.stringify(requestData)
     })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
         })
         .then(data => {
             hideLoading();
-            console.log('등록 결과:', data);
-
             if (data.status === 'success') {
-                alert(`${data.data.count || validProblems.length}개 문제가 성공적으로 등록되었습니다!`);
-                // 성공시 목록 비우기
+                alert(`${data.data.count}개 문제가 성공적으로 등록되었습니다!`);
                 problemList = [];
                 problemIdCounter = 0;
                 renderProblemList();
@@ -432,71 +371,43 @@ function registerAllProblems() {
             }
         })
         .catch(error => {
-            console.error('등록 에러:', error);
             hideLoading();
-            alert('문제 등록 중 오류가 발생했습니다: ' + error.message);
+            alert('문제 등록 중 오류 발생: ' + error.message);
         })
         .finally(() => {
-            // 버튼 복원
-            if (registerBtn) {
-                registerBtn.disabled = false;
-                registerBtn.innerHTML = originalContent || '<i class="fas fa-save me-2"></i>모든 문제 등록하기';
-            }
+            registerBtn.disabled = false;
+            registerBtn.innerHTML = originalContent;
         });
 }
 
-/**
- * 모든 문제 목록 비우기
- */
 function clearAllProblems() {
-    if (problemList.length > 0 && !confirm('모든 문제를 목록에서 제거하시겠습니까?')) {
-        return;
-    }
-
+    if (problemList.length > 0 && !confirm('모든 문제를 제거하시겠습니까?')) return;
     problemList = [];
     problemIdCounter = 0;
     renderProblemList();
     hideProblemListCard();
-
-    alert('문제 목록이 비워졌습니다.');
 }
 
-// ==================== 유틸리티 함수들 ====================
-
-/**
- * 로딩 표시
- */
+// ==================== 로딩 UI ====================
 function showLoading(message = '처리 중...') {
-    // 기존 로딩 오버레이 제거
     hideLoading();
-
-    const loadingOverlay = document.createElement('div');
-    loadingOverlay.id = 'loading-overlay';
-    loadingOverlay.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center';
-    loadingOverlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    loadingOverlay.style.zIndex = '9998';
-    loadingOverlay.innerHTML = `
+    const overlay = document.createElement('div');
+    overlay.id = 'loading-overlay';
+    overlay.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = '9998';
+    overlay.innerHTML = `
         <div class="bg-white p-4 rounded shadow">
             <div class="text-center">
                 <div class="spinner-border text-primary me-2" role="status"></div>
                 <span>${message}</span>
             </div>
-        </div>
-    `;
-    document.body.appendChild(loadingOverlay);
-
-    console.log('로딩 표시:', message);
+        </div>`;
+    document.body.appendChild(overlay);
 }
-
-/**
- * 로딩 숨김
- */
 function hideLoading() {
-    const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) {
-        loadingOverlay.remove();
-        console.log('로딩 숨김');
-    }
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.remove();
 }
 
-console.log('문제 등록 JavaScript 파일이 성공적으로 로드되었습니다!');
+console.log('문제 등록 JavaScript 로드 완료');

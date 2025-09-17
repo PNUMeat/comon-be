@@ -20,7 +20,6 @@ public class ProgrammersCollector implements ProblemCollector {
     private static final int MIN_PROBLEM_ID = 10000;
     private static final int MAX_PROBLEM_ID = 99999;
     private static final int MAX_TITLE_LENGTH = 50;
-    private static final int MAX_TAGS_LENGTH = 50;
 
     @Override
     public ProblemInfoResponse collectProblemInfo(ProblemInfoRequest request) {
@@ -30,9 +29,8 @@ public class ProgrammersCollector implements ProblemCollector {
                 .platform(Platform.PROGRAMMERS)
                 .platformProblemId(request.getPlatformProblemId())
                 .title(request.getTitle().trim())
-                .difficulty(request.getDifficulty())
+                .problemStep(request.getProblemStep())
                 .url(buildProgrammersUrl(request.getPlatformProblemId()))
-                .tags(request.getTags() != null ? request.getTags().trim() : "")
                 .isDuplicate(false)
                 .success(true)
                 .build();
@@ -61,21 +59,6 @@ public class ProgrammersCollector implements ProblemCollector {
         // 제목 길이 검증
         if (request.getTitle().length() > MAX_TITLE_LENGTH) {
             throw new ProblemValidationException(PROBLEM_TITLE_TOO_LONG_ERROR);
-        }
-
-        // 난이도 검증
-        if (request.getDifficulty() == null || request.getDifficulty().trim().isEmpty()) {
-            throw new ProblemValidationException(PROBLEM_DIFFICULTY_REQUIRED_ERROR);
-        }
-
-        // 난이도 값이 유효한지 확인
-        if (!VALID_PROGRAMMERS_LEVELS.contains(request.getDifficulty())) {
-            throw new ProblemValidationException(PROBLEM_DIFFICULTY_INVALID_ERROR);
-        }
-
-        // 태그 검증
-        if (request.getTags() != null && request.getTags().length() > MAX_TAGS_LENGTH) {
-            throw new ProblemValidationException(PROBLEM_TAGS_TOO_LONG_ERROR);
         }
     }
 

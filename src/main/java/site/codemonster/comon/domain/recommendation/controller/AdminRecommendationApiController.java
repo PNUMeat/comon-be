@@ -23,18 +23,17 @@ import site.codemonster.comon.global.error.dto.response.ApiResponse;
 @RequiredArgsConstructor
 public class AdminRecommendationApiController {
 
-    private final TeamRecommendationCommandService teamRecommendationCommandService;
-    private final TeamRecommendationQueryService teamRecommendationQueryService;
+    private final TeamRecommendationService teamRecommendationService;
     private final PlatformRecommendationService platformRecommendationService;
     private final TeamService teamService;
 
     @PostMapping("/settings")
     public ResponseEntity<?> saveTeamRecommendationSetting(@RequestBody @Valid TeamRecommendationRequest request) {
         Team team = teamService.getTeamByTeamId(request.teamId());
-        TeamRecommendation teamRecommendation = teamRecommendationQueryService.getTeamRecommendationByTeamOrThrow(team);
+        TeamRecommendation teamRecommendation = teamRecommendationService.getOrCreateTeamRecommendation(team);
 
-        teamRecommendationCommandService.saveTeamRecommendationSettings(teamRecommendation, request);
-        platformRecommendationService.createPlatformRecommendations(teamRecommendation, request.platformSettings());
+        teamRecommendationService.saveRecommendationSettings(teamRecommendation, request);
+        platformRecommendationService.savePlatformRecommendations(teamRecommendation, request.platformSettings());
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -44,11 +43,11 @@ public class AdminRecommendationApiController {
     @GetMapping("/settings/{teamId}")
     public ResponseEntity<?> getTeamRecommendationSetting(@PathVariable Long teamId) {
         Team team = teamService.getTeamByTeamId(teamId);
-        TeamRecommendation teamRecommendation = teamRecommendationCommandService.getOrCreateTeamRecommendation(team);
+        TeamRecommendation teamRecommendation = teamRecommendationService.getOrCreateTeamRecommendation(team);
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_GET_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(teamRecommendationQueryService.getTeamRecommendationSettingsResponse(teamRecommendation), RECOMMENDATION_SETTINGS_GET_SUCCESS.getMessage()));
+                .body(ApiResponse.successResponse(teamRecommendationService.getRecommendationSettings(teamRecommendation), RECOMMENDATION_SETTINGS_GET_SUCCESS.getMessage()));
     }
 
     @PutMapping("/settings/{teamId}")

@@ -8,9 +8,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import site.codemonster.comon.domain.problem.dto.request.ProblemBatchRequest;
-import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
+import site.codemonster.comon.domain.problem.dto.request.ProblemRequest;
+import site.codemonster.comon.domain.problem.dto.request.ProblemUpdateRequest;
 import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
-import site.codemonster.comon.domain.problem.entity.Problem;
+import site.codemonster.comon.domain.problem.dto.response.ProblemResponse;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.service.ProblemCommandService;
 import site.codemonster.comon.domain.problem.service.ProblemQueryService;
@@ -28,8 +29,8 @@ public class AdminProblemApiController {
     private final ProblemQueryService problemQueryService;
 
     @PostMapping("/get/baekjoon")
-    public ResponseEntity<?> getBaekjoonProblemInfo(@RequestParam String problemId) {
-        ProblemInfoResponse response = problemCommandService.checkProblem(problemId, Platform.BAEKJOON);
+    public ResponseEntity<?> getBaekjoonProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {
+        ProblemInfoResponse response = problemCommandService.checkProblem(problemRequest, Platform.BAEKJOON);
 
         return ResponseEntity.status(PROBLEM_CHECK_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -37,10 +38,9 @@ public class AdminProblemApiController {
     }
 
     @PostMapping("/get/programmers")
-    public ResponseEntity<?> getProgrammersProblemInfo(@RequestBody @Valid ProblemInfoRequest request) {
-        if (request.getPlatform() == null) request.setPlatform(Platform.PROGRAMMERS);
+    public ResponseEntity<?> getProgrammersProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {
 
-        ProblemInfoResponse response = problemCommandService.checkProblem(request);
+        ProblemInfoResponse response = problemCommandService.checkProblem(problemRequest, Platform.PROGRAMMERS);
 
         return ResponseEntity.status(PROBLEM_CHECK_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -48,8 +48,8 @@ public class AdminProblemApiController {
     }
 
     @PostMapping("/get/leetcode")
-    public ResponseEntity<?> getLeetcodeProblemInfo(@RequestParam String url) {
-        ProblemInfoResponse response = problemCommandService.checkProblem(url, Platform.LEETCODE);
+    public ResponseEntity<?> getLeetcodeProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {
+        ProblemInfoResponse response = problemCommandService.checkProblem(problemRequest, Platform.LEETCODE);
 
         return ResponseEntity.status(PROBLEM_CHECK_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -58,7 +58,7 @@ public class AdminProblemApiController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerProblems(@RequestBody @Valid ProblemBatchRequest batchRequest) {
-        List<Problem> savedProblems = problemCommandService.registerProblems(batchRequest.getProblems());
+        List<ProblemResponse> savedProblems = problemCommandService.registerProblems(batchRequest.getProblems());
 
         Map<String, Object> responseData = Map.of(
                 "count", savedProblems.size(),
@@ -81,7 +81,7 @@ public class AdminProblemApiController {
 
     @GetMapping("/problem-list")
     public ResponseEntity<?> getProblemList() {
-        List<Problem> problems = problemQueryService.getAllProblems();
+        List<ProblemResponse> problems = problemQueryService.getAllProblems();
 
         return ResponseEntity.status(PROBLEM_LIST_GET_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +90,7 @@ public class AdminProblemApiController {
 
     @GetMapping("/list-by-platform")
     public ResponseEntity<?> getProblemListByPlatform(@RequestParam String platform) {
-        List<Problem> problems = problemQueryService.getProblemsByPlatform(Platform.valueOf(platform.toUpperCase()));
+        List<ProblemResponse> problems = problemQueryService.getProblemsByPlatform(Platform.valueOf(platform.toUpperCase()));
 
         return ResponseEntity.status(PROBLEM_LIST_GET_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -98,12 +98,12 @@ public class AdminProblemApiController {
     }
 
     @PutMapping("/{problemId}")
-    public ResponseEntity<?> updateProblem(@PathVariable Long problemId, @RequestBody Map<String, String> updateData) {
-        Problem updatedProblem = problemCommandService.updateProblem(problemId, updateData);
+    public ResponseEntity<?> updateProblem(@PathVariable Long problemId, @RequestBody @Valid ProblemUpdateRequest problemUpdateRequest) {
+        problemCommandService.updateProblem(problemId, problemUpdateRequest);
 
         return ResponseEntity.status(PROBLEM_UPDATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(updatedProblem, PROBLEM_UPDATE_SUCCESS.getMessage()));
+                .body(ApiResponse.successResponseWithMessage(PROBLEM_UPDATE_SUCCESS.getMessage()));
     }
 
     @DeleteMapping("/{problemId}")

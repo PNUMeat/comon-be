@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.problem.dto.response.ProblemResponse;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.repository.ProblemRepository;
@@ -31,12 +32,14 @@ public class ProblemQueryService {
         );
     }
 
-    public List<Problem> getAllProblems() {
-        return problemRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"));
+    public List<ProblemResponse> getAllProblems() {
+        return problemRepository.findAll(Sort.by(Sort.Direction.DESC, "createdDate"))
+                .stream().map(ProblemResponse::new).toList();
     }
 
-    public List<Problem> getProblemsByPlatform(Platform platform) {
-        return problemRepository.findByPlatform(platform);
+    public List<ProblemResponse> getProblemsByPlatform(Platform platform) {
+        return problemRepository.findByPlatform(platform)
+                .stream().map(ProblemResponse::new).toList();
     }
 
     public Problem findProblemById(Long problemId) {

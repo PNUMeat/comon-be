@@ -72,7 +72,8 @@ public enum ErrorCode {
     PROBLEM_DIFFICULTY_INVALID_ERROR(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 난이도입니다."),
     PROBLEM_TITLE_TOO_LONG_ERROR(HttpStatus.BAD_REQUEST, 400, "제목이 너무 깁니다. (최대 50자)"),
     PROBLEM_TAGS_TOO_LONG_ERROR(HttpStatus.BAD_REQUEST, 400, "태그가 너무 깁니다. (최대 50자)"),
-    PROBLEM_VALIDATION_ERROR(HttpStatus.BAD_REQUEST, 400, "문제 정보 검증에 실패했습니다.");
+    PROBLEM_VALIDATION_ERROR(HttpStatus.BAD_REQUEST, 400, "문제 정보 검증에 실패했습니다."),
+    PROBLEM_DUPLICATE_ERROR(HttpStatus.CONFLICT, 409, "이미 등록되어있는 문제입니다.");
 
     private final HttpStatus status;
     private final int customStatusCode;

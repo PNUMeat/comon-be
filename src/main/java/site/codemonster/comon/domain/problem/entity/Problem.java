@@ -1,21 +1,26 @@
 package site.codemonster.comon.domain.problem.entity;
 
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
+import site.codemonster.comon.domain.problem.dto.request.ProblemUpdateRequest;
+import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.global.entityListeners.TimeStamp;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 
 @Entity
 @Getter
-@Setter
 @Table(
         name = "problem",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"platform", "platform_problem_id"})
         }
 )
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Problem extends TimeStamp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,23 +36,27 @@ public class Problem extends TimeStamp {
     @Column(nullable = false)
     private String title;
 
-    private String difficulty;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ProblemStep problemStep;
+
 
     @Column(columnDefinition = "TEXT")
     private String url;
 
-    private String tags; // 문제 유형
 
-    @Builder
-    public Problem(Platform platform, String platformProblemId, String title, String difficulty, String url, String tags) {
-        this.platform = platform;
-        this.platformProblemId = platformProblemId;
-        this.title = title;
-        this.difficulty = difficulty;
-        this.url = url;
-        this.tags = tags;
+    public Problem(ProblemInfoRequest problemInfoRequest) {
+        this.platform = problemInfoRequest.getPlatform();
+        this.platformProblemId = problemInfoRequest.getPlatformProblemId();
+        this.title = problemInfoRequest.getTitle();
+        this.problemStep = problemInfoRequest.getProblemStep();
+        this.url = problemInfoRequest.getUrl();
     }
 
-    protected Problem() {
+    public void updateProblem(ProblemUpdateRequest problemUpdateRequest) {
+        this.title = problemUpdateRequest.title();
+        this.problemStep = problemUpdateRequest.problemStep();
+        this.url = problemUpdateRequest.url();
     }
+
 }
