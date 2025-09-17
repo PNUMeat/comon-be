@@ -5,6 +5,7 @@ import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
+import site.codemonster.comon.domain.team.dto.response.TeamMemberResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
 import site.codemonster.comon.domain.teamApply.service.TeamApplyService;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
 
 @Service
 @Transactional(readOnly = true)
@@ -34,6 +36,7 @@ public class TeamMemberService {
     private final MemberService memberService;
     private final TeamRepository teamRepository;
     private final TeamApplyService teamApplyService;
+    private final ImageFieldConvertUtils imageFieldConvertUtils;
 
     public List<TeamMember> getTeamMembersByMember(Member member){
         return teamMemberRepository.findByMemberIdOrderByTeamInfoIdDesc(member.getId());
@@ -67,6 +70,15 @@ public class TeamMemberService {
 
         // 내가 쓴 글 삭제
         articleRepository.deleteByMemberIdAndTeamId(member.getId(), teamId);
+    }
+
+    public TeamMemberResponse getTeamMemberResponse(TeamMember teamMember){
+        return new TeamMemberResponse(teamMember.getMember().getUuid(),
+                teamMember.getMember().getMemberName(),
+                teamMember.getMember().getDescription(),
+                imageFieldConvertUtils.convertObjectKeyToImageUrl(teamMember.getMember().getImageUrl()),
+                teamMember.getCreatedDate(),
+                teamMember.getIsTeamManager());
     }
 
     public List<TeamMember> getTeamMemberAndTeamByMember(Member member){
