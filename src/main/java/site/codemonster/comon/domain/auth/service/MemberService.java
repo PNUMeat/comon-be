@@ -4,9 +4,12 @@ import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileCreateRequest;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileUpdateRequest;
+import site.codemonster.comon.domain.auth.dto.response.MemberInfoResponse;
+import site.codemonster.comon.domain.auth.dto.response.MemberProfileResponse;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
 import site.codemonster.comon.domain.auth.repository.RefreshTokenRepository;
+import site.codemonster.comon.domain.team.dto.response.TeamAbstractResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
 import site.codemonster.comon.domain.teamApply.repository.TeamApplyRepository;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,16 +37,16 @@ public class MemberService {
     private final TeamRecruitRepository teamRecruitRepository;
     private final TeamApplyRepository teamApplyRepository;
     private final TeamRecruitImageRepository teamRecruitImageRepository;
+    private final ImageFieldConvertUtils imageFieldConvertUtils;
 
     @Transactional
-    public Member createMemberProfile(
+    public void createMemberProfile(
         MemberProfileCreateRequest memberProfileCreateRequest,
         Member member
     ){
         member.updateProfile(
             memberProfileCreateRequest.memberName(), memberProfileCreateRequest.memberExplain(), memberProfileCreateRequest.imageUrl()
         );
-        return member;
     }
 
     @Transactional
@@ -51,9 +55,27 @@ public class MemberService {
         Member member
     ){
         member.updateProfile(
-            memberProfileUpdateRequest.memberName(), memberProfileUpdateRequest.memberExplain(), memberProfileUpdateRequest.imageUrl()
+            memberProfileUpdateRequest.memberName(), memberProfileUpdateRequest.memberExplain(),
+                imageFieldConvertUtils.convertImageUrlToObjectKey(memberProfileUpdateRequest.imageUrl())
         );
         return member;
+    }
+
+    public MemberProfileResponse getMemberProfileResponse(Member member) {
+        return new MemberProfileResponse(
+                member.getMemberName(),
+                imageFieldConvertUtils.convertObjectKeyToImageUrl(member.getImageUrl()),
+                member.getDescription(),
+                member.getUuid()
+        );
+    }
+
+    public MemberInfoResponse getMemberInfoResponse(Member member, List<TeamAbstractResponse> teamAbstractResponse) {
+        return new MemberInfoResponse(
+                member.getMemberName(),
+                imageFieldConvertUtils.convertObjectKeyToImageUrl(member.getImageUrl()),
+                teamAbstractResponse
+        );
     }
 
     public Member getMemberByUUID(String uuid){
