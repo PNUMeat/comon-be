@@ -8,6 +8,7 @@ import site.codemonster.comon.domain.team.dto.request.*;
 import site.codemonster.comon.domain.team.dto.response.*;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamService;
+import site.codemonster.comon.domain.team.utils.TeamResponseUtils;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
@@ -43,6 +44,7 @@ public class TeamController {
     private final TeamMemberService teamMemberService;
     private final MemberService memberService;
     private final TeamRecruitService teamRecruitService;
+    private final TeamResponseUtils teamResponseUtils;
 
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createTeam(
@@ -81,7 +83,7 @@ public class TeamController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
 
-        Page<TeamAllResponse> teamAllResponses = teams.map(teamService::getTeamAllResponse);
+        Page<TeamAllResponse> teamAllResponses = teams.map(teamResponseUtils::getTeamAllResponse);
 
         return ResponseEntity.status(TEAM_TOTAL_DETAILS_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +112,7 @@ public class TeamController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Team> teams = teamService.getAllTeamsByKeywordUsingPaging(pageable,keyword);
-        Page<TeamAllResponse> teamAllResponses = teams.map(teamService::getTeamAllResponse);
+        Page<TeamAllResponse> teamAllResponses = teams.map(teamResponseUtils::getTeamAllResponse);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -122,7 +124,7 @@ public class TeamController {
         List<Team> teamMembers =  teamService.getMyTeams(member);
 
         List<MyTeamResponse> myTeamResponse = teamMembers.stream()
-                .map(teamService::getMyTeamResponse)
+                .map(teamResponseUtils::getMyTeamResponse)
                 .collect(Collectors.toList());
 
         return ResponseEntity.status(MY_TEAM_DETAILS_SUCCESS.getStatusCode())
@@ -153,11 +155,11 @@ public class TeamController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
-        Page<TeamAllResponse> teamAllResponses = teams.map(teamService::getTeamAllResponse);
+        Page<TeamAllResponse> teamAllResponses = teams.map(teamResponseUtils::getTeamAllResponse);
 
         List<Team> myTeams = teamService.getMyTeams(member);
         List<MyTeamResponse> myTeamResponses = myTeams.stream()
-                .map(teamService::getMyTeamResponse)
+                .map(teamResponseUtils::getMyTeamResponse)
                 .collect(Collectors.toList());
 
         TeamCombinedResponse teamCombinedResponse = new TeamCombinedResponse(myTeamResponses, teamAllResponses);

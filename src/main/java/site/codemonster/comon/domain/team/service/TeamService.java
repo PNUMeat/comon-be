@@ -3,11 +3,8 @@ package site.codemonster.comon.domain.team.service;
 import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
-import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.domain.team.dto.request.TeamInfoEditRequest;
 import site.codemonster.comon.domain.team.dto.request.TeamRequest;
-import site.codemonster.comon.domain.team.dto.response.MyTeamResponse;
-import site.codemonster.comon.domain.team.dto.response.TeamAllResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamInfoResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.enums.Topic;
@@ -40,7 +37,6 @@ public class TeamService {
     private final TeamRecruitService teamRecruitService;
     private final TeamApplyService teamApplyService;
     private final ImageFieldConvertUtils imageFieldConvertUtils;
-    private final MemberService memberService;
 
     @Transactional
     public Team createTeam(TeamRequest teamRequest, Member manager, List<Member> applyMembers, Long teamRecruitId) {
@@ -74,45 +70,6 @@ public class TeamService {
 
     public Page<Team> getAllTeamsUsingPaging(Pageable pageable){
         return teamRepository.findAllWithPagination(pageable);
-    }
-
-    public TeamAllResponse getTeamAllResponse(Team team){
-        return new TeamAllResponse(
-                team.getTeamId(),
-                team.getTeamName(),
-                team.getTeamExplain(),
-                imageFieldConvertUtils.convertObjectKeyToImageUrl(team.getTeamIconUrl()),
-                team.getTeamTopic().getName(),
-                team.getMaxParticipant(),
-                team.getTeamMembers().size(),
-                team.getStreakDays(),
-                team.getCreatedDate().toLocalDate(),
-                team.getTeamMembers().stream()
-                        .map(tm -> memberService.getMemberProfileResponse((tm.getMember())))
-                        .collect(Collectors.toList())
-        );
-    }
-
-    public MyTeamResponse getMyTeamResponse(Team team) {
-        Long teamRecruitId = null;
-        if(team.getTeamRecruit() != null){
-            teamRecruitId = team.getTeamRecruit().getTeamRecruitId();
-        }
-
-        return new MyTeamResponse(
-                team.getTeamId(),
-                team.getTeamName(),
-                team.getTeamExplain(),
-                imageFieldConvertUtils.convertObjectKeyToImageUrl(team.getTeamIconUrl()),
-                team.getTeamTopic().getName(),
-                team.getMaxParticipant(),
-                team.getTeamMembers().size(),
-                team.getStreakDays(),
-                0, // 게시물 엔티티 없는 관계로 0으로 설정
-                team.getTeamAnnouncement(),
-                teamRecruitId,
-                team.getCreatedDate().toLocalDate()
-        );
     }
 
     public TeamInfoResponse getTeamInfoResponse(Team team){
