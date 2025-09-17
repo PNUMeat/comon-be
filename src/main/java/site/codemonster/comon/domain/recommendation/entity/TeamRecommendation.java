@@ -61,11 +61,18 @@ public class TeamRecommendation extends TimeStamp {
         return DateUtils.convertBitMaskToDays(this.recommendDays);
     }
 
-    public void updateInitialSettings(TeamRecommendationRequest request) {
+    public void updateTeamRecommendationSettings(TeamRecommendationRequest request) {
         this.autoRecommendationEnabled = request.autoRecommendationEnabled();
         this.recommendationAt = request.recommendationAt();
         this.totalProblemCount = calculateTotalProblemCount(request.platformSettings());
         this.setRecommendationDays(request.recommendDays());
+    }
+
+    public void reset() {
+        this.autoRecommendationEnabled = false;
+        this.recommendationAt = 9;
+        this.recommendDays = 0;
+        this.totalProblemCount = 0;
     }
 
     private Integer calculateTotalProblemCount(List<TeamRecommendationRequest.PlatformRecommendationSetting> settings) {

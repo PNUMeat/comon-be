@@ -1,6 +1,5 @@
 package site.codemonster.comon.domain.recommendation.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,27 +22,21 @@ public class PlatformRecommendationService {
     private final PlatformRecommendationRepository platformRecommendationRepository;
     private final ConvertUtils convertUtils;
 
-    public PlatformRecommendation createPlatformRecommendation(TeamRecommendationRequest.PlatformRecommendationSetting setting,
-                                                               TeamRecommendation teamRecommendation) {
-        PlatformRecommendation platform = PlatformRecommendation.builder()
-                .platform(setting.platform())
-                .difficulties(convertUtils.convertListToJson(setting.difficulties()))
-                .tags(convertUtils.convertListToJson(setting.tags()))
-                .problemCount(setting.problemCount())
-                .enabled(setting.enabled())
-                .build();
-
-        platform.setTeamRecommendation(teamRecommendation);
-        return platform;
-    }
-
     @Transactional
-    public void savePlatformRecommendations(TeamRecommendation teamRecommendation,
-                                            List<TeamRecommendationRequest.PlatformRecommendationSetting> settings) {
-        platformRecommendationRepository.deleteByTeamRecommendation(teamRecommendation);
-
+    public void createPlatformRecommendations(TeamRecommendation teamRecommendation, List<TeamRecommendationRequest.PlatformRecommendationSetting> settings) {
         List<PlatformRecommendation> platforms = settings.stream()
-                .map(setting -> createPlatformRecommendation(setting, teamRecommendation))
+                .map(setting -> {
+                    PlatformRecommendation platform = PlatformRecommendation.builder()
+                            .platform(setting.platform())
+                            .difficulties(convertUtils.convertListToJson(setting.difficulties()))
+                            .tags(convertUtils.convertListToJson(setting.tags()))
+                            .problemCount(setting.problemCount())
+                            .enabled(setting.enabled())
+                            .build();
+
+                    platform.setTeamRecommendation(teamRecommendation);
+                    return platform;
+                })
                 .collect(Collectors.toList());
 
         platformRecommendationRepository.saveAll(platforms);

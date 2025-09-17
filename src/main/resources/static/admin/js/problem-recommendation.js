@@ -879,7 +879,7 @@ function resetCurrentSettings() {
     showLoading('설정을 초기화하는 중...');
 
     fetch(`/admin/recommendations/settings/${currentTeamId}`, {
-        method: 'DELETE'
+        method: 'PUT'
     })
         .then(response => {
             if (!response.ok) {
@@ -915,6 +915,24 @@ function resetUISettings() {
     // 플랫폼 카드 초기화
     document.querySelectorAll('.platform-card').forEach(card => {
         card.classList.remove('enabled');
+    });
+
+    // 난이도 체크박스 초기화
+    document.querySelectorAll('[id$="-difficulty-container"] input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+        checkbox.closest('.form-check').classList.remove('selected');
+    });
+
+    // 태그 체크박스 초기화
+    document.querySelectorAll('[id$="-tags-container"] input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+        checkbox.closest('.form-check').classList.remove('selected');
+    });
+
+    // 문제 수 입력 필드 초기화
+    ['baekjoon-count', 'programmers-count', 'leetcode-count'].forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) input.value = 2;
     });
 
     // 자동 추천 비활성화
