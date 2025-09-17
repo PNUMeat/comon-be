@@ -10,6 +10,14 @@ public record TeamInfoResponse(Long teamId,
                                String password,
                                String teamIconUrl) {
     public static TeamInfoResponse of(Team team){
-        return new TeamInfoResponse(team.getTeamId(), team.getTeamName(), team.getTeamExplain(), team.getTeamTopic().getName(), team.getMaxParticipant(), team.getTeamPassword(), team.getTeamIconUrl());
+        return new TeamInfoResponse(
+                team.getTeamId(),
+                team.getTeamName(),
+                team.getTeamExplain(),
+                team.getTeamTopic().getName(),
+                team.getMaxParticipant(),
+                team.getTeamPassword(),
+                team.getTeamIconUrl()
+        );
     }
 }

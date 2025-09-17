@@ -152,7 +152,7 @@ public class ArticleService {
 
         List<Article> subjectArticles = articleRepository.findSubjectArticlesByTeamIdAndYearAndMonth(teamId, calenderSubjectRequest.year(), calenderSubjectRequest.month(), getSubjectCategories());
         boolean isTeamManager = teamMemberService.checkMemberIsTeamManager(teamId, member);
-        return TeamPageResponse.from(team, isTeamManager, subjectArticles);
+        return TeamPageResponse.from(teamService.getMyTeamResponse(team), isTeamManager, subjectArticles);
     }
 
     private void validateTeamManager(Member member, Team team) {
