@@ -23,8 +23,6 @@ import site.codemonster.comon.domain.team.service.TeamService;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-import site.codemonster.comon.global.util.convertUtils.ConvertUtils;
-import site.codemonster.comon.global.error.recommendation.TeamRecommendationNotFoundException;
 import site.codemonster.comon.global.util.convertUtils.JsonListConvertUtils;
 import site.codemonster.comon.global.util.responseUtils.ResponseUtils;
 
@@ -41,8 +39,6 @@ public class TeamRecommendationCommandService {
     private final MemberService memberService;
     private final ProblemQueryService problemQueryService;
     private final TeamRecommendationRepository teamRecommendationRepository;
-    private final ConvertUtils convertUtils;
-    private final ObjectMapper objectMapper;
     private final JsonListConvertUtils convertUtils;
 
     @Value("${app.system-admin-id:1}")
