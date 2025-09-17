@@ -1,8 +1,6 @@
 package site.codemonster.comon.domain.article.service;
 
 
-import site.codemonster.comon.domain.article.dto.response.ArticleParticularDateResponse;
-import site.codemonster.comon.domain.article.dto.response.ArticleResponse;
 import site.codemonster.comon.domain.article.factory.RecommendationArticleFactory;
 import site.codemonster.comon.domain.article.dto.request.*;
 import site.codemonster.comon.domain.article.entity.Article;
@@ -26,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
 
 import static site.codemonster.comon.domain.article.enums.ArticleCategory.fromName;
 import static site.codemonster.comon.domain.article.enums.ArticleCategory.getSubjectCategories;
@@ -40,7 +37,6 @@ public class ArticleService {
     private final TeamMemberService teamMemberService;
     private final ArticleRepository articleRepository;
     private final ArticleImageRepository articleImageRepository;
-    private final ImageFieldConvertUtils imageFieldConvertUtils;
     private final TeamResponseUtils teamResponseUtils;
 
     @Transactional
@@ -176,41 +172,6 @@ public class ArticleService {
                 .articleCategory(fromName(teamSubjectRequest.articleCategory()))
                 .selectedDate(selectedDate)
                 .build();
-    }
-
-    public ArticleResponse getArticleResponse(Article article){
-        return new ArticleResponse(
-                article.getArticleId(),
-                article.getArticleTitle(),
-                article.getArticleBody(),
-                article.getCreatedDate(),
-                article.getMember().getMemberName(),
-                imageFieldConvertUtils.convertObjectKeyToImageUrl(article.getMember().getImageUrl())  // 변환된 멤버 이미지
-        );
-    }
-
-    public ArticleParticularDateResponse getArticleParticularDateResponse(Article article, Member member, boolean isMyTeam) {
-        if (!isMyTeam) {
-            return new ArticleParticularDateResponse(
-                    article.getArticleId(),
-                    article.getArticleTitle(),
-                    null,
-                    article.getCreatedDate(),
-                    null,
-                    article.getMember().getMemberName(),
-                    member.getUuid().equals(article.getMember().getUuid())
-            );
-        }
-
-        return new ArticleParticularDateResponse(
-                article.getArticleId(),
-                article.getArticleTitle(),
-                article.getArticleBody(),
-                article.getCreatedDate(),
-                article.getMember().getMemberName(),
-                imageFieldConvertUtils.convertObjectKeyToImageUrl(article.getMember().getImageUrl()), // 변환!
-                member.getUuid().equals(article.getMember().getUuid())
-        );
     }
 
     public String createRecommendationArticle(Team team, Member systemAdmin, List<Problem> problems, LocalDate date) {

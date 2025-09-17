@@ -10,6 +10,7 @@ import site.codemonster.comon.domain.article.dto.response.ArticleResponse;
 import site.codemonster.comon.domain.article.dto.response.TeamSubjectResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.service.ArticleService;
+import site.codemonster.comon.domain.article.utils.ArticleResponseUtils;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
@@ -40,6 +41,7 @@ public class ArticleController {
 
     private final ArticleService articleService;
     private final TeamMemberService teamMemberService;
+    private final ArticleResponseUtils articleResponseUtils;
 
     @PostMapping
     public ResponseEntity<?> createArticle(
@@ -68,7 +70,7 @@ public class ArticleController {
 
         Page<Article> myArticles = articleService.getMyArticlesUsingPaging(member.getId(), teamId, pageable);
 
-        Page<ArticleResponse> responses = myArticles.map(articleService::getArticleResponse);
+        Page<ArticleResponse> responses = myArticles.map(articleResponseUtils::getArticleResponse);
 
         return ResponseEntity.status(GET_MY_PAGE_ARTICLE_PARTICULAR_TEAM.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +81,7 @@ public class ArticleController {
     public ResponseEntity<?> getArticlesByTeam(@PathVariable Long teamId) {
         List<Article> articles = articleService.getAllArticlesByTeam(teamId);
         List<ArticleResponse> responses = articles.stream()
-                .map(articleService::getArticleResponse)
+                .map(articleResponseUtils::getArticleResponse)
                 .toList();
 
         return ResponseEntity.status(GET_ARTICLE_PARTICULAR_TEAM.getStatusCode())
@@ -123,7 +125,7 @@ public class ArticleController {
         Page<Article> articlePage = articleService.getArticlesByTeamAndDate(teamId, date, pageable);
 
         Page<ArticleParticularDateResponse> responsePage = articlePage.map(article ->
-                articleService.getArticleParticularDateResponse(article, member, isMyTeam));
+                articleResponseUtils.getArticleParticularDateResponse(article, member, isMyTeam));
 
 
         return ResponseEntity.status(GET_ARTICLE_PARTICULAR_TEAM_AND_DATE.getStatusCode())
