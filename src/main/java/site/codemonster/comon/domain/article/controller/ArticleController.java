@@ -68,7 +68,7 @@ public class ArticleController {
 
         Page<Article> myArticles = articleService.getMyArticlesUsingPaging(member.getId(), teamId, pageable);
 
-        Page<ArticleResponse> responses = myArticles.map(ArticleResponse::of);
+        Page<ArticleResponse> responses = myArticles.map(articleService::getArticleResponse);
 
         return ResponseEntity.status(GET_MY_PAGE_ARTICLE_PARTICULAR_TEAM.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +79,7 @@ public class ArticleController {
     public ResponseEntity<?> getArticlesByTeam(@PathVariable Long teamId) {
         List<Article> articles = articleService.getAllArticlesByTeam(teamId);
         List<ArticleResponse> responses = articles.stream()
-                .map(ArticleResponse::of)
+                .map(articleService::getArticleResponse)
                 .toList();
 
         return ResponseEntity.status(GET_ARTICLE_PARTICULAR_TEAM.getStatusCode())
@@ -122,7 +122,9 @@ public class ArticleController {
         boolean isMyTeam = teamMemberService.existsByTeamIdAndMemberId(teamId, member);
         Page<Article> articlePage = articleService.getArticlesByTeamAndDate(teamId, date, pageable);
 
-        Page<ArticleParticularDateResponse> responsePage = articlePage.map(article -> ArticleParticularDateResponse.from(article, member, isMyTeam));
+        Page<ArticleParticularDateResponse> responsePage = articlePage.map(article ->
+                articleService.getArticleParticularDateResponse(article, member, isMyTeam));
+
 
         return ResponseEntity.status(GET_ARTICLE_PARTICULAR_TEAM_AND_DATE.getStatusCode())
             .contentType(MediaType.APPLICATION_JSON)
@@ -144,7 +146,7 @@ public class ArticleController {
     }
 
     @GetMapping("/teams/{teamId}/subjects")
-    public ResponseEntity<?> getTeamSubjectsByDate(
+    public ResponseEntity<?> getTeamSubjectsByDate( // 특정 날짜에 팀 공지사항 조회
             @PathVariable("teamId") Long teamId,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {

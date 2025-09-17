@@ -11,22 +11,15 @@ public record ArticleResponse(
     String articleBody,
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdDate,
-    String imageUrl,
     String memberName,
     String memberImage
 ) {
     public static ArticleResponse of(Article article) {
-        String imageUrl = null;
-        if(!article.getImages().isEmpty()){
-            imageUrl = article.getImages().get(0).getImageUrl();
-        }
-
         return new ArticleResponse(
             article.getArticleId(),
             article.getArticleTitle(),
             article.getArticleBody(),
             article.getCreatedDate(),
-            imageUrl,
             article.getMember().getMemberName(),
             article.getMember().getImageUrl()
         );

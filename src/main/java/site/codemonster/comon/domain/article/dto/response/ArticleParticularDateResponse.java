@@ -12,7 +12,6 @@ public record ArticleParticularDateResponse(
         String articleBody,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdDate,
-        String imageUrl,
         String memberName,
         String memberImage,
         Boolean isAuthor
@@ -26,14 +25,8 @@ public record ArticleParticularDateResponse(
                     article.getCreatedDate(),
                     null,
                     article.getMember().getMemberName(),
-                    article.getMember().getImageUrl(),
                     member.getUuid().equals(article.getMember().getUuid())
             );
-        }
-
-        String imageUrl = null;
-        if(!article.getImages().isEmpty()){
-            imageUrl = article.getImages().get(0).getImageUrl();
         }
 
         return new ArticleParticularDateResponse(
@@ -41,7 +34,6 @@ public record ArticleParticularDateResponse(
                 article.getArticleTitle(),
                 article.getArticleBody(),
                 article.getCreatedDate(),
-                imageUrl,
                 article.getMember().getMemberName(),
                 article.getMember().getImageUrl(),
                 member.getUuid().equals(article.getMember().getUuid())
