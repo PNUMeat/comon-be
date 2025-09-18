@@ -45,7 +45,8 @@ public class MemberService {
         Member member
     ){
         member.updateProfile(
-            memberProfileCreateRequest.memberName(), memberProfileCreateRequest.memberExplain(), memberProfileCreateRequest.imageUrl()
+            memberProfileCreateRequest.memberName(), memberProfileCreateRequest.memberExplain(),
+                imageFieldConvertUtils.convertImageUrlToObjectKey(memberProfileCreateRequest.imageUrl())
         );
     }
 

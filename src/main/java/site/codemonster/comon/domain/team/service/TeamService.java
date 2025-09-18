@@ -166,7 +166,7 @@ public class TeamService {
         team.updateTeamInfo(teamInfoEditRequest);
 
         if (teamInfoEditRequest.teamIconUrl() != null){
-            team.updateTeamIconUrl(teamInfoEditRequest.teamIconUrl());
+            team.updateTeamIconUrl(imageFieldConvertUtils.convertImageUrlToObjectKey(teamInfoEditRequest.teamIconUrl()));
         }
 
         return team;
