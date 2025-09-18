@@ -30,8 +30,4 @@ public class ArticleImage {
     public void updateArticle(Article article) {
         this.article = article;
     }
-
-    public void updateImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }

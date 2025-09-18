@@ -20,7 +20,7 @@ public class ArticleResponseUtils {
                 article.getArticleBody(),
                 article.getCreatedDate(),
                 article.getMember().getMemberName(),
-                imageFieldConvertUtils.convertObjectKeyToImageUrl(article.getMember().getImageUrl())  // 변환된 멤버 이미지
+                imageFieldConvertUtils.convertObjectKeyToImageUrl(article.getMember().getImageUrl())
         );
     }
 
