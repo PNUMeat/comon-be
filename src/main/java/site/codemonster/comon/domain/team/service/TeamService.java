@@ -72,18 +72,6 @@ public class TeamService {
         return teamRepository.findAllWithPagination(pageable);
     }
 
-    public TeamInfoResponse getTeamInfoResponse(Team team){
-        return new TeamInfoResponse(
-                team.getTeamId(),
-                team.getTeamName(),
-                team.getTeamExplain(),
-                team.getTeamTopic().getName(),
-                team.getMaxParticipant(),
-                team.getTeamPassword(),
-                imageFieldConvertUtils.convertObjectKeyToImageUrl(team.getTeamIconUrl())
-        );
-    }
-
     public Page<Team> getAllTeamsByKeywordUsingPaging(Pageable pageable, String keyword){
         return teamRepository.findByTeamNameContaining(keyword, pageable);
     }

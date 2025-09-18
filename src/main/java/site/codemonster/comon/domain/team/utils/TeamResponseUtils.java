@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import site.codemonster.comon.domain.auth.utils.MemberResponseUtils;
 import site.codemonster.comon.domain.team.dto.response.MyTeamResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamAllResponse;
+import site.codemonster.comon.domain.team.dto.response.TeamInfoResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
 
@@ -51,6 +52,18 @@ public class TeamResponseUtils {
                 team.getTeamAnnouncement(),
                 teamRecruitId,
                 team.getCreatedDate().toLocalDate()
+        );
+    }
+
+    public TeamInfoResponse getTeamInfoResponse(Team team){
+        return new TeamInfoResponse(
+                team.getTeamId(),
+                team.getTeamName(),
+                team.getTeamExplain(),
+                team.getTeamTopic().getName(),
+                team.getMaxParticipant(),
+                team.getTeamPassword(),
+                imageFieldConvertUtils.convertObjectKeyToImageUrl(team.getTeamIconUrl())
         );
     }
 }

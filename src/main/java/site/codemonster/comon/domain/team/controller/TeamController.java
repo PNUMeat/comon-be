@@ -238,7 +238,7 @@ public class TeamController {
 
         return ResponseEntity.status(TEAM_EDIT_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(teamService.getTeamInfoResponse(updatedTeam)));
+                .body(ApiResponse.successResponseWithData(teamResponseUtils.getTeamInfoResponse(updatedTeam)));
     }
 
     @DeleteMapping("/{teamId}")
@@ -263,7 +263,7 @@ public class TeamController {
         Team team = teamService.getTeamInfo(teamId, member);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(teamService.getTeamInfoResponse(team)));
+                .body(ApiResponse.successResponseWithData(teamResponseUtils.getTeamInfoResponse(team)));
     }
 
     @PostMapping("/{teamId}/team-manager")
