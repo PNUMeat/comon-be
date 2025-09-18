@@ -11,7 +11,7 @@ import site.codemonster.comon.domain.recommendation.repository.PlatformRecommend
 
 import java.util.List;
 import java.util.stream.Collectors;
-import site.codemonster.comon.global.util.convertUtils.ConvertUtils;
+import site.codemonster.comon.global.util.convertUtils.JsonListConvertUtils;
 
 @Slf4j
 @Service
@@ -20,7 +20,7 @@ import site.codemonster.comon.global.util.convertUtils.ConvertUtils;
 public class PlatformRecommendationService {
 
     private final PlatformRecommendationRepository platformRecommendationRepository;
-    private final ConvertUtils convertUtils;
+    private final JsonListConvertUtils convertUtils;
 
     @Transactional
     public void createPlatformRecommendations(TeamRecommendation teamRecommendation, List<TeamRecommendationRequest.PlatformRecommendationSetting> settings) {

@@ -28,4 +28,8 @@ public class TeamRecruitImage {
     public void updateTeamRecruit(TeamRecruit teamRecruit){
         this.teamRecruit = teamRecruit;
     }
+
+    public void updateImageUrl(String imageUrl){
+        this.imageUrl = imageUrl;
+    }
 }

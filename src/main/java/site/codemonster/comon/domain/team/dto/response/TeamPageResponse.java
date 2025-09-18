@@ -12,9 +12,9 @@ public record TeamPageResponse(
         Boolean teamManager,
         List<SubjectArticleDateAndTagResponse> subjectArticleDateAndTagResponses
 ) {
-    public static TeamPageResponse from(Team team, Boolean teamManager , List<Article> articles){
+    public static TeamPageResponse from(MyTeamResponse myTeamResponse, Boolean teamManager , List<Article> articles){
         return new TeamPageResponse(
-                MyTeamResponse.of(team),
+                myTeamResponse,
                 teamManager,
                 articles.stream()
                         .map(SubjectArticleDateAndTagResponse::of)

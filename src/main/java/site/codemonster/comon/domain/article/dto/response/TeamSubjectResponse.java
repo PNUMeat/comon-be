@@ -12,23 +12,16 @@ public record TeamSubjectResponse(
         String articleBody,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdDate,
-        String imageUrl,
         String authorName,
         String authorImageUrl
 ) {
     public static TeamSubjectResponse of(Article article) {
-        String imageUrl = null;
-        if(!article.getImages().isEmpty()){
-            imageUrl = article.getImages().get(0).getImageUrl();
-        }
-
         return new TeamSubjectResponse(
                 article.getArticleId(),
                 article.getArticleCategory().getName(),
                 article.getArticleTitle(),
                 article.getArticleBody(),
                 article.getCreatedDate(),
-                imageUrl,
                 article.getMember().getMemberName(),
                 article.getMember().getImageUrl()
         );
