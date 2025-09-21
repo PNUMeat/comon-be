@@ -19,57 +19,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TeamRecommendationScheduler {
 
-    private final TeamRecommendationLowService teamRecommendationLowService;
     private final TeamRecommendationService teamRecommendationService;
-    private final RecommendationHistoryLowService recommendationHistoryLowService;
 
     @Scheduled(cron = "0 0 * * * *")
-    @Transactional
     public void executeAutoRecommendations() {
-        LocalDateTime now = LocalDateTime.now();
-        int currentHour = now.getHour();
-        DayOfWeek currentDayOfWeek = now.getDayOfWeek();
-        LocalDate today = now.toLocalDate();
-
-        // 등록된 모든 TeamRecommendation 조회
-        List<TeamRecommendation> teamRecommendations =
-                teamRecommendationLowService.findAllWithRecommendationDays();
-
-        // 오늘 이미 추천된 팀들의 PK
-        List<Long> alreadyRecommendedTeamIds = recommendationHistoryLowService.findByLocalDate(today)
-                .stream()
-                .map(recommendationHistory ->
-                        recommendationHistory.getTeam().getTeamId()).toList();
-
-
-        // 추천 요일, 시간이 아닌 팀과 이미 추천된 팀들을 제외한 TeamRecommendation
-        List<TeamRecommendation> activeTeamRecommendations = teamRecommendations.stream()
-                .filter(teamRecommendation -> {
-                    if(!teamRecommendation.getRecommendationAt().equals(currentHour)) return false;
-
-                    List<DayOfWeek> dayOfWeeks = teamRecommendation.getTeamRecommendationDays()
-                            .stream().map(TeamRecommendationDay::getDayOfWeek).toList();
-
-                    if (alreadyRecommendedTeamIds.contains(teamRecommendation.getTeam().getTeamId())) return false;
-
-                    if (dayOfWeeks.contains(currentDayOfWeek)) return true;
-                    return false;
-                }).toList();
-
-
-
-        log.info("자동 추천 실행 - 시간: {}시, 요일: {}, 대상 팀: {}개",
-                currentHour, currentDayOfWeek.name(), teamRecommendations.size());
-        try {
-            activeTeamRecommendations.forEach(teamRecommendation -> {
-                teamRecommendationService.executeRecommendation(teamRecommendation, today);
-            });
-        } catch (Exception e) {
-            log.info("자동 추천 실패 {}", e.getMessage());
-        }
-
-        log.info("자동 추천 성공");
-
+        LocalDateTime current = LocalDateTime.now();
+        teamRecommendationService.executeAutoRecommendation(current);
     }
 
 }

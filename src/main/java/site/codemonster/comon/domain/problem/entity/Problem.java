@@ -20,7 +20,6 @@ import lombok.Getter;
         }
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 public class Problem extends TimeStamp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +50,14 @@ public class Problem extends TimeStamp {
         this.title = problemInfoRequest.getTitle();
         this.problemStep = problemInfoRequest.getProblemStep();
         this.url = problemInfoRequest.getUrl();
+    }
+
+    public Problem(Platform platform, String platformProblemId, String title, ProblemStep problemStep, String url) {
+        this.platform = platform;
+        this.platformProblemId = platformProblemId;
+        this.title = title;
+        this.problemStep = problemStep;
+        this.url = url;
     }
 
     public void updateProblem(ProblemUpdateRequest problemUpdateRequest) {

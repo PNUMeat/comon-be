@@ -41,5 +41,4 @@ public class TeamRecommendation extends TimeStamp {
         this.team = team;
         this.recommendationAt = recommendationAt;
     }
-
 }

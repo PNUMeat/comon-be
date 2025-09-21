@@ -41,4 +41,11 @@ public class PlatformRecommendation extends TimeStamp {
         this.problemStep = platformRecommendationRequest.problemStep();
         this.problemCount = platformRecommendationRequest.problemCount();
     }
+
+    public PlatformRecommendation(TeamRecommendation teamRecommendation, Platform platform, ProblemStep problemStep, Integer problemCount) {
+        this.teamRecommendation = teamRecommendation;
+        this.platform = platform;
+        this.problemStep = problemStep;
+        this.problemCount = problemCount;
+    }
 }

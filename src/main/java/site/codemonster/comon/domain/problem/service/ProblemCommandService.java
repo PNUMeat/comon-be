@@ -32,8 +32,6 @@ public class ProblemCommandService {
     private final ProblemRepository problemRepository;
     private final ProblemCollectorFactory collectorFactory;
     private final ProblemQueryService problemQueryService;
-    private final TeamLowService teamLowService;
-    private final RecommendationHistoryLowService recommendationHistoryLowService;
 
     public ProblemInfoResponse checkProblem(ProblemRequest problemRequest, Platform platform) {
         if (platform == Platform.PROGRAMMERS && problemRequest.title().isBlank())
