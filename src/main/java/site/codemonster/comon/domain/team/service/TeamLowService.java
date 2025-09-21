@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
 import site.codemonster.comon.global.error.Team.TeamNotFoundException;
+import site.codemonster.comon.global.error.recommendation.TeamRecommendationNotFoundException;
 
 @RequiredArgsConstructor
 @Transactional
@@ -20,7 +21,12 @@ public class TeamLowService {
     }
 
     public Team findByTeamIdWithTeamRecommendation(Long teamId) {
-        return teamRepository.findByTeamIdWithTeamRecommendation(teamId)
+        Team team = teamRepository.findByTeamIdWithTeamRecommendation(teamId)
                 .orElseThrow(TeamNotFoundException::new);
+
+        if (team.getTeamRecommendation() == null)
+            throw new TeamRecommendationNotFoundException();
+
+        return team;
     }
 }

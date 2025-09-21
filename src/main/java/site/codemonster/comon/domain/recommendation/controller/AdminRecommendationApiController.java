@@ -22,13 +22,12 @@ public class AdminRecommendationApiController {
     private final TeamRecommendationService teamRecommendationService;
 
     @PostMapping("/settings")
-    public ResponseEntity<?> saveTeamRecommendationSetting(@RequestBody @Valid TeamRecommendationRequest request) {
+    public ResponseEntity<Void> saveTeamRecommendationSetting(@RequestBody @Valid TeamRecommendationRequest request) {
 
         teamRecommendationService.saveRecommendationSettings(request);
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getStatusCode())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.createResponseWithMessage(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getMessage()));
+                .contentType(MediaType.APPLICATION_JSON).build();
     }
 
     @GetMapping("/settings/{teamId}")
@@ -43,14 +42,12 @@ public class AdminRecommendationApiController {
     }
 
     @DeleteMapping("/settings/{teamId}")
-    public ResponseEntity<ApiResponse<?>> deleteTeamRecommendationSetting(@PathVariable Long teamId) {
+    public ResponseEntity<Void> deleteTeamRecommendationSetting(@PathVariable Long teamId) {
 
         teamRecommendationService.deleteTeamRecommendation(teamId);
 
 
-        return ResponseEntity.status(RECOMMENDATION_SETTINGS_RESET_SUCCESS.getStatusCode())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithMessage(RECOMMENDATION_SETTINGS_RESET_SUCCESS.getMessage()));
+        return ResponseEntity.status(RECOMMENDATION_SETTINGS_RESET_SUCCESS.getStatusCode()).build();
     }
 
     @PostMapping("/manual")

@@ -23,6 +23,7 @@ public record TeamRecommendationRequest(
         Integer recommendationAt,
 
         @NotNull(message = "추천 요일 설정은 필수입니다.")
+        @Size(min = 1, max = 7, message = "추천 요일 설정은 필수입니다.")
         Set<DayOfWeek> recommendDays
 ) {
 }

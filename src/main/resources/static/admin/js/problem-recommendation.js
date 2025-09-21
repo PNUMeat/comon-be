@@ -1,5 +1,3 @@
-// problem-recommendation.js - 문제 추천 설정 페이지 JavaScript
-
 let currentTeamId = null;
 let selectedDays = [];       // ["MONDAY", ...]
 let selectedDates = [];      // ["2025-01-01", ...] for manual
@@ -14,14 +12,18 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadTeamOptions() {
     fetch("/api/v1/teams/all")
         .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                populateTeamOptions(data.data);
+        .then(apiRes => {
+            if (apiRes.status === "success") {
+                populateTeamOptions(apiRes.data);
             } else {
-                console.error("팀 목록 로드 실패:", data.message);
+                console.error("팀 목록 로드 실패:", apiRes.message);
+                alert(apiRes.message || "팀 목록 조회 실패");
             }
         })
-        .catch(err => console.error("팀 목록 불러오기 오류:", err));
+        .catch(err => {
+            console.error("팀 목록 불러오기 오류:", err);
+            alert("팀 목록 불러오기 중 오류: " + err.message);
+        });
 }
 
 function populateTeamOptions(teams) {
@@ -154,7 +156,7 @@ function saveSettings() {
         teamId: parseInt(currentTeamId),
         platformRecommendationRequests: platformSettings,
         recommendationAt: hour,
-        recommendDays: selectedDays // ["MONDAY", ...]
+        recommendDays: selectedDays
     };
 
     fetch("/admin/recommendations/settings", {
@@ -162,12 +164,21 @@ function saveSettings() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                alert(data.message || "설정이 저장되었습니다.");
+        .then(res => {
+            if (res.status === 201) {
+                alert("설정이 저장되었습니다.");
+                return null;
             } else {
-                alert("저장 실패: " + (data.message || "알 수 없는 오류"));
+                return res.json();
+            }
+        })
+        .then(apiRes => {
+            if (!apiRes) return;
+            if (apiRes.status === "fail") {
+                const messages = Object.values(apiRes.data || {}).join("\n");
+                alert("입력값 검증 실패:\n" + messages);
+            } else {
+                alert("저장 실패: " + (apiRes.message || "알 수 없는 오류"));
             }
         })
         .catch(err => {
@@ -182,14 +193,13 @@ function loadTeamSettings() {
 
     fetch(`/admin/recommendations/settings/${currentTeamId}`)
         .then(res => res.json())
-        .then(data => {
-            if (data.status !== "success") {
-                alert(data.message || "설정 조회에 실패했습니다.");
+        .then(apiRes => {
+            if (apiRes.status !== "success") {
+                alert(apiRes.message || "설정 조회에 실패했습니다.");
                 return;
             }
-            const res = data.data; // TeamRecommendationResponse
-            applyTeamSettingsToUI(res);
-            alert(data.message || "설정을 불러왔습니다.");
+            applyTeamSettingsToUI(apiRes.data);
+            alert(apiRes.message || "설정을 불러왔습니다.");
         })
         .catch(err => {
             console.error("설정 조회 실패:", err);
@@ -198,13 +208,11 @@ function loadTeamSettings() {
 }
 
 function applyTeamSettingsToUI(res) {
-    // 시간
     const timeSel = document.getElementById("recommendation-time");
     if (typeof res.recommendationAt === "number") {
         timeSel.value = String(res.recommendationAt);
     }
 
-    // 요일
     selectedDays = Array.isArray(res.recommendDays) ? res.recommendDays.slice() : [];
     document.querySelectorAll(".day-btn").forEach(btn => {
         const day = btn.getAttribute("data-day");
@@ -212,7 +220,6 @@ function applyTeamSettingsToUI(res) {
         else btn.classList.remove("active");
     });
 
-    // 플랫폼 추천 목록
     const tbody = document.getElementById("recommendation-list");
     tbody.innerHTML = "";
 
@@ -237,21 +244,25 @@ function applyTeamSettingsToUI(res) {
     }
 }
 
-// 삭제(초기화) (DELETE /admin/recommendations/settings/{teamId})
+// 삭제 (DELETE /admin/recommendations/settings/{teamId})
 function deleteTeamSettings() {
     if (!currentTeamId) return;
 
     if (!confirm("정말로 이 팀의 추천 설정을 초기화하시겠습니까?")) return;
 
     fetch(`/admin/recommendations/settings/${currentTeamId}`, { method: "DELETE" })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                alert(data.message || "설정이 초기화되었습니다.");
+        .then(res => {
+            if (res.status === 204) {
+                alert("설정이 초기화되었습니다.");
                 clearUiOnly();
+                return null;
             } else {
-                alert("초기화 실패: " + (data.message || "알 수 없는 오류"));
+                return res.json();
             }
+        })
+        .then(apiRes => {
+            if (!apiRes) return;
+            alert("초기화 실패: " + (apiRes.message || "알 수 없는 오류"));
         })
         .catch(err => {
             console.error("설정 삭제 실패:", err);
@@ -259,23 +270,19 @@ function deleteTeamSettings() {
         });
 }
 
-// 화면만 초기화(서버 값은 유지)
+// 화면만 초기화
 function clearUiOnly() {
-    // 목록 테이블
     document.getElementById("recommendation-list").innerHTML =
         `<tr><td colspan="4" class="text-center text-muted">아직 추가된 설정이 없습니다</td></tr>`;
 
-    // 시간/요일
     document.getElementById("recommendation-time").value = "9";
     selectedDays = [];
     document.querySelectorAll(".day-btn").forEach(btn => btn.classList.remove("active"));
 
-    // 입력 필드
     document.getElementById("platform-select").value = "";
     document.getElementById("step-select").value = "";
     document.getElementById("problem-count").value = "2";
 
-    // 수동 추천 선택 날짜
     selectedDates = [];
     refreshSelectedDatesUi();
 }
@@ -283,7 +290,7 @@ function clearUiOnly() {
 // ==================== 수동 추천 (POST /admin/recommendations/manual) ====================
 function addSelectedDate() {
     const input = document.getElementById("manual-date-picker");
-    const val = input.value; // "YYYY-MM-DD"
+    const val = input.value;
     if (!val) return;
     if (!selectedDates.includes(val)) selectedDates.push(val);
     input.value = "";
@@ -329,7 +336,7 @@ function executeManualRecommendation() {
 
     const payload = {
         teamId: parseInt(currentTeamId),
-        selectedDates: selectedDates // ["2025-01-01", ...]
+        selectedDates: selectedDates
     };
 
     fetch("/admin/recommendations/manual", {
@@ -338,13 +345,22 @@ function executeManualRecommendation() {
         body: JSON.stringify(payload)
     })
         .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                // ManualRecommendationResponse: totalRecommended, processedDates, createdArticleTitles, message
-                const msg = data.data?.message || data.message || "수동 추천이 완료되었습니다.";
+        .then(apiRes => {
+            if (apiRes.status === "success") {
+                const msg = apiRes.data?.message
+                    || apiRes.message
+                    || "수동 추천이 완료되었습니다.";
+
                 alert(msg);
+
+                console.log("총 추천 문제 수:", apiRes.data.totalRecommended);
+                console.log("처리된 날짜 수:", apiRes.data.processedDates);
+                console.log("생성된 게시글 목록:", apiRes.data.createdArticleTitles);
+            } else if (apiRes.status === "fail") {
+                const messages = Object.values(apiRes.data || {}).join("\n");
+                alert("입력값 검증 실패:\n" + messages);
             } else {
-                alert("수동 추천 실패: " + (data.message || "알 수 없는 오류"));
+                alert("수동 추천 실패: " + (apiRes.message || "알 수 없는 오류"));
             }
         })
         .catch(err => {
@@ -352,3 +368,4 @@ function executeManualRecommendation() {
             alert("수동 추천 중 오류 발생: " + err.message);
         });
 }
+

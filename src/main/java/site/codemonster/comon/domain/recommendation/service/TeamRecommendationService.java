@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationDuplicateException;
+import site.codemonster.comon.global.error.recommendation.TeamRecommendationNotFoundException;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationProblemShortageException;
 
 @Slf4j
@@ -86,7 +87,7 @@ public class TeamRecommendationService {
     // 팀 추천 삭제
     public void deleteTeamRecommendation(Long teamId) {
 
-        Team team = teamLowService.findById(teamId);
+        Team team = teamLowService.findByTeamIdWithTeamRecommendation(teamId);
 
         platformRecommendationLowService.deleteByTeamRecommendationId(team.getTeamRecommendation().getId());
         teamRecommendationDayLowService.deleteByTeamRecommendationId(team.getTeamRecommendation().getId());

@@ -33,6 +33,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     )
     Optional<Team> findTeamByTeamIdWithTeamRecruit(@Param("teamId") Long teamId);
 
-    @Query("select t from Team t join fetch t.teamRecommendation where t.teamId = :teamId")
+    @Query("select t from Team t left join fetch t.teamRecommendation where t.teamId = :teamId")
     Optional<Team> findByTeamIdWithTeamRecommendation(Long teamId);
 }
