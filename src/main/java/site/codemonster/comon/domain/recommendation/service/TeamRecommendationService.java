@@ -1,33 +1,33 @@
 package site.codemonster.comon.domain.recommendation.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.service.ArticleService;
-import site.codemonster.comon.domain.auth.entity.Member;
-import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.domain.problem.entity.Problem;
-import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.service.ProblemQueryService;
 import site.codemonster.comon.domain.recommendation.dto.request.ManualRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.request.TeamRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.response.ManualRecommendationResponse;
-import site.codemonster.comon.domain.recommendation.dto.response.TeamRecommendationSettingsResponse;
+import site.codemonster.comon.domain.recommendation.dto.response.PlatformRecommendationResponse;
+import site.codemonster.comon.domain.recommendation.dto.response.TeamRecommendationResponse;
 import site.codemonster.comon.domain.recommendation.entity.PlatformRecommendation;
+import site.codemonster.comon.domain.recommendation.entity.RecommendationHistory;
 import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
-import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationRepository;
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendationDay;
 import site.codemonster.comon.domain.team.entity.Team;
-import site.codemonster.comon.domain.team.service.TeamService;
+import site.codemonster.comon.domain.team.service.TeamLowService;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-import site.codemonster.comon.global.error.recommendation.TeamRecommendationNotFoundException;
-import site.codemonster.comon.global.util.convertUtils.ConvertUtils;
-import site.codemonster.comon.global.util.responseUtils.ResponseUtils;
+
+import site.codemonster.comon.domain.teamMember.entity.TeamMember;
+import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
+import site.codemonster.comon.global.error.recommendation.TeamRecommendationDuplicateException;
+import site.codemonster.comon.global.error.recommendation.TeamRecommendationProblemShortageException;
 
 @Slf4j
 @Service
@@ -35,173 +35,134 @@ import site.codemonster.comon.global.util.responseUtils.ResponseUtils;
 @Transactional(readOnly = true)
 public class TeamRecommendationService {
 
-    private final TeamService teamService;
-    private final ArticleService articleService;
-    private final RecommendationHistoryService recommendationHistoryService;
-    private final TeamRecommendationRepository teamRecommendationRepository;
-    private final PlatformRecommendationService platformRecommendationService;
-    private final MemberService memberService;
+    private final TeamLowService teamLowService;
+    private final TeamRecommendationLowService teamRecommendationLowService;
+    private final TeamRecommendationDayLowService teamRecommendationDayLowService;
+    private final PlatformRecommendationLowService platformRecommendationLowService;
+    private final RecommendationHistoryLowService recommendationHistoryLowService;
     private final ProblemQueryService problemQueryService;
-    private final ObjectMapper objectMapper;
-    private final ConvertUtils convertUtils;
-
-    @Value("${app.system-admin-id:1}")
-    private Long adminId;
+    private final ArticleService articleService;
+    private final TeamMemberService teamMemberService;
 
     @Transactional
-    public void saveRecommendationSettings(TeamRecommendation teamRecommendation, TeamRecommendationRequest request) {
-        teamRecommendation.updateInitialSettings(request);
-        teamRecommendationRepository.save(teamRecommendation);
+    public TeamRecommendation saveRecommendationSettings(TeamRecommendationRequest teamRecommendationRequest) {
+        Long teamId = teamRecommendationRequest.teamId();
+        Team findTeam = teamLowService.findById(teamId);
+
+        if(teamRecommendationLowService.isExistByTeam(findTeam)) // 이미 존재하는 추천이 있으면 throw
+            throw new TeamRecommendationDuplicateException();
+
+        TeamRecommendation savedTeamRecommendation = teamRecommendationLowService.save(teamRecommendationRequest, findTeam);
+
+        // 추천 요일 저장
+        teamRecommendationDayLowService.saveAll(savedTeamRecommendation, teamRecommendationRequest.recommendDays());
+        // 추천 플랫폼 저장
+        platformRecommendationLowService.saveAll(teamRecommendationRequest.platformRecommendationRequests(), savedTeamRecommendation);
+
+        return savedTeamRecommendation;
     }
 
-    public TeamRecommendationSettingsResponse getRecommendationSettings(TeamRecommendation teamRecommendation) {
-        List<PlatformRecommendation> platformRecommendations =
-                platformRecommendationService.findByTeamRecommendation(teamRecommendation);
-        return TeamRecommendationSettingsResponse.of(teamRecommendation, platformRecommendations, objectMapper);
+    // 기존 팀 추천 조회
+    public TeamRecommendationResponse getRecommendationSettings(Long teamId) {
+
+        // 추천할 팀을 TeamRecommendation과 함께 fetch join해서 조회
+        Team team = teamLowService.findByTeamIdWithTeamRecommendation(teamId);
+
+        TeamRecommendation teamRecommendation = team.getTeamRecommendation();
+
+        Set<DayOfWeek> recommendDays = teamRecommendation.getTeamRecommendationDays().stream().
+                map(TeamRecommendationDay::getDayOfWeek)
+                .collect(Collectors.toSet());
+
+        List<PlatformRecommendationResponse> recommendationResponses = teamRecommendation.getPlatformRecommendations()
+                .stream().map(PlatformRecommendationResponse::new).toList();
+
+        return new TeamRecommendationResponse(teamRecommendation.getRecommendationAt(),
+                recommendDays, recommendationResponses);
     }
+
+
+    // 팀 추천 삭제
+    @Transactional
+    public void deleteTeamRecommendation(Long teamId) {
+
+        Team team = teamLowService.findById(teamId);
+
+        platformRecommendationLowService.deleteByTeamRecommendationId(team.getTeamRecommendation().getId());
+        teamRecommendationDayLowService.deleteByTeamRecommendationId(team.getTeamRecommendation().getId());
+        teamRecommendationLowService.deleteByTeamId(team.getTeamId());
+    }
+
 
     @Transactional
-    public void resetRecommendationSettings(Team team) {
-        teamRecommendationRepository.findByTeam(team)
-                .ifPresent(teamRecommendation -> {
-                    platformRecommendationService.deleteByTeamRecommendation(teamRecommendation);
-                    teamRecommendationRepository.delete(teamRecommendation);
+    public ManualRecommendationResponse executeManualRecommendation(ManualRecommendationRequest request) {
+
+        // 추천할 팀을 TeamRecommendation과 함께 fetch join해서 조회
+        Team team = teamLowService.findByTeamIdWithTeamRecommendation(request.teamId());
+
+        // 추천할 날짜 조회
+        List<LocalDate> historyDates = recommendationHistoryLowService.findByTeamId(team.getTeamId())
+                .stream().map(RecommendationHistory::getRecommendedAt).toList();
+
+        // 이미 추천되었던 날이 있으면 예외 반환
+        request.selectedDates()
+                .forEach(selectedDate -> {
+                    if(historyDates.contains(selectedDate))
+                        throw new TeamRecommendationDuplicateException();
                 });
 
-        TeamRecommendation defaultTeamRecommendation = createDefaultTeamRecommendation(team);
-        teamRecommendationRepository.save(defaultTeamRecommendation);
-    }
+        List<String> createdArticleTitles = new ArrayList<>();
 
-//    @Transactional
-//    public ManualRecommendationResponse executeManualRecommendation(ManualRecommendationRequest request) {
-//        Team team = teamService.getTeamByTeamId(request.teamId());
-//        Member systemAdmin = memberService.getMemberById(adminId);
-//
-//        TeamRecommendation teamRecommendation = getTeamRecommendationByTeam(team);
-//        List<PlatformRecommendation> platformRecommendations = platformRecommendationService.findByTeamRecommendation(teamRecommendation);
-//
-//        int totalRecommended = 0;
-//        List<String> createdArticleTitles = new ArrayList<>();
-//        StringBuilder failMessageBuilder = new StringBuilder();
-//
-//        for (LocalDate date : request.selectedDates()) {
-//            if (articleService.isRecommendationAlreadyExists(team, date)) {
-//                failMessageBuilder.append(String.format("날짜 %s에 이미 추천 기록이 존재합니다.\n", date));
-//                continue;
-//            }
-//
-//            List<Problem> recommendedProblems = recommendProblemsForTeam(team, platformRecommendations); // 팀 설정에 따른 문제 추천 로직 실행
-//
-//            if (!recommendedProblems.isEmpty()) {
-//                String articleTitle = articleService.createRecommendationArticle(team, systemAdmin, recommendedProblems, date);
-//                recommendationHistoryService.saveRecommendationHistory(team, recommendedProblems, date);
-//                createdArticleTitles.add(articleTitle);
-//                totalRecommended += recommendedProblems.size();
-//            } else {
-//                failMessageBuilder.append(String.format("날짜 %s에 추천할 문제가 없습니다. 설정 또는 문제 데이터를 확인하세요.\n", date));
-//            }
-//        }
-//
-//        String responseMessage = ResponseUtils.createRecommendationResponseMessage(totalRecommended, failMessageBuilder);
-//        return ManualRecommendationResponse.of(totalRecommended, createdArticleTitles, responseMessage);
-//    }
+        // 추천 실행
+        request.selectedDates()
+                        .forEach(selectedDate -> createdArticleTitles.add(executeRecommendation(team.getTeamRecommendation(), selectedDate)));
 
-    public TeamRecommendation getTeamRecommendationByTeam(Team team) {
-        return teamRecommendationRepository.findByTeam(team)
-                .orElseThrow(TeamRecommendationNotFoundException::new);
+
+        return ManualRecommendationResponse.of(createdArticleTitles.size(), createdArticleTitles);
+
     }
 
     @Transactional
-    public TeamRecommendation getOrCreateTeamRecommendation(Team team) {
-        return teamRecommendationRepository.findByTeam(team)
-                .orElseGet(() -> {
-                    TeamRecommendation newRecommendation = createDefaultTeamRecommendation(team);
-                    return teamRecommendationRepository.save(newRecommendation);
-                });
+    public String executeRecommendation(TeamRecommendation teamRecommendation, LocalDate selectedDate) {
+
+        List<PlatformRecommendation> platformRecommendations = teamRecommendation.getPlatformRecommendations();
+
+        // 이미 사용한 Problem의 PK들
+        List<Long> excludedProblemIds = recommendationHistoryLowService.findByTeamId(teamRecommendation.getTeam().getTeamId())
+                .stream().map(recommendationHistory -> recommendationHistory.getProblem().getProblemId()).toList();
+
+        // 추천 가능한 문제들
+        List<Problem> recommendationProblems = new ArrayList<>();
+
+        // 추천해야하는 문제 개수
+        int totalProblemCount = 0;
+
+        for (PlatformRecommendation platformRecommendation : platformRecommendations) {
+            recommendationProblems.addAll(problemQueryService
+                    .findRecommendationProblem(excludedProblemIds, platformRecommendation));
+            totalProblemCount += platformRecommendation.getProblemCount();
+        }
+
+        // 추천해야하는 문제 개수보다 적다면 예외 반환
+        if (recommendationProblems.size() < totalProblemCount)
+            throw new TeamRecommendationProblemShortageException();
+
+        // 문제 추천할 TeamManager 아무나 한 명 조회
+        TeamMember findTeamManager = teamMemberService.getTeamManagerByTeamId(teamRecommendation.getTeam().getTeamId());
+
+        // 추천 글 생성
+        String articleTitle = articleService.createRecommendationArticle(
+                   teamRecommendation.getTeam(), findTeamManager.getMember(), recommendationProblems, selectedDate);
+
+        // 추천 기록 저장
+        List<RecommendationHistory> recommendationHistories = recommendationProblems.stream()
+                .map(problem -> new RecommendationHistory(teamRecommendation.getTeam(), problem, selectedDate))
+                .toList();
+
+
+        recommendationHistoryLowService.saveAll(recommendationHistories);
+
+        return articleTitle;
     }
 
-    private TeamRecommendation createDefaultTeamRecommendation(Team team) {
-        return TeamRecommendation.builder()
-                .team(team)
-                .autoRecommendationEnabled(false)
-                .recommendationAt(9)
-                .totalProblemCount(0)
-                .build();
-    }
-
-//    public List<Problem> recommendProblemsForTeam(Team team, List<PlatformRecommendation> platformRecommendations) {
-//        List<PlatformRecommendation> enabledPlatforms = platformRecommendations.stream()
-//                .filter(PlatformRecommendation::getEnabled)
-//                .toList();
-//
-//        if (enabledPlatforms.isEmpty()) {
-//            return Arrays.stream(Platform.values())
-//                    .flatMap(platform -> recommendProblemsByPlatform(team, platform, 2, null, null).stream())
-//                    .collect(Collectors.toList());
-//        }
-//
-//        return enabledPlatforms.stream()
-//                .flatMap(platformRec -> {
-//                    List<String> difficulties = convertUtils.parseJsonToList(platformRec.getDifficulties());
-//                    List<String> tags = convertUtils.parseJsonToList(platformRec.getTags());
-//                    return recommendProblemsByPlatform(
-//                            team,
-//                            platformRec.getPlatform(),
-//                            platformRec.getProblemCount(),
-//                            difficulties,
-//                            tags
-//                    ).stream();
-//                })
-//                .collect(Collectors.toList());
-//    }
-
-//    private List<Problem> recommendProblemsByPlatform(Team team, Platform platform, int count,
-//                                                      List<String> difficulties, List<String> tags) {
-//        Set<Long> recommendedProblemIds = recommendationHistoryService.getRecommendedProblemIds(team, platform);
-//        List<Problem> allProblemsForPlatform = problemQueryService.getProblemsByPlatform(platform);
-//
-//        List<Problem> availableProblems = allProblemsForPlatform.stream()
-//                .filter(p -> !recommendedProblemIds.contains(p.getProblemId()))
-//                .collect(Collectors.toList());
-//
-//        List<Problem> filteredProblems = availableProblems.stream()
-//                .filter(p -> {
-//                    // 난이도 필터링 (OR 조건)
-//                    boolean difficultyMatch = (difficulties == null || difficulties.isEmpty())
-//                            || difficulties.contains(p.getDifficulty());
-//
-//                    // 태그 필터링 (OR 조건) - 개선된 로직
-//                    boolean tagsMatch = true; // 기본값을 true로 변경
-//                    if (tags != null && !tags.isEmpty()) {
-//                        if (p.getTags() == null || p.getTags().trim().isEmpty()) {
-//                            tagsMatch = false;
-//                        } else {
-//                            Set<String> problemTagsSet = Arrays.stream(p.getTags().split(","))
-//                                    .map(String::trim)
-//                                    .filter(tag -> !tag.isEmpty())
-//                                    .collect(Collectors.toSet());
-//
-//                            // 선택한 태그 중 하나라도 문제에 있으면 매치
-//                            tagsMatch = tags.stream()
-//                                    .anyMatch(problemTagsSet::contains);
-//                        }
-//                    }
-//
-//                    return difficultyMatch && tagsMatch;
-//                })
-//                .collect(Collectors.toList());
-//
-//        if (filteredProblems.isEmpty()) {
-//            return Collections.emptyList();
-//        }
-//
-//        Collections.shuffle(filteredProblems);
-//        return filteredProblems.stream()
-//                .limit(count)
-//                .collect(Collectors.toList());
-//    }
-
-    public List<TeamRecommendation> getSchedulingActiveTeamRecommendations() {
-        return teamRecommendationRepository.findByAutoRecommendationEnabledTrue();
-    }
 }

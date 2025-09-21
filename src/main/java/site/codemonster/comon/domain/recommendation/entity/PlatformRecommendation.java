@@ -1,9 +1,10 @@
 package site.codemonster.comon.domain.recommendation.entity;
 
+import site.codemonster.comon.domain.problem.entity.ProblemStep;
 import site.codemonster.comon.domain.problem.enums.Platform;
+import site.codemonster.comon.domain.recommendation.dto.request.PlatformRecommendationRequest;
 import site.codemonster.comon.global.entityListeners.TimeStamp;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,27 +26,19 @@ public class PlatformRecommendation extends TimeStamp {
     @Column(nullable = false)
     private Platform platform;
 
-    @Column(columnDefinition = "TEXT")
-    private String difficulties;
-
-    @Column(columnDefinition = "TEXT")
-    private String tags;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    ProblemStep problemStep;
 
     @Column(nullable = false)
-    private Integer problemCount = 2;
-
-    @Column(nullable = false)
-    private Boolean enabled = false;
+    private Integer problemCount;
 
     protected PlatformRecommendation() {}
 
-    @Builder
-    public PlatformRecommendation(Platform platform, String difficulties, String tags,
-                                  Integer problemCount, Boolean enabled) {
-        this.platform = platform;
-        this.difficulties = difficulties;
-        this.tags = tags;
-        this.problemCount = problemCount;
-        this.enabled = enabled;
+    public PlatformRecommendation(TeamRecommendation teamRecommendation, PlatformRecommendationRequest platformRecommendationRequest) {
+        this.teamRecommendation = teamRecommendation;
+        this.platform = platformRecommendationRequest.platform();
+        this.problemStep = platformRecommendationRequest.problemStep();
+        this.problemCount = platformRecommendationRequest.problemCount();
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import site.codemonster.comon.domain.problem.enums.Platform;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Repository
@@ -30,4 +31,10 @@ public interface RecommendationHistoryRepository extends JpaRepository<Recommend
      * 팀의 추천 기록 삭제
      */
     void deleteByTeamTeamId(Long teamId);
+
+    @Query("select rh from RecommendationHistory rh where rh.recommendedAt = :today")
+    List<RecommendationHistory> findByLocalDate(LocalDate today);
+
+    @Query("select rh from RecommendationHistory rh where rh.team.teamId = :teamId")
+    List<RecommendationHistory> findByTeamId(Long teamId);
 }

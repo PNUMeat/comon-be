@@ -1,6 +1,8 @@
 package site.codemonster.comon.domain.problem.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.problem.collector.ProblemCollector;
@@ -13,6 +15,9 @@ import site.codemonster.comon.domain.problem.dto.response.ProblemResponse;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.repository.ProblemRepository;
+import site.codemonster.comon.domain.recommendation.service.RecommendationHistoryLowService;
+import site.codemonster.comon.domain.team.entity.Team;
+import site.codemonster.comon.domain.team.service.TeamLowService;
 import site.codemonster.comon.global.error.problem.*;
 
 import java.util.ArrayList;
@@ -27,6 +32,8 @@ public class ProblemCommandService {
     private final ProblemRepository problemRepository;
     private final ProblemCollectorFactory collectorFactory;
     private final ProblemQueryService problemQueryService;
+    private final TeamLowService teamLowService;
+    private final RecommendationHistoryLowService recommendationHistoryLowService;
 
     public ProblemInfoResponse checkProblem(ProblemRequest problemRequest, Platform platform) {
         if (platform == Platform.PROGRAMMERS && problemRequest.title().isBlank())

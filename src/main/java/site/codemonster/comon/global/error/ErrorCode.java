@@ -57,6 +57,8 @@ public enum ErrorCode {
 
     // TEAM_RECOMMENDATION
     TEAM_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "팀의 추천 설정이 존재하지 않습니다."),
+    TEAM_RECOMMENDATION_DUPLICATE(HttpStatus.CONFLICT, 400,"이미 팀 추천이 존재합니다"),
+    TEAM_RECOMMENDATION_PROBLEM_SHORTAGE(HttpStatus.BAD_REQUEST, 400,"추천하려는 문제 수가 부족합니다"),
 
     // PROBLEM
     PROBLEM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, 404, "문제를 찾을 수 없습니다."),

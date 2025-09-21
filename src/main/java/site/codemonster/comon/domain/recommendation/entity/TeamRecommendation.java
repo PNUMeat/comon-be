@@ -26,59 +26,20 @@ public class TeamRecommendation extends TimeStamp {
     @JoinColumn(name = "team_id", nullable = false, unique = true)
     private Team team;
 
-    @Setter
-    @Column(nullable = false)
-    private Boolean autoRecommendationEnabled = false;
-
-    @Setter
     @Column(nullable = false)
     private Integer recommendationAt = 9; // 추천 시간 (기본 9시)
 
-    @Setter
-    @Column(nullable = false)
-    private Integer recommendDays = 0; // 비트마스킹으로 요일 저장
+    @OneToMany(mappedBy = "teamRecommendation")
+    private List<TeamRecommendationDay> teamRecommendationDays;
 
-    @Setter
-    @Column(nullable = false)
-    private Integer totalProblemCount = 0;
+    @OneToMany(mappedBy = "teamRecommendation")
+    private List<PlatformRecommendation>  platformRecommendations;
 
     protected TeamRecommendation() {}
 
-    @Builder
-    public TeamRecommendation(Team team, Boolean autoRecommendationEnabled,
-                              Integer recommendationAt, Integer totalProblemCount) {
+    public TeamRecommendation(Team team, Integer recommendationAt) {
         this.team = team;
-        this.autoRecommendationEnabled = autoRecommendationEnabled;
         this.recommendationAt = recommendationAt;
-        this.totalProblemCount = totalProblemCount;
     }
 
-    public void setRecommendationDays(Set<DayOfWeek> days) {
-        this.recommendDays = DateUtils.convertDaysToBitMask(days);
-    }
-
-    public Set<DayOfWeek> getRecommendationDays() {
-        return DateUtils.convertBitMaskToDays(this.recommendDays);
-    }
-
-    public void updateTeamRecommendationSettings(TeamRecommendationRequest request) {
-        this.autoRecommendationEnabled = request.autoRecommendationEnabled();
-        this.recommendationAt = request.recommendationAt();
-        this.totalProblemCount = calculateTotalProblemCount(request.platformSettings());
-        this.setRecommendationDays(request.recommendDays());
-    }
-
-    public void reset() {
-        this.autoRecommendationEnabled = false;
-        this.recommendationAt = 9;
-        this.recommendDays = 0;
-        this.totalProblemCount = 0;
-    }
-
-    private Integer calculateTotalProblemCount(List<TeamRecommendationRequest.PlatformRecommendationSetting> settings) {
-        return settings.stream()
-                .filter(TeamRecommendationRequest.PlatformRecommendationSetting::enabled)
-                .mapToInt(TeamRecommendationRequest.PlatformRecommendationSetting::problemCount)
-                .sum();
-    }
 }

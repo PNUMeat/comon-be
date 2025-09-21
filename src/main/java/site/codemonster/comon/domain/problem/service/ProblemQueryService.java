@@ -1,15 +1,21 @@
 package site.codemonster.comon.domain.problem.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.problem.dto.response.ProblemResponse;
 import site.codemonster.comon.domain.problem.entity.Problem;
+import site.codemonster.comon.domain.problem.entity.ProblemStep;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.repository.ProblemRepository;
+import site.codemonster.comon.domain.recommendation.entity.PlatformRecommendation;
 import site.codemonster.comon.global.error.problem.ProblemNotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,5 +51,14 @@ public class ProblemQueryService {
     public Problem findProblemById(Long problemId) {
         return problemRepository.findById(problemId)
                 .orElseThrow(ProblemNotFoundException::new);
+    }
+
+    public List<Problem> findRecommendationProblem(List<Long> excludedIds, PlatformRecommendation platformRecommendation) {
+
+
+        return problemRepository.findRecommendationProblem(excludedIds, platformRecommendation.getPlatform(),
+                platformRecommendation.getProblemStep(),
+                PageRequest.of(0, platformRecommendation.getProblemCount()))
+                .stream().toList();
     }
 }
