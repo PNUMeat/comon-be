@@ -1,6 +1,7 @@
 package site.codemonster.comon.domain.util;
 
 import org.springframework.test.util.ReflectionTestUtils;
+import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.entity.ProblemStep;
@@ -39,7 +40,7 @@ public final class TestUtil {
     }
 
     public static PlatformRecommendation createPlatformRecommendation(TeamRecommendation teamRecommendation) {
-        PlatformRecommendation platformRecommendation = new PlatformRecommendation(teamRecommendation, Platform.PROGRAMMERS, ProblemStep.STEP1, 3);
+        PlatformRecommendation platformRecommendation = new PlatformRecommendation(teamRecommendation, Platform.PROGRAMMERS, ProblemStep.STEP1, 1);
         ReflectionTestUtils.setField(platformRecommendation, "id", 1L);
         return platformRecommendation;
     }
@@ -66,5 +67,9 @@ public final class TestUtil {
         TeamMember teamMember = new TeamMember(team, member, true);
         ReflectionTestUtils.setField(member, "id", 1L);
         return teamMember;
+    }
+
+    public static AdminMember createAdminMember() {
+        return new AdminMember("admin","admin", "admin");
     }
 }

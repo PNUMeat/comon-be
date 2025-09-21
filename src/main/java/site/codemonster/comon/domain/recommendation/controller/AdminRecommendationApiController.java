@@ -28,7 +28,7 @@ public class AdminRecommendationApiController {
 
         return ResponseEntity.status(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithMessage(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getMessage()));
+                .body(ApiResponse.createResponseWithMessage(RECOMMENDATION_SETTINGS_SAVE_SUCCESS.getMessage()));
     }
 
     @GetMapping("/settings/{teamId}")
