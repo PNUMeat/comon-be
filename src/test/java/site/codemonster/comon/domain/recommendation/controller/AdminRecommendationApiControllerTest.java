@@ -160,8 +160,7 @@ class AdminRecommendationApiControllerTest {
 
         mockMvc.perform(delete("/admin/recommendations/settings/{teamId}", team.getTeamId())
                         .session(session))
-                .andExpect(status().isNoContent())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(status().isNoContent());
 
         boolean present = teamRecommendationRepository.findById(teamRecommendationDay.getId()).isPresent();
         boolean present1 = teamRecommendationDayRepository.findById(teamRecommendationDay.getId()).isPresent();

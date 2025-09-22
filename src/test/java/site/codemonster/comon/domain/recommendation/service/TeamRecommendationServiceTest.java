@@ -335,7 +335,7 @@ class TeamRecommendationServiceTest {
                 .willReturn(List.of(recommendationHistory));
 
         given(problemQueryService.findRecommendationProblem(any(),any()))
-                .willReturn(List.of(problem, problem)); // 추천 가능한 문제 2개
+                .willReturn(List.of()); // 추천 가능한 문제 0개
 
         // when & then
         assertThatThrownBy(()->teamRecommendationService.executeRecommendation(
