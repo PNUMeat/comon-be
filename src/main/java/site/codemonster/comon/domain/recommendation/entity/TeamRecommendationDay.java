@@ -10,6 +10,12 @@ import java.time.DayOfWeek;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Table(uniqueConstraints={
+                @UniqueConstraint(
+                        name="day_of_week_team_recommendation_id",
+                        columnNames={"day_of_week", "team_recommendation_id"}
+                )
+})
 public class TeamRecommendationDay {
 
     @Id
