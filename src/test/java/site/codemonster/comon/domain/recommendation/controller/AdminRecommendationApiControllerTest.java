@@ -3,6 +3,7 @@ package site.codemonster.comon.domain.recommendation.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,11 +41,14 @@ import site.codemonster.comon.domain.teamMember.repository.TeamMemberRepository;
 import site.codemonster.comon.domain.util.TestUtil;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 
+import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -119,6 +123,36 @@ class AdminRecommendationApiControllerTest {
     }
 
     @Test
+    @DisplayName("추천 저장 실패 - 중복된 문제 추천 조합 존재")
+    void saveTeamRecommendationFail() throws Exception {
+
+        // given
+        Team team = teamRepository.save(TestUtil.createTeam());
+
+        TeamRecommendationRequest teamRecommendationRequest = new TeamRecommendationRequest(
+                team.getTeamId(),
+                List.of(
+                        new PlatformRecommendationRequest(Platform.BAEKJOON, ProblemStep.STEP1, 1),
+                        new PlatformRecommendationRequest(Platform.BAEKJOON, ProblemStep.STEP1, 2)),
+                9, Set.of(DayOfWeek.MONDAY));
+
+        String content = objectMapper.writeValueAsString(teamRecommendationRequest);
+
+        String response = mockMvc.perform(post("/admin/recommendations/settings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .session(session)
+                        .content(content)
+                ).andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+        ApiResponse<Map<String,String>> apiResponse = objectMapper.readValue(response, new TypeReference<ApiResponse<Map<String,String>>>() {});
+
+        Map<String, String> data = apiResponse.getData();
+
+        assertThat(data.get("noDuplicateRecommendation")).isEqualTo("중복된 Platform + ProblemStep 조합입니다.");
+    }
+
+    @Test
     @DisplayName("추천 조회 성공")
     void getTeamRecommendationSuccess() throws Exception {
         Team team = teamRepository.save(TestUtil.createTeam());
@@ -133,7 +167,7 @@ class AdminRecommendationApiControllerTest {
                         .session(session))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         ApiResponse<TeamRecommendationResponse> apiResponse =
                 objectMapper.readValue(content, new TypeReference<ApiResponse<TeamRecommendationResponse>>() {});
@@ -194,7 +228,7 @@ class AdminRecommendationApiControllerTest {
                         .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         ApiResponse<ManualRecommendationResponse> apiResponse =
                 objectMapper.readValue(response, new TypeReference<ApiResponse<ManualRecommendationResponse>>() {});
