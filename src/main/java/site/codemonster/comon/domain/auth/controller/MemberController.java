@@ -3,9 +3,9 @@ package site.codemonster.comon.domain.auth.controller;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileCreateRequest;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileUpdateRequest;
 import site.codemonster.comon.domain.auth.dto.response.MemberInfoResponse;
+import site.codemonster.comon.domain.auth.dto.response.MemberProfileResponse;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
-import site.codemonster.comon.domain.auth.utils.MemberResponseUtils;
 import site.codemonster.comon.domain.team.dto.response.TeamAbstractResponse;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
@@ -33,7 +33,6 @@ public class MemberController {
 
     private final MemberService memberService;
     private final TeamMemberService teamMemberService;
-    private final MemberResponseUtils memberResponseUtils;
 
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createMemberProfile(
@@ -56,7 +55,7 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(memberResponseUtils.getMemberProfileResponse(updatedMember)));
+                .body(ApiResponse.successResponseWithData(new MemberProfileResponse(updatedMember)));
     }
 
     @GetMapping("/own-profile") // 자신의 회원 프로필 조회
@@ -64,7 +63,7 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(memberResponseUtils.getMemberProfileResponse(member)));
+                .body(ApiResponse.successResponseWithData(new MemberProfileResponse(member)));
     }
 
     @GetMapping("/profile/{uuid}") // uuid로 회원 프로필 조회
@@ -74,7 +73,7 @@ public class MemberController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(memberResponseUtils.getMemberProfileResponse(findMember)));
+                .body(ApiResponse.successResponseWithData(new MemberProfileResponse(findMember)));
     }
 
 
@@ -88,7 +87,7 @@ public class MemberController {
                 .map(TeamAbstractResponse::of)
                 .toList();
 
-        MemberInfoResponse memberInfoResponse = memberResponseUtils.getMemberInfoResponse(member, teamAbstractResponses);
+        MemberInfoResponse memberInfoResponse = new MemberInfoResponse(member, teamAbstractResponses);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)

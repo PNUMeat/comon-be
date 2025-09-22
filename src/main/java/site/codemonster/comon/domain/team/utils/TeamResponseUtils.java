@@ -3,7 +3,7 @@ package site.codemonster.comon.domain.team.utils;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import site.codemonster.comon.domain.auth.utils.MemberResponseUtils;
+import site.codemonster.comon.domain.auth.dto.response.MemberProfileResponse;
 import site.codemonster.comon.domain.team.dto.response.MyTeamResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamAllResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamInfoResponse;
@@ -14,7 +14,6 @@ import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
 @RequiredArgsConstructor
 public class TeamResponseUtils {
     private final ImageFieldConvertUtils imageFieldConvertUtils;
-    private final MemberResponseUtils memberResponseUtils;
 
     public TeamAllResponse getTeamAllResponse(Team team){
         return new TeamAllResponse(
@@ -28,7 +27,7 @@ public class TeamResponseUtils {
                 team.getStreakDays(),
                 team.getCreatedDate().toLocalDate(),
                 team.getTeamMembers().stream()
-                        .map(tm -> memberResponseUtils.getMemberProfileResponse((tm.getMember())))
+                        .map(tm -> new MemberProfileResponse(tm.getMember()))
                         .collect(Collectors.toList())
         );
     }

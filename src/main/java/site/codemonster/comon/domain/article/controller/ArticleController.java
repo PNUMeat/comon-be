@@ -10,7 +10,6 @@ import site.codemonster.comon.domain.article.dto.response.ArticleResponse;
 import site.codemonster.comon.domain.article.dto.response.TeamSubjectResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.service.ArticleService;
-import site.codemonster.comon.domain.article.utils.ArticleResponseUtils;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
@@ -41,7 +40,6 @@ public class ArticleController {
 
     private final ArticleService articleService;
     private final TeamMemberService teamMemberService;
-    private final ArticleResponseUtils articleResponseUtils;
 
     @PostMapping
     public ResponseEntity<?> createArticle(

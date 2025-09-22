@@ -17,23 +17,6 @@ public record TeamAllResponse(Long teamId,
                               int streakDays,
                               LocalDate createdAt,
                               List<MemberProfileResponse> members) {
-
-    public static TeamAllResponse of(Team team){
-        return new TeamAllResponse(
-                team.getTeamId(),
-                team.getTeamName(),
-                team.getTeamExplain(),
-                team.getTeamIconUrl(),
-                team.getTeamTopic().getName(),
-                team.getMaxParticipant(),
-                team.getTeamMembers().size(),
-                team.getStreakDays(),
-                team.getCreatedDate().toLocalDate(),
-                team.getTeamMembers().stream()
-                        .map(tm -> MemberProfileResponse.of(tm.getMember()))
-                        .collect(Collectors.toList())
-        );
-    }
 }
 
 
