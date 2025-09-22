@@ -29,7 +29,7 @@ public class AdminProblemApiController {
     private final ProblemQueryService problemQueryService;
 
     @PostMapping("/get/baekjoon")
-    public ResponseEntity<?> getBaekjoonProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {
+    public ResponseEntity<ApiResponse<ProblemInfoResponse>> getBaekjoonProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {
         ProblemInfoResponse response = problemCommandService.checkProblem(problemRequest, Platform.BAEKJOON);
 
         return ResponseEntity.status(PROBLEM_CHECK_SUCCESS.getStatusCode())
@@ -38,7 +38,7 @@ public class AdminProblemApiController {
     }
 
     @PostMapping("/get/programmers")
-    public ResponseEntity<?> getProgrammersProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {
+    public ResponseEntity<ApiResponse<ProblemInfoResponse>> getProgrammersProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {
 
         ProblemInfoResponse response = problemCommandService.checkProblem(problemRequest, Platform.PROGRAMMERS);
 
@@ -48,7 +48,7 @@ public class AdminProblemApiController {
     }
 
     @PostMapping("/get/leetcode")
-    public ResponseEntity<?> getLeetcodeProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {
+    public ResponseEntity<ApiResponse<ProblemInfoResponse>> getLeetcodeProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {
         ProblemInfoResponse response = problemCommandService.checkProblem(problemRequest, Platform.LEETCODE);
 
         return ResponseEntity.status(PROBLEM_CHECK_SUCCESS.getStatusCode())
@@ -57,7 +57,7 @@ public class AdminProblemApiController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerProblems(@RequestBody @Valid ProblemBatchRequest batchRequest) {
+    public ResponseEntity<ApiResponse<Map<String,Object>>> registerProblems(@RequestBody @Valid ProblemBatchRequest batchRequest) {
         List<ProblemResponse> savedProblems = problemCommandService.registerProblems(batchRequest.getProblems());
 
         Map<String, Object> responseData = Map.of(
@@ -71,7 +71,7 @@ public class AdminProblemApiController {
     }
 
     @GetMapping("/statistics")
-    public ResponseEntity<?> getProblemStatistics() {
+    public ResponseEntity<ApiResponse<Map<Platform, Long>>> getProblemStatistics() {
         Map<Platform, Long> statistics = problemQueryService.getProblemStatistics();
 
         return ResponseEntity.status(PROBLEM_STATISTICS_GET_SUCCESS.getStatusCode())
@@ -80,7 +80,7 @@ public class AdminProblemApiController {
     }
 
     @GetMapping("/problem-list")
-    public ResponseEntity<?> getProblemList() {
+    public ResponseEntity<ApiResponse<List<ProblemResponse>>> getProblemList() {
         List<ProblemResponse> problems = problemQueryService.getAllProblems();
 
         return ResponseEntity.status(PROBLEM_LIST_GET_SUCCESS.getStatusCode())
@@ -89,7 +89,7 @@ public class AdminProblemApiController {
     }
 
     @GetMapping("/list-by-platform")
-    public ResponseEntity<?> getProblemListByPlatform(@RequestParam String platform) {
+    public ResponseEntity<ApiResponse<List<ProblemResponse>>> getProblemListByPlatform(@RequestParam String platform) {
         List<ProblemResponse> problems = problemQueryService.getProblemsByPlatform(Platform.valueOf(platform.toUpperCase()));
 
         return ResponseEntity.status(PROBLEM_LIST_GET_SUCCESS.getStatusCode())
@@ -98,7 +98,7 @@ public class AdminProblemApiController {
     }
 
     @PutMapping("/{problemId}")
-    public ResponseEntity<?> updateProblem(@PathVariable Long problemId, @RequestBody @Valid ProblemUpdateRequest problemUpdateRequest) {
+    public ResponseEntity<ApiResponse<Void>> updateProblem(@PathVariable Long problemId, @RequestBody @Valid ProblemUpdateRequest problemUpdateRequest) {
         problemCommandService.updateProblem(problemId, problemUpdateRequest);
 
         return ResponseEntity.status(PROBLEM_UPDATE_SUCCESS.getStatusCode())
@@ -107,7 +107,7 @@ public class AdminProblemApiController {
     }
 
     @DeleteMapping("/{problemId}")
-    public ResponseEntity<?> deleteProblem(@PathVariable Long problemId) {
+    public ResponseEntity<ApiResponse<Void>> deleteProblem(@PathVariable Long problemId) {
         problemCommandService.deleteProblem(problemId);
 
         return ResponseEntity.status(PROBLEM_DELETE_SUCCESS.getStatusCode())

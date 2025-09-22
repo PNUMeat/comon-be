@@ -31,7 +31,7 @@ public class AdminRecommendationApiController {
     }
 
     @GetMapping("/settings/{teamId}")
-    public ResponseEntity<?> getTeamRecommendationSetting(@PathVariable Long teamId) {
+    public ResponseEntity<ApiResponse<TeamRecommendationResponse>> getTeamRecommendationSetting(@PathVariable Long teamId) {
 
 
         TeamRecommendationResponse response = teamRecommendationService.getRecommendationSettings(teamId);
@@ -51,7 +51,7 @@ public class AdminRecommendationApiController {
     }
 
     @PostMapping("/manual")
-    public ResponseEntity<?> executeManualRecommendation(@RequestBody @Valid ManualRecommendationRequest request) {
+    public ResponseEntity<ApiResponse<ManualRecommendationResponse>> executeManualRecommendation(@RequestBody @Valid ManualRecommendationRequest request) {
         ManualRecommendationResponse result = teamRecommendationService.executeManualRecommendation(request);
 
         return ResponseEntity.status(MANUAL_RECOMMENDATION_SUCCESS.getStatusCode())
