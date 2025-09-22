@@ -13,8 +13,8 @@ import site.codemonster.comon.domain.problem.dto.request.ProblemUpdateRequest;
 import site.codemonster.comon.domain.problem.dto.response.ProblemInfoResponse;
 import site.codemonster.comon.domain.problem.dto.response.ProblemResponse;
 import site.codemonster.comon.domain.problem.enums.Platform;
-import site.codemonster.comon.domain.problem.service.ProblemCommandService;
-import site.codemonster.comon.domain.problem.service.ProblemQueryService;
+import site.codemonster.comon.domain.problem.service.ProblemHighService;
+import site.codemonster.comon.domain.problem.service.ProblemLowService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 
 import java.util.List;
@@ -25,8 +25,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AdminProblemApiController {
 
-    private final ProblemCommandService problemCommandService;
-    private final ProblemQueryService problemQueryService;
+    private final ProblemHighService problemCommandService;
+    private final ProblemLowService problemQueryService;
 
     @PostMapping("/get/baekjoon")
     public ResponseEntity<ApiResponse<ProblemInfoResponse>> getBaekjoonProblemInfo(@RequestBody @Valid ProblemRequest problemRequest) {

@@ -11,7 +11,7 @@ import site.codemonster.comon.domain.recommendation.dto.response.TeamRecommendat
 import site.codemonster.comon.domain.recommendation.dto.request.ManualRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.request.TeamRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.response.ManualRecommendationResponse;
-import site.codemonster.comon.domain.recommendation.service.TeamRecommendationService;
+import site.codemonster.comon.domain.recommendation.service.TeamRecommendationHighService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 
 @RestController
@@ -19,7 +19,7 @@ import site.codemonster.comon.global.error.dto.response.ApiResponse;
 @RequiredArgsConstructor
 public class AdminRecommendationApiController {
 
-    private final TeamRecommendationService teamRecommendationService;
+    private final TeamRecommendationHighService teamRecommendationService;
 
     @PostMapping("/settings")
     public ResponseEntity<Void> saveTeamRecommendationSetting(@RequestBody @Valid TeamRecommendationRequest request) {

@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.service.ArticleService;
 import site.codemonster.comon.domain.problem.entity.Problem;
-import site.codemonster.comon.domain.problem.service.ProblemQueryService;
+import site.codemonster.comon.domain.problem.service.ProblemLowService;
 import site.codemonster.comon.domain.recommendation.dto.request.ManualRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.request.TeamRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.response.ManualRecommendationResponse;
@@ -29,21 +29,20 @@ import java.util.stream.Collectors;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationDuplicateException;
-import site.codemonster.comon.global.error.recommendation.TeamRecommendationNotFoundException;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationProblemShortageException;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class TeamRecommendationService {
+public class TeamRecommendationHighService {
 
     private final TeamLowService teamLowService;
     private final TeamRecommendationLowService teamRecommendationLowService;
     private final TeamRecommendationDayLowService teamRecommendationDayLowService;
     private final PlatformRecommendationLowService platformRecommendationLowService;
     private final RecommendationHistoryLowService recommendationHistoryLowService;
-    private final ProblemQueryService problemQueryService;
+    private final ProblemLowService problemQueryService;
     private final ArticleService articleService;
     private final TeamMemberService teamMemberService;
 

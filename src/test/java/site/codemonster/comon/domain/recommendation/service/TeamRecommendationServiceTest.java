@@ -11,7 +11,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import site.codemonster.comon.domain.article.service.ArticleService;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
-import site.codemonster.comon.domain.problem.service.ProblemQueryService;
+import site.codemonster.comon.domain.problem.service.ProblemLowService;
 import site.codemonster.comon.domain.recommendation.dto.request.ManualRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.request.TeamRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.response.ManualRecommendationResponse;
@@ -41,7 +41,7 @@ import static org.mockito.BDDMockito.*;
 class TeamRecommendationServiceTest {
 
     @InjectMocks
-    private TeamRecommendationService teamRecommendationService;
+    private TeamRecommendationHighService teamRecommendationService;
 
     @Mock
     private TeamLowService teamLowService;
@@ -59,7 +59,7 @@ class TeamRecommendationServiceTest {
     private RecommendationHistoryLowService recommendationHistoryLowService;
 
     @Mock
-    private ProblemQueryService problemQueryService;
+    private ProblemLowService problemQueryService;
 
     @Mock
     private ArticleService articleService;

@@ -1,8 +1,6 @@
 package site.codemonster.comon.domain.problem.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.problem.collector.ProblemCollector;
@@ -15,9 +13,6 @@ import site.codemonster.comon.domain.problem.dto.response.ProblemResponse;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.repository.ProblemRepository;
-import site.codemonster.comon.domain.recommendation.service.RecommendationHistoryLowService;
-import site.codemonster.comon.domain.team.entity.Team;
-import site.codemonster.comon.domain.team.service.TeamLowService;
 import site.codemonster.comon.global.error.problem.*;
 
 import java.util.ArrayList;
@@ -27,17 +22,16 @@ import static site.codemonster.comon.global.error.ErrorCode.*;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ProblemCommandService {
+public class ProblemHighService {
 
-    private final ProblemRepository problemRepository;
     private final ProblemCollectorFactory collectorFactory;
-    private final ProblemQueryService problemQueryService;
+    private final ProblemLowService problemLowService;
 
     public ProblemInfoResponse checkProblem(ProblemRequest problemRequest, Platform platform) {
         if (platform == Platform.PROGRAMMERS && problemRequest.title().isBlank())
             throw new ProblemInvalidInputException();
 
-        if (problemQueryService.checkDuplicateProblem(platform, problemRequest.platformProblemId())) {
+        if (problemLowService.checkDuplicateProblem(platform, problemRequest.platformProblemId())) {
             return createDuplicateResponse(platform, problemRequest, null);
         }
 
@@ -61,14 +55,14 @@ public class ProblemCommandService {
 
     public void updateProblem(Long problemId, ProblemUpdateRequest problemUpdateRequest) {
 
-        Problem problem = problemQueryService.findProblemById(problemId);
+        Problem problem = problemLowService.findProblemById(problemId);
 
         problem.updateProblem(problemUpdateRequest);
     }
 
     public void deleteProblem(Long problemId) {
-        Problem problem = problemQueryService.findProblemById(problemId);
-        problemRepository.delete(problem);
+        Problem problem = problemLowService.findProblemById(problemId);
+        problemLowService.delete(problem);
     }
 
     private ProblemInfoResponse collectProblemInfo(ProblemRequest problemRequest, Platform platform) {
@@ -121,7 +115,7 @@ public class ProblemCommandService {
 
         Problem problem = new Problem(request);
 
-        return problemRepository.save(problem);
+        return problemLowService.save(problem);
     }
 
     private void validateProblemRequest(ProblemInfoRequest request) {
