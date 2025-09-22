@@ -4,6 +4,7 @@ import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
+import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 public record TeamMemberResponse(String uuid,
                                  String memberName,
@@ -13,12 +14,14 @@ public record TeamMemberResponse(String uuid,
                                  LocalDateTime registerDate,
                                  boolean isTeamManager
                                  ) {
-    public static TeamMemberResponse of(TeamMember tm){
-        return new TeamMemberResponse(tm.getMember().getUuid(),
-                tm.getMember().getMemberName(),
-                tm.getMember().getDescription(),
-                tm.getMember().getImageUrl(),
-                tm.getCreatedDate(),
-                tm.getIsTeamManager());
+    public TeamMemberResponse(TeamMember teamMember) {
+        this(
+                teamMember.getMember().getUuid(),
+                teamMember.getMember().getMemberName(),
+                teamMember.getMember().getDescription(),
+                S3ImageUtil.convertObjectKeyToImageUrl(teamMember.getMember().getImageUrl()),
+                teamMember.getCreatedDate(),
+                teamMember.getIsTeamManager()
+        );
     }
 }

@@ -10,7 +10,6 @@ import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
-import site.codemonster.comon.domain.teamMember.utils.TeamMemberResponseUtils;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
 import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
@@ -44,7 +43,6 @@ public class TeamController {
     private final TeamMemberService teamMemberService;
     private final MemberService memberService;
     private final TeamRecruitService teamRecruitService;
-    private final TeamMemberResponseUtils teamMemberResponseUtils;
 
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createTeam(
@@ -323,7 +321,7 @@ public class TeamController {
     ){
         List<TeamMemberResponse> teamMemberResponses = teamMemberService.getTeamMembersByTeamId(teamId, member)
                 .stream()
-                .map(teamMemberResponseUtils::getTeamMemberResponse)
+                .map(TeamMemberResponse::new)
                 .toList();
 
         return ResponseEntity.status(HttpStatus.OK)
