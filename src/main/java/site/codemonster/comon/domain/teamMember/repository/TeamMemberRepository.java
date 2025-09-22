@@ -1,6 +1,8 @@
 package site.codemonster.comon.domain.teamMember.repository;
 
+import org.springframework.data.domain.Pageable;
 import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -44,4 +46,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
             "JOIN FETCH tm.member " +
             "WHERE tm.team.teamId = :teamId")
     List<TeamMember> findByTeamId(@Param("teamId") Long teamId);
+
+    @Query(value = "select * from team_member tm where tm.team_id = :teamId and tm.is_team_manager = true limit 1", nativeQuery = true)
+    Optional<TeamMember> findFirstTeamManagerByTeamId(@Param("teamId") Long teamId);
 }

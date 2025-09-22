@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.team.entity;
 
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
 import site.codemonster.comon.domain.team.dto.request.TeamInfoEditRequest;
 import site.codemonster.comon.domain.team.enums.Topic;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
@@ -42,6 +43,9 @@ public class Team extends TimeStamp {
 
     @OneToMany(mappedBy = "team")
     private List<TeamMember> teamMembers = new ArrayList<>();
+
+    @OneToOne(mappedBy = "team", fetch = FetchType.LAZY)
+    private TeamRecommendation teamRecommendation;
 
     protected Team(){
     }

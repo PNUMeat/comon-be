@@ -1,6 +1,8 @@
 package site.codemonster.comon.domain.recommendation.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import site.codemonster.comon.domain.recommendation.entity.PlatformRecommendation;
 import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
@@ -12,5 +14,7 @@ public interface PlatformRecommendationRepository extends JpaRepository<Platform
 
     List<PlatformRecommendation> findByTeamRecommendation(TeamRecommendation teamRecommendation);
 
-    void deleteByTeamRecommendation(TeamRecommendation teamRecommendation);
+    @Modifying(clearAutomatically = true)
+    @Query("delete from PlatformRecommendation pr where pr.teamRecommendation.id = :teamRecommendationId")
+    void deleteByTeamRecommendationId(Long teamRecommendationId);
 }

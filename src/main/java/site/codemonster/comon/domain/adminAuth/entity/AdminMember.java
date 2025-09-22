@@ -22,4 +22,10 @@ public class AdminMember extends TimeStamp {
 
     @Column(nullable = false)
     private String name;
+
+    public AdminMember(String adminId, String password, String name) {
+        this.adminId = adminId;
+        this.password = password;
+        this.name = name;
+    }
 }

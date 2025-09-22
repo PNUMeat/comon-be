@@ -91,7 +91,7 @@
                                     <option value="oldest">등록순</option>
                                     <option value="title">제목순</option>
                                     <option value="platform">플랫폼순</option>
-                                    <option value="difficulty">난이도순</option>
+                                    <option value="problemStep">단계순</option>
                                 </select>
                             </div>
                         </div>
@@ -119,20 +119,11 @@
                             </div>
                         </div>
 
-                        <!-- 난이도 필터 -->
+                        <!-- ProblemStep 필터 -->
                         <div class="filter-section mb-3">
-                            <h6 class="filter-title">난이도</h6>
-                            <div class="filter-buttons" id="difficultyFilters">
-                                <button class="filter-btn active" data-type="difficulty" data-value="ALL">전체</button>
-                                <!-- 동적으로 생성됨 -->
-                            </div>
-                        </div>
-
-                        <!-- 태그 필터 -->
-                        <div class="filter-section">
-                            <h6 class="filter-title">태그</h6>
-                            <div class="filter-buttons" id="tagFilters">
-                                <button class="filter-btn active" data-type="tag" data-value="ALL">전체</button>
+                            <h6 class="filter-title">ProblemStep</h6>
+                            <div class="filter-buttons" id="stepFilters">
+                                <button class="filter-btn active" data-type="problemStep" data-value="ALL">전체</button>
                                 <!-- 동적으로 생성됨 -->
                             </div>
                         </div>
@@ -166,9 +157,7 @@
                         </div>
 
                         <!-- 카드 뷰 -->
-                        <div class="problem-grid p-3" id="problemGrid">
-                            <!-- 동적으로 생성됨 -->
-                        </div>
+                        <div class="problem-grid p-3" id="problemGrid"></div>
 
                         <!-- 테이블 뷰 -->
                         <div class="problem-table" id="problemTable" style="display: none;">
@@ -179,14 +168,12 @@
                                         <th width="10%">플랫폼</th>
                                         <th width="10%">번호</th>
                                         <th width="35%">제목</th>
-                                        <th width="15%">난이도</th>
-                                        <th width="20%">태그</th>
+                                        <th width="15%">ProblemStep</th>
+                                        <th width="20%">URL</th>
                                         <th width="10%">관리</th>
                                     </tr>
                                     </thead>
-                                    <tbody id="problemTableBody">
-                                    <!-- 동적으로 생성됨 -->
-                                    </tbody>
+                                    <tbody id="problemTableBody"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -203,9 +190,7 @@
                 <!-- 페이지네이션 -->
                 <div class="d-flex justify-content-center mt-4">
                     <nav aria-label="문제 목록 페이지네이션">
-                        <ul class="pagination" id="pagination">
-                            <!-- 동적으로 생성됨 -->
-                        </ul>
+                        <ul class="pagination" id="pagination"></ul>
                     </nav>
                 </div>
             </div>
@@ -238,16 +223,14 @@
                         <label class="form-label">제목 *</label>
                         <input type="text" class="form-control" id="editTitle" required>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="form-label">난이도</label>
-                            <input type="text" class="form-control" id="editDifficulty">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">태그</label>
-                            <input type="text" class="form-control" id="editTags"
-                                   placeholder="쉼표(,)로 구분">
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label">ProblemStep</label>
+                        <select class="form-select" id="editProblemStep">
+                            <option value="STEP1">STEP1</option>
+                            <option value="STEP2">STEP2</option>
+                            <option value="STEP3">STEP3</option>
+                            <option value="STEP4">STEP4</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">URL</label>

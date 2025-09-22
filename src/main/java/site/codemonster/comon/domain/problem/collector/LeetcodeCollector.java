@@ -40,9 +40,8 @@ public class LeetcodeCollector implements ProblemCollector {
                 .platform(Platform.LEETCODE)
                 .platformProblemId(slug)
                 .title(problemInfo.getTitle())
-                .difficulty(problemInfo.getDifficulty())
+                .problemStep(request.getProblemStep())
                 .url(url)
-                .tags(formatTags(problemInfo))
                 .isDuplicate(false)
                 .success(true)
                 .build();

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import site.codemonster.comon.domain.problem.entity.ProblemStep;
 import site.codemonster.comon.domain.problem.enums.Platform;
 
 @Data
@@ -15,9 +16,8 @@ public class ProblemInfoResponse {
     private Platform platform;
     private String platformProblemId;
     private String title;
-    private String difficulty;
+    private ProblemStep problemStep;
     private String url;
-    private String tags;
 
     private boolean isDuplicate;
 

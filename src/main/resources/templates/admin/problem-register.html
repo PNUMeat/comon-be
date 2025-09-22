@@ -109,14 +109,24 @@
                         <i class="fas fa-trophy me-2"></i>백준 문제 등록
                         <span class="badge bg-success ms-2">자동 수집</span>
                     </h5>
-                    <div class="row">
-                        <div class="col-md-8">
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label class="form-label fw-bold">문제번호</label>
                             <input type="text" class="form-control form-control-lg"
                                    id="baekjoon-problem-id" placeholder="예: 1000">
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="button" class="btn btn-check-info w-100"
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">STEP</label>
+                            <select class="form-select" id="baekjoon-problem-step">
+                                <option value="">선택하세요</option>
+                                <option value="STEP1">STEP1</option>
+                                <option value="STEP2">STEP2</option>
+                                <option value="STEP3">STEP3</option>
+                                <option value="STEP4">STEP4</option>
+                            </select>
+                        </div>
+                        <div class="col-12 text-center">
+                            <button type="button" class="btn btn-check-info"
                                     onclick="checkBaekjoon()">
                                 <i class="fas fa-plus me-2"></i>추가
                             </button>
@@ -131,32 +141,25 @@
                         <span class="badge bg-warning text-dark ms-2">수동 입력</span>
                     </h5>
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label fw-bold">문제번호</label>
                             <input type="text" class="form-control" id="programmers-problem-id"
                                    placeholder="예: 42577">
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label fw-bold">제목</label>
                             <input type="text" class="form-control" id="programmers-title"
                                    placeholder="예: 전화번호 목록">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">난이도</label>
-                            <select class="form-select" id="programmers-difficulty">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">STEP</label>
+                            <select class="form-select" id="programmers-problem-step">
                                 <option value="">선택하세요</option>
-                                <option value="Level 0">Level 0</option>
-                                <option value="Level 1">Level 1</option>
-                                <option value="Level 2">Level 2</option>
-                                <option value="Level 3">Level 3</option>
-                                <option value="Level 4">Level 4</option>
-                                <option value="Level 5">Level 5</option>
+                                <option value="STEP1">STEP1</option>
+                                <option value="STEP2">STEP2</option>
+                                <option value="STEP3">STEP3</option>
+                                <option value="STEP4">STEP4</option>
                             </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">태그</label>
-                            <input type="text" class="form-control" id="programmers-tags"
-                                   placeholder="예: 해시">
                         </div>
                         <div class="col-12 text-center">
                             <button type="button" class="btn btn-check-info"
@@ -167,29 +170,32 @@
                     </div>
                 </div>
 
-                <!-- 리트코드 폼 - 개선된 버전 -->
+                <!-- 리트코드 폼 -->
                 <div class="form-section" id="leetcode-form">
                     <h5 class="text-warning mb-3">
                         <i class="fas fa-bolt me-2"></i>리트코드 문제 등록
                         <span class="badge bg-success ms-2">자동 수집</span>
                     </h5>
                     <div class="row g-3">
-                        <div class="col-md-8">
-                            <div class="leetcode-input-container">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-link me-1"></i>문제 URL
-                                </label>
-                                <input type="url" class="form-control form-control-lg with-icon"
-                                       id="leetcode-url"
-                                       placeholder="https://leetcode.com/problems/merge-strings-alternately/"
-                                       autocomplete="url"
-                                       spellcheck="false">
-                            </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">문제 URL</label>
+                            <input type="url" class="form-control form-control-lg"
+                                   id="leetcode-url"
+                                   placeholder="https://leetcode.com/problems/merge-strings-alternately/">
                         </div>
-                        <div class="col-md-4">
-                            <button type="button" class="btn btn-check-info w-100 h-100 d-flex align-items-center justify-content-center"
-                                    onclick="checkLeetcode()"
-                                    style="min-height: 56px;">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">STEP</label>
+                            <select class="form-select" id="leetcode-problem-step">
+                                <option value="">선택하세요</option>
+                                <option value="STEP1">STEP1</option>
+                                <option value="STEP2">STEP2</option>
+                                <option value="STEP3">STEP3</option>
+                                <option value="STEP4">STEP4</option>
+                            </select>
+                        </div>
+                        <div class="col-12 text-center">
+                            <button type="button" class="btn btn-check-info"
+                                    onclick="checkLeetcode()">
                                 <i class="fas fa-plus me-2"></i>추가
                             </button>
                         </div>
