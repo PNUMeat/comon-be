@@ -43,7 +43,7 @@ public class ArticleResponseUtils {
                 article.getArticleBody(),
                 article.getCreatedDate(),
                 article.getMember().getMemberName(),
-                imageFieldConvertUtils.convertObjectKeyToImageUrl(article.getMember().getImageUrl()), // 변환!
+                imageFieldConvertUtils.convertObjectKeyToImageUrl(article.getMember().getImageUrl()),
                 member.getUuid().equals(article.getMember().getUuid())
         );
     }
