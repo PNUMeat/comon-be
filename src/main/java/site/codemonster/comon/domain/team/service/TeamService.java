@@ -5,7 +5,6 @@ import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.team.dto.request.TeamInfoEditRequest;
 import site.codemonster.comon.domain.team.dto.request.TeamRequest;
-import site.codemonster.comon.domain.team.dto.response.TeamInfoResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.enums.Topic;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
 import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 @Service
@@ -37,7 +35,6 @@ public class TeamService {
     private final ArticleImageRepository articleImageRepository;
     private final TeamRecruitService teamRecruitService;
     private final TeamApplyService teamApplyService;
-    private final ImageFieldConvertUtils imageFieldConvertUtils;
 
     @Transactional
     public Team createTeam(TeamRequest teamRequest, Member manager, List<Member> applyMembers, Long teamRecruitId) {

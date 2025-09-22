@@ -4,12 +4,9 @@ import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileCreateRequest;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileUpdateRequest;
-import site.codemonster.comon.domain.auth.dto.response.MemberInfoResponse;
-import site.codemonster.comon.domain.auth.dto.response.MemberProfileResponse;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
 import site.codemonster.comon.domain.auth.repository.RefreshTokenRepository;
-import site.codemonster.comon.domain.team.dto.response.TeamAbstractResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
 import site.codemonster.comon.domain.teamApply.repository.TeamApplyRepository;
@@ -22,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
 import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 @Service
@@ -38,7 +34,6 @@ public class MemberService {
     private final TeamRecruitRepository teamRecruitRepository;
     private final TeamApplyRepository teamApplyRepository;
     private final TeamRecruitImageRepository teamRecruitImageRepository;
-    private final ImageFieldConvertUtils imageFieldConvertUtils;
 
     @Transactional
     public void createMemberProfile(
