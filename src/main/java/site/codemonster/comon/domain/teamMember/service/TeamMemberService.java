@@ -211,4 +211,10 @@ public class TeamMemberService {
 
         teamApplyService.deleteTeamApplyAfterTeamMake(teamRecruit);
     }
+
+    @Transactional
+    public TeamMember getTeamManagerByTeamId(Long teamId) {
+        return teamMemberRepository.findFirstTeamManagerByTeamId(teamId)
+                .orElseThrow(TeamManagerNotFoundException::new);
+    }
 }

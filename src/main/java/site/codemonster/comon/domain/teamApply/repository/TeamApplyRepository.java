@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.teamApply.repository;
 
+import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamApply.entity.TeamApply;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TeamApplyRepository extends JpaRepository<TeamApply, Long> {
 
@@ -34,7 +36,6 @@ public interface TeamApplyRepository extends JpaRepository<TeamApply, Long> {
     @Query("DELETE FROM TeamApply ta " +
             "WHERE ta.member.id = :memberId")
     void deleteTeamAppliesByMemberId(@Param("memberId") Long memberId);
-
 
 
 }

@@ -1,6 +1,5 @@
 // problem-list.js
 
-// 전역 변수
 let allProblems = [];
 let filteredProblems = [];
 let currentPage = 1;
@@ -8,50 +7,35 @@ let itemsPerPage = 12;
 let currentView = 'card';
 let filters = {
     platform: 'ALL',
-    difficulty: 'ALL',
-    tag: 'ALL',
+    problemStep: 'ALL',
     search: ''
 };
 let currentSort = 'newest';
 
-/**
- * DOM 로드 완료 시 초기화
- */
 document.addEventListener('DOMContentLoaded', function() {
     initializePage();
     setupEventListeners();
     loadProblems();
 });
 
-/**
- * 페이지 초기화
- */
 function initializePage() {
     updateActiveNavigation();
 }
 
-/**
- * 이벤트 리스너 설정
- */
 function setupEventListeners() {
-    // 검색 입력
-    const searchInput = document.getElementById('searchInput');
-    let searchTimeout;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            filters.search = this.value.toLowerCase();
-            applyFilters();
-        }, 300);
+    // 검색
+    document.getElementById('searchInput').addEventListener('input', function() {
+        filters.search = this.value.toLowerCase();
+        applyFilters();
     });
 
-    // 정렬 선택
+    // 정렬
     document.getElementById('sortSelect').addEventListener('change', function() {
         currentSort = this.value;
         applyFilters();
     });
 
-    // 정적 필터 버튼들 (플랫폼 - HTML에 이미 있는 것들)
+    // 플랫폼 필터
     document.querySelectorAll('.filter-btn[data-type="platform"]').forEach(btn => {
         btn.addEventListener('click', handleFilterClick);
     });
@@ -59,27 +43,16 @@ function setupEventListeners() {
     // 뷰 토글
     document.querySelectorAll('.view-toggle').forEach(btn => {
         btn.addEventListener('click', function() {
-            const view = this.dataset.view;
-
-            // 버튼 상태 변경
-            document.querySelectorAll('.view-toggle').forEach(b =>
-                b.classList.remove('active'));
+            document.querySelectorAll('.view-toggle').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-
-            // 뷰 변경
-            toggleView(view);
+            toggleView(this.dataset.view);
         });
     });
 }
 
-/**
- * 활성 네비게이션 업데이트
- */
 function updateActiveNavigation() {
     const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll('.sidebar .nav-link');
-
-    navLinks.forEach(link => {
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
         link.classList.remove('active');
         if (link.getAttribute('href') === currentPath) {
             link.classList.add('active');
@@ -87,177 +60,81 @@ function updateActiveNavigation() {
     });
 }
 
-/**
- * 문제 목록 로드
- */
 function loadProblems() {
     showLoading();
-
-    // 실제 API 호출
     fetch('/admin/problems/problem-list')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(r => r.json())
         .then(data => {
-            console.log('문제 목록 로드 성공:', data);
             if (data.status === 'success') {
                 allProblems = data.data || [];
                 initializeFilters();
                 applyFilters();
-                hideLoading();
             } else {
-                throw new Error(data.message || '문제 목록을 불러올 수 없습니다');
+                throw new Error(data.message || '목록 불러오기 실패');
             }
         })
-        .catch(error => {
-            console.error('문제 목록 로드 실패:', error);
-            hideLoading();
-
-            // 에러 메시지 표시
-            const grid = document.getElementById('problemGrid');
-            grid.innerHTML = `
-                <div class="col-12 text-center p-5">
-                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                    <h5 class="text-muted">문제 목록을 불러올 수 없습니다</h5>
-                    <p class="text-muted">서버 연결을 확인해주세요.</p>
-                    <button class="btn btn-primary" onclick="loadProblems()">
-                        <i class="fas fa-sync-alt me-1"></i>다시 시도
-                    </button>
-                </div>
-            `;
-        });
+        .catch(err => {
+            console.error('문제 목록 로드 실패:', err);
+        })
+        .finally(hideLoading);
 }
 
-/**
- * 필터 옵션 초기화
- */
 function initializeFilters() {
-    // 난이도 필터 생성
-    const difficulties = [...new Set(allProblems.map(p => p.difficulty).filter(d => d))];
-    const difficultyFilters = document.getElementById('difficultyFilters');
-    difficultyFilters.innerHTML = '<button class="filter-btn active" data-type="difficulty" data-value="ALL">전체</button>';
-
-    difficulties.forEach(difficulty => {
+    const steps = [...new Set(allProblems.map(p => p.problemStep).filter(s => s))];
+    const stepFilters = document.getElementById('stepFilters');
+    stepFilters.innerHTML = '<button class="filter-btn active" data-type="problemStep" data-value="ALL">전체</button>';
+    steps.forEach(step => {
         const btn = document.createElement('button');
         btn.className = 'filter-btn';
-        btn.setAttribute('data-type', 'difficulty');
-        btn.setAttribute('data-value', difficulty);
-        btn.textContent = difficulty;
-        difficultyFilters.appendChild(btn);
+        btn.dataset.type = 'problemStep';
+        btn.dataset.value = step;
+        btn.textContent = step;
+        stepFilters.appendChild(btn);
     });
-
-    // 태그 필터 생성
-    const allTags = allProblems.flatMap(p =>
-        p.tags ? p.tags.split(',').map(tag => tag.trim()) : []
-    );
-    const uniqueTags = [...new Set(allTags)].slice(0, 20); // 최대 20개 태그만 표시
-
-    const tagFilters = document.getElementById('tagFilters');
-    tagFilters.innerHTML = '<button class="filter-btn active" data-type="tag" data-value="ALL">전체</button>';
-
-    uniqueTags.forEach(tag => {
-        const btn = document.createElement('button');
-        btn.className = 'filter-btn';
-        btn.setAttribute('data-type', 'tag');
-        btn.setAttribute('data-value', tag);
-        btn.textContent = tag;
-        tagFilters.appendChild(btn);
-    });
-
-    // 동적으로 생성된 필터 버튼들에 이벤트 리스너 추가
     setupDynamicFilterListeners();
 }
 
-/**
- * 동적으로 생성된 필터 버튼들에 이벤트 리스너 설정
- */
 function setupDynamicFilterListeners() {
-    // 모든 필터 버튼에 이벤트 리스너 추가 (기존 + 새로 생성된 것들)
     document.querySelectorAll('.filter-btn').forEach(btn => {
-        // 기존 리스너 제거 후 새로 추가 (중복 방지)
         btn.removeEventListener('click', handleFilterClick);
         btn.addEventListener('click', handleFilterClick);
     });
 }
 
-/**
- * 필터 버튼 클릭 처리
- */
 function handleFilterClick() {
     const type = this.dataset.type;
     const value = this.dataset.value;
-
-    // 같은 타입의 다른 버튼들 비활성화
-    document.querySelectorAll(`[data-type="${type}"]`).forEach(b =>
-        b.classList.remove('active'));
-
-    // 현재 버튼 활성화
+    document.querySelectorAll(`[data-type="${type}"]`).forEach(b => b.classList.remove('active'));
     this.classList.add('active');
-
-    // 필터 적용
     filters[type] = value;
     applyFilters();
 }
 
-/**
- * 필터 및 정렬 적용
- */
 function applyFilters() {
-    filteredProblems = allProblems.filter(problem => {
-        // 플랫폼 필터
-        if (filters.platform !== 'ALL' && problem.platform !== filters.platform) {
-            return false;
-        }
-
-        // 난이도 필터
-        if (filters.difficulty !== 'ALL' && problem.difficulty !== filters.difficulty) {
-            return false;
-        }
-
-        // 태그 필터
-        if (filters.tag !== 'ALL') {
-            const problemTags = problem.tags ? problem.tags.toLowerCase().split(',').map(t => t.trim()) : [];
-            if (!problemTags.includes(filters.tag.toLowerCase())) {
-                return false;
-            }
-        }
-
-        // 검색 필터
+    filteredProblems = allProblems.filter(p => {
+        if (filters.platform !== 'ALL' && p.platform !== filters.platform) return false;
+        if (filters.problemStep !== 'ALL' && p.problemStep !== filters.problemStep) return false;
         if (filters.search) {
-            const searchTerm = filters.search.toLowerCase();
-            const titleMatch = problem.title.toLowerCase().includes(searchTerm);
-            const numberMatch = problem.platformProblemId.toLowerCase().includes(searchTerm);
-            if (!titleMatch && !numberMatch) {
-                return false;
-            }
+            const s = filters.search;
+            if (!p.title.toLowerCase().includes(s) &&
+                !p.platformProblemId.toLowerCase().includes(s)) return false;
         }
-
         return true;
     });
-
-    // 정렬 적용
     sortProblems();
-
-    // 페이지 초기화 및 렌더링
     currentPage = 1;
     renderProblems();
     updatePagination();
     updateProblemCount();
 }
 
-/**
- * 문제 정렬
- */
 function sortProblems() {
     switch (currentSort) {
         case 'newest':
-            filteredProblems.sort((a, b) => new Date(b.createdAt || b.createdDate) - new Date(a.createdAt || a.createdDate));
+            filteredProblems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             break;
         case 'oldest':
-            filteredProblems.sort((a, b) => new Date(a.createdAt || a.createdDate) - new Date(b.createdAt || b.createdDate));
+            filteredProblems.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
             break;
         case 'title':
             filteredProblems.sort((a, b) => a.title.localeCompare(b.title));
@@ -265,251 +142,149 @@ function sortProblems() {
         case 'platform':
             filteredProblems.sort((a, b) => a.platform.localeCompare(b.platform));
             break;
-        case 'difficulty':
-            filteredProblems.sort((a, b) => (a.difficulty || '').localeCompare(b.difficulty || ''));
+        case 'problemStep':
+            filteredProblems.sort((a, b) => (a.problemStep || '').localeCompare(b.problemStep || ''));
             break;
     }
 }
 
-/**
- * 문제 목록 렌더링
- */
 function renderProblems() {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const problemsToShow = filteredProblems.slice(startIndex, endIndex);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const list = filteredProblems.slice(start, end);
 
-    if (currentView === 'card') {
-        renderCardView(problemsToShow);
-    } else {
-        renderTableView(problemsToShow);
-    }
+    if (currentView === 'card') renderCardView(list);
+    else renderTableView(list);
 
-    // 빈 결과 처리
-    const emptyState = document.getElementById('emptyState');
-    if (problemsToShow.length === 0 && allProblems.length > 0) {
-        emptyState.style.display = 'block';
-    } else {
-        emptyState.style.display = 'none';
-    }
+    document.getElementById('emptyState').style.display = list.length === 0 ? 'block' : 'none';
 }
 
-/**
- * 카드 뷰 렌더링
- */
-function renderCardView(problems) {
+function renderCardView(list) {
     const grid = document.getElementById('problemGrid');
-
-    if (problems.length === 0) {
-        if (allProblems.length === 0) {
-            grid.innerHTML = `
-                <div class="col-12 text-center p-5">
-                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">등록된 문제가 없습니다</h5>
-                    <p class="text-muted">문제 등록 페이지에서 새로운 문제를 등록해보세요.</p>
-                    <a href="/admin/problems/register" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i>문제 등록하기
-                    </a>
-                </div>
-            `;
-        } else {
-            grid.innerHTML = '';
-        }
+    if (list.length === 0) {
+        grid.innerHTML = allProblems.length === 0
+            ? `<div class="col-12 text-center p-5">
+                 <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                 <h5 class="text-muted">등록된 문제가 없습니다</h5>
+                 <a href="/admin/problems/register" class="btn btn-primary">
+                     <i class="fas fa-plus me-1"></i>문제 등록하기
+                 </a>
+               </div>`
+            : '';
         return;
     }
 
-    grid.innerHTML = problems.map(problem => {
-        const tags = problem.tags ? problem.tags.split(',').map(tag => tag.trim()) : [];
-        const tagsHtml = tags.slice(0, 4).map(tag =>
-            `<span class="tag">${tag}</span>`
-        ).join('');
+    grid.innerHTML = list.map(p => `
+        <div class="problem-card">
+            <div class="problem-card-header">
+                <span class="platform-badge ${p.platform}">${getPlatformName(p.platform)}</span>
+                <span class="problem-number">#${p.platformProblemId}</span>
+            </div>
+            <h6 class="problem-title">${p.title}</h6>
+            <div class="problem-meta">
+                <span class="difficulty-badge">${p.problemStep || '미지정'}</span>
+            </div>
+            <div class="problem-actions">
+                <button class="btn-action btn-link" onclick="openProblemUrl('${p.url || ''}')">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button class="btn-action btn-edit" onclick="openEditModal(${p.problemId})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-action btn-delete" onclick="deleteProblem(${p.problemId}, '${p.title}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
 
-        return `
-            <div class="problem-card">
-                <div class="problem-card-header">
-                    <span class="platform-badge ${problem.platform}">${getPlatformName(problem.platform)}</span>
-                    <span class="problem-number">#${problem.platformProblemId}</span>
-                </div>
-                <h6 class="problem-title">${problem.title}</h6>
-                <div class="problem-meta">
-                    <span class="difficulty-badge">${problem.difficulty || '미지정'}</span>
-                </div>
-                <div class="problem-tags">
-                    ${tagsHtml}
-                    ${tags.length > 4 ? '<span class="tag">+' + (tags.length - 4) + '</span>' : ''}
-                </div>
-                <div class="problem-actions">
-                    <button class="btn-action btn-link" onclick="openProblemUrl('${problem.url || ''}')">
+function renderTableView(list) {
+    const tbody = document.getElementById('problemTableBody');
+    if (list.length === 0) {
+        tbody.innerHTML = allProblems.length === 0
+            ? `<tr><td colspan="6" class="text-center py-5">
+                  <i class="fas fa-inbox fa-2x text-muted mb-3 d-block"></i>
+                  <h6 class="text-muted">등록된 문제가 없습니다</h6>
+                  <a href="/admin/problems/register" class="btn btn-sm btn-primary mt-2">
+                      <i class="fas fa-plus me-1"></i>문제 등록하기
+                  </a>
+               </td></tr>`
+            : `<tr><td colspan="6" class="text-center py-4 text-muted">검색 조건에 맞는 문제가 없습니다.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = list.map(p => `
+        <tr>
+            <td><span class="platform-badge ${p.platform}">${getPlatformName(p.platform)}</span></td>
+            <td><strong>${p.platformProblemId}</strong></td>
+            <td>${p.title}</td>
+            <td>${p.problemStep || '미지정'}</td>
+            <td><a href="${p.url || '#'}" target="_blank">${p.url ? '바로가기' : '-'}</a></td>
+            <td>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-info" onclick="openProblemUrl('${p.url || ''}')" title="문제 보기">
                         <i class="fas fa-external-link-alt"></i>
                     </button>
-                    <button class="btn-action btn-edit" onclick="editProblem(${problem.problemId})">
+                    <button class="btn btn-sm btn-outline-warning" onclick="openEditModal(${p.problemId})" title="수정">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-action btn-delete" onclick="deleteProblem(${problem.problemId})">
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteProblem(${p.problemId}, '${p.title}')" title="삭제">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
-            </div>
-        `;
-    }).join('');
+            </td>
+        </tr>
+    `).join('');
 }
 
-/**
- * 테이블 뷰 렌더링
- */
-function renderTableView(problems) {
-    const tbody = document.getElementById('problemTableBody');
-
-    if (problems.length === 0) {
-        if (allProblems.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center py-5">
-                        <i class="fas fa-inbox fa-2x text-muted mb-3 d-block"></i>
-                        <h6 class="text-muted">등록된 문제가 없습니다</h6>
-                        <a href="/admin/problems/register" class="btn btn-sm btn-primary mt-2">
-                            <i class="fas fa-plus me-1"></i>문제 등록하기
-                        </a>
-                    </td>
-                </tr>
-            `;
-        } else {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">검색 조건에 맞는 문제가 없습니다.</td></tr>';
-        }
-        return;
-    }
-
-    tbody.innerHTML = problems.map(problem => {
-        const tags = problem.tags ? problem.tags.split(',').map(tag => tag.trim()).slice(0, 3) : [];
-        const tagsText = tags.length > 0 ? tags.join(', ') : '태그 없음';
-
-        return `
-            <tr>
-                <td>
-                    <span class="platform-badge ${problem.platform}">${getPlatformName(problem.platform)}</span>
-                </td>
-                <td><strong>${problem.platformProblemId}</strong></td>
-                <td>${problem.title}</td>
-                <td>${problem.difficulty || '미지정'}</td>
-                <td class="text-muted small">${tagsText}</td>
-                <td>
-                    <div class="d-flex gap-1">
-                        <button class="btn btn-sm btn-outline-info" onclick="openProblemUrl('${problem.url || ''}')" title="문제 보기">
-                            <i class="fas fa-external-link-alt"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-warning" onclick="editProblem(${problem.problemId})" title="수정">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteProblem(${problem.problemId})" title="삭제">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
-
-/**
- * 뷰 전환
- */
 function toggleView(view) {
     currentView = view;
-
-    const grid = document.getElementById('problemGrid');
-    const table = document.getElementById('problemTable');
-
-    if (view === 'card') {
-        grid.style.display = 'grid';
-        table.style.display = 'none';
-    } else {
-        grid.style.display = 'none';
-        table.style.display = 'block';
-    }
-
+    document.getElementById('problemGrid').style.display = view === 'card' ? 'grid' : 'none';
+    document.getElementById('problemTable').style.display = view === 'table' ? 'block' : 'none';
     renderProblems();
 }
 
-/**
- * 페이지네이션 업데이트
- */
 function updatePagination() {
-    const totalPages = Math.ceil(filteredProblems.length / itemsPerPage);
+    const total = Math.ceil(filteredProblems.length / itemsPerPage);
     const pagination = document.getElementById('pagination');
-
-    if (totalPages <= 1) {
+    if (total <= 1) {
         pagination.innerHTML = '';
         return;
     }
-
-    let paginationHtml = '';
-
-    // 이전 페이지
+    let html = '';
     if (currentPage > 1) {
-        paginationHtml += `
-            <li class="page-item">
-                <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">이전</a>
-            </li>
-        `;
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${currentPage - 1});return false;">이전</a></li>`;
     }
-
-    // 페이지 번호들
-    const startPage = Math.max(1, currentPage - 2);
-    const endPage = Math.min(totalPages, currentPage + 2);
-
-    for (let i = startPage; i <= endPage; i++) {
-        paginationHtml += `
-            <li class="page-item ${i === currentPage ? 'active' : ''}">
-                <a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>
-            </li>
-        `;
+    for (let i = 1; i <= total; i++) {
+        html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                   <a class="page-link" href="#" onclick="changePage(${i});return false;">${i}</a>
+                 </li>`;
     }
-
-    // 다음 페이지
-    if (currentPage < totalPages) {
-        paginationHtml += `
-            <li class="page-item">
-                <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">다음</a>
-            </li>
-        `;
+    if (currentPage < total) {
+        html += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${currentPage + 1});return false;">다음</a></li>`;
     }
-
-    pagination.innerHTML = paginationHtml;
+    pagination.innerHTML = html;
 }
 
-/**
- * 페이지 변경 (스크롤 이동 제거)
- */
 function changePage(page) {
     currentPage = page;
     renderProblems();
     updatePagination();
-
-    // 스크롤 이동 코드 제거 - 페이지 변경 시 현재 위치 유지
 }
 
-/**
- * 문제 수 업데이트
- */
 function updateProblemCount() {
     document.getElementById('problemCount').textContent = `${filteredProblems.length}개`;
 }
 
-/**
- * 플랫폼 이름 가져오기
- */
 function getPlatformName(platform) {
-    const names = {
-        'BAEKJOON': '백준',
-        'PROGRAMMERS': '프로그래머스',
-        'LEETCODE': '리트코드'
-    };
-    return names[platform] || platform;
+    return {
+        BAEKJOON: '백준',
+        PROGRAMMERS: '프로그래머스',
+        LEETCODE: '리트코드'
+    }[platform] || platform;
 }
 
-/**
- * 로딩 상태 표시/숨김
- */
 function showLoading() {
     document.getElementById('loadingContainer').style.display = 'block';
     document.getElementById('problemGrid').style.display = 'none';
@@ -522,9 +297,6 @@ function hideLoading() {
     toggleView(currentView);
 }
 
-/**
- * 문제 관리 함수들
- */
 function openProblemUrl(url) {
     if (url && url.trim()) {
         window.open(url, '_blank');
@@ -533,47 +305,68 @@ function openProblemUrl(url) {
     }
 }
 
-function editProblem(problemId) {
-    const problem = allProblems.find(p => p.problemId == problemId);
+// 문제 삭제 함수
+function deleteProblem(problemId, title) {
+    if (!confirm(`"${title}" 문제를 삭제하시겠습니까?`)) return;
+
+    fetch(`/admin/problems/${problemId}`, {
+        method: 'DELETE'
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('문제가 삭제되었습니다.');
+                allProblems = allProblems.filter(p => p.problemId !== problemId);
+                applyFilters();
+            } else {
+                alert('삭제 실패: ' + (data.message || '알 수 없는 오류'));
+            }
+        })
+        .catch(err => {
+            console.error('문제 삭제 실패:', err);
+            alert('삭제 요청에 실패했습니다.');
+        });
+}
+
+// 문제 수정 모달 열기
+function openEditModal(problemId) {
+    const problem = allProblems.find(p => p.problemId === problemId);
     if (!problem) {
-        alert('문제를 찾을 수 없습니다.');
+        alert("문제를 찾을 수 없습니다.");
         return;
     }
 
-    // 모달에 데이터 설정
     document.getElementById('editProblemId').value = problem.problemId;
     document.getElementById('editPlatform').value = getPlatformName(problem.platform);
     document.getElementById('editPlatformProblemId').value = problem.platformProblemId;
     document.getElementById('editTitle').value = problem.title;
-    document.getElementById('editDifficulty').value = problem.difficulty || '';
-    document.getElementById('editTags').value = problem.tags || '';
+    document.getElementById('editProblemStep').value = problem.problemStep || 'STEP1';
     document.getElementById('editUrl').value = problem.url || '';
 
-    // 모달 표시
     const modal = new bootstrap.Modal(document.getElementById('editModal'));
     modal.show();
 }
 
+// 문제 저장 함수
 function saveProblem() {
     const problemId = document.getElementById('editProblemId').value;
+    const platform = document.getElementById('editPlatform').value.trim();
+    const platformProblemId = document.getElementById('editPlatformProblemId').value.trim();
     const title = document.getElementById('editTitle').value.trim();
-    const difficulty = document.getElementById('editDifficulty').value.trim();
-    const tags = document.getElementById('editTags').value.trim();
+    const problemStep = document.getElementById('editProblemStep').value;
     const url = document.getElementById('editUrl').value.trim();
 
     if (!title) {
-        alert('제목은 필수 입력 항목입니다.');
+        alert("제목은 필수 입력 항목입니다.");
         return;
     }
 
     const updateData = {
         title: title,
-        difficulty: difficulty,
-        tags: tags,
+        problemStep: problemStep,
         url: url
     };
 
-    // API 호출
     fetch(`/admin/problems/${problemId}`, {
         method: 'PUT',
         headers: {
@@ -581,105 +374,35 @@ function saveProblem() {
         },
         body: JSON.stringify(updateData)
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(r => r.json())
         .then(data => {
             if (data.status === 'success') {
-                alert('문제가 성공적으로 수정되었습니다.');
-
-                // 로컬 데이터 업데이트 - data.data가 수정된 Problem 엔티티
-                const problemIndex = allProblems.findIndex(p => p.problemId == problemId);
-                if (problemIndex !== -1) {
-                    allProblems[problemIndex] = { ...allProblems[problemIndex], ...updateData };
+                alert("문제가 수정되었습니다.");
+                const idx = allProblems.findIndex(p => p.problemId === parseInt(problemId));
+                if (idx !== -1) {
+                    allProblems[idx] = { ...allProblems[idx], ...updateData };
                 }
-
-                // 필터 다시 적용
                 applyFilters();
-
-                // 모달 닫기
                 bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
             } else {
-                alert('문제 수정에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
+                alert("수정 실패: " + (data.message || '알 수 없는 오류'));
             }
         })
-        .catch(error => {
-            console.error('문제 수정 실패:', error);
-            alert('문제 수정에 실패했습니다.');
+        .catch(err => {
+            console.error("수정 실패:", err);
+            alert("수정 요청 중 오류가 발생했습니다.");
         });
 }
 
-function deleteProblem(problemId) {
-    const problem = allProblems.find(p => p.problemId == problemId);
-    if (!problem) {
-        alert('문제를 찾을 수 없습니다.');
-        return;
-    }
-
-    if (!confirm(`"${problem.title}" 문제를 정말 삭제하시겠습니까?`)) {
-        return;
-    }
-
-    // API 호출
-    fetch(`/admin/problems/${problemId}`, {
-        method: 'DELETE'
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                alert('문제가 성공적으로 삭제되었습니다.');
-
-                // 로컬 데이터에서 제거
-                allProblems = allProblems.filter(p => p.problemId != problemId);
-
-                // 필터 다시 적용
-                applyFilters();
-            } else {
-                alert('문제 삭제에 실패했습니다: ' + (data.message || '알 수 없는 오류'));
-            }
-        })
-        .catch(error => {
-            console.error('문제 삭제 실패:', error);
-            alert('문제 삭제에 실패했습니다.');
-        });
-}
-
-/**
- * 문제 목록 새로고침
- */
 function refreshProblems() {
-    // 필터 초기화
-    filters = {
-        platform: 'ALL',
-        difficulty: 'ALL',
-        tag: 'ALL',
-        search: ''
-    };
+    filters = { platform: 'ALL', problemStep: 'ALL', search: '' };
     currentSort = 'newest';
     currentPage = 1;
-
-    // UI 초기화
     document.getElementById('searchInput').value = '';
     document.getElementById('sortSelect').value = 'newest';
-
-    // 모든 필터 버튼 비활성화 후 "전체" 버튼들만 활성화
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.dataset.value === 'ALL') {
-            btn.classList.add('active');
-        }
+        if (btn.dataset.value === 'ALL') btn.classList.add('active');
     });
-
-    // 데이터 다시 로드
     loadProblems();
 }
-
-console.log('문제 목록 페이지 JavaScript 로드 완료');

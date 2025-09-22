@@ -42,9 +42,8 @@ public class BaekjoonCollector implements ProblemCollector {
                 .platform(Platform.BAEKJOON)
                 .platformProblemId(problemId)
                 .title(problemInfo.getTitleKo())
-                .difficulty(convertToDifficulty(problemInfo.getLevel()))
+                .problemStep(request.getProblemStep())
                 .url("https://www.acmicpc.net/problem/" + problemId)
-                .tags(problemInfo.getTagsAsString())
                 .isDuplicate(false)
                 .success(true)
                 .build();

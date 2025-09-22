@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
 import site.codemonster.comon.domain.problem.dto.request.ProblemInfoRequest;
 import site.codemonster.comon.domain.problem.enums.Platform;
-import site.codemonster.comon.domain.problem.service.ProblemQueryService;
+import site.codemonster.comon.domain.problem.service.ProblemLowService;
 
 import static site.codemonster.comon.domain.adminAuth.util.SessionConst.*;
 
@@ -20,7 +20,7 @@ import static site.codemonster.comon.domain.adminAuth.util.SessionConst.*;
 @RequiredArgsConstructor
 public class AdminProblemPageController {
 
-    private final ProblemQueryService problemQueryService;
+    private final ProblemLowService problemQueryService;
 
     // 관리자 메인 페이지
     @GetMapping

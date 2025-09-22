@@ -32,6 +32,7 @@ public enum ErrorCode {
     EXCEED_MAX_MEMBERS(HttpStatus.BAD_REQUEST, 400, "현재 팀의 최대 인원을 넘었습니다."),
     ALREADY_TEAM_MANAGER(HttpStatus.BAD_REQUEST, 400, "이미 팀장 입니다."),
     NOT_TEAM_OWNER(HttpStatus.BAD_REQUEST,400,"팀의 방장이 아닙니다."),
+    TEAM_MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND,404,"팀에 팀장이 존재하지 않습니다."),
 
     //TEAM RECRUIT
     TEAM_RECRUIT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, 404,"팀 모집글이 존재하지 않습니다."),
@@ -56,6 +57,8 @@ public enum ErrorCode {
 
     // TEAM_RECOMMENDATION
     TEAM_RECOMMENDATION_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "팀의 추천 설정이 존재하지 않습니다."),
+    TEAM_RECOMMENDATION_DUPLICATE(HttpStatus.CONFLICT, 400,"이미 팀 추천이 존재합니다"),
+    TEAM_RECOMMENDATION_PROBLEM_SHORTAGE(HttpStatus.BAD_REQUEST, 400,"추천하려는 문제 수가 부족합니다"),
 
     // PROBLEM
     PROBLEM_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, 404, "문제를 찾을 수 없습니다."),
@@ -73,10 +76,12 @@ public enum ErrorCode {
     PROBLEM_TITLE_TOO_LONG_ERROR(HttpStatus.BAD_REQUEST, 400, "제목이 너무 깁니다. (최대 50자)"),
     PROBLEM_TAGS_TOO_LONG_ERROR(HttpStatus.BAD_REQUEST, 400, "태그가 너무 깁니다. (최대 50자)"),
     PROBLEM_VALIDATION_ERROR(HttpStatus.BAD_REQUEST, 400, "문제 정보 검증에 실패했습니다."),
+    PROBLEM_DUPLICATE_ERROR(HttpStatus.CONFLICT, 409, "이미 등록되어있는 문제입니다."),
 
     // ETC
     INVALID_IMAGE_URL_FORMAT(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 이미지 URL 형식입니다."),
     ;
+
 
     private final HttpStatus status;
     private final int customStatusCode;

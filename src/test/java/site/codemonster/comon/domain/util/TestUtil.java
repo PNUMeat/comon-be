@@ -1,0 +1,75 @@
+package site.codemonster.comon.domain.util;
+
+import org.springframework.test.util.ReflectionTestUtils;
+import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
+import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.problem.entity.Problem;
+import site.codemonster.comon.domain.problem.entity.ProblemStep;
+import site.codemonster.comon.domain.problem.enums.Platform;
+import site.codemonster.comon.domain.recommendation.entity.PlatformRecommendation;
+import site.codemonster.comon.domain.recommendation.entity.RecommendationHistory;
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendationDay;
+import site.codemonster.comon.domain.team.entity.Team;
+import site.codemonster.comon.domain.team.enums.Topic;
+import site.codemonster.comon.domain.teamMember.entity.TeamMember;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+public final class TestUtil {
+
+
+    public static Team createTeam() {
+        Team team = new Team("팀이름", Topic.CODINGTEST, "팀설명", 10, "1234");
+        ReflectionTestUtils.setField(team, "teamId", 1L);
+        return team;
+    }
+
+    public static TeamRecommendation createTeamRecommendation(Team team) {
+        TeamRecommendation teamRecommendation = new TeamRecommendation(team, LocalDateTime.now().getHour());
+        ReflectionTestUtils.setField(teamRecommendation,"id", 1L);
+        return teamRecommendation;
+    }
+
+    public static TeamRecommendationDay createTeamRecommendationDay(TeamRecommendation teamRecommendation) {
+        TeamRecommendationDay teamRecommendationDay = new TeamRecommendationDay(DayOfWeek.MONDAY, teamRecommendation);
+        ReflectionTestUtils.setField(teamRecommendationDay, "id", 1L);
+        return teamRecommendationDay;
+    }
+
+    public static PlatformRecommendation createPlatformRecommendation(TeamRecommendation teamRecommendation) {
+        PlatformRecommendation platformRecommendation = new PlatformRecommendation(teamRecommendation, Platform.PROGRAMMERS, ProblemStep.STEP1, 1);
+        ReflectionTestUtils.setField(platformRecommendation, "id", 1L);
+        return platformRecommendation;
+    }
+
+    public static RecommendationHistory createRecommendationHistory(Team team, Problem problem) {
+        RecommendationHistory recommendationHistory = new RecommendationHistory(team, problem, LocalDate.now().minusDays(1));
+        ReflectionTestUtils.setField(recommendationHistory, "historyId", 1L);
+        return recommendationHistory;
+    }
+
+    public static Problem createProblem() {
+        Problem problem = new Problem(Platform.PROGRAMMERS, "123", "문제제목", ProblemStep.STEP1, "url");
+        ReflectionTestUtils.setField(problem, "problemId", 1L);
+        return problem;
+    }
+
+    public static Member createMember() {
+        Member member = new Member("email", "KAKAO 12345", "ROLE_USER");
+        ReflectionTestUtils.setField(member, "id", 1L);
+        return member;
+    }
+
+    public static TeamMember createTeamManager(Team team, Member member) {
+        TeamMember teamMember = new TeamMember(team, member, true);
+        ReflectionTestUtils.setField(member, "id", 1L);
+        return teamMember;
+    }
+
+    public static AdminMember createAdminMember() {
+        return new AdminMember("admin","admin", "admin");
+    }
+}

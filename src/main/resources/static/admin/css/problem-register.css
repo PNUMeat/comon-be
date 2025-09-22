@@ -479,4 +479,9 @@
     #leetcode-url::placeholder {
         font-size: 0.75rem;
     }
+
+    .form-select {
+        min-height: 46px;
+        font-size: 0.95rem;
+    }
 }
