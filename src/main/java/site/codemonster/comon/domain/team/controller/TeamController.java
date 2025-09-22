@@ -8,7 +8,6 @@ import site.codemonster.comon.domain.team.dto.request.*;
 import site.codemonster.comon.domain.team.dto.response.*;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamService;
-import site.codemonster.comon.domain.team.utils.TeamResponseUtils;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.domain.teamMember.utils.TeamMemberResponseUtils;
@@ -45,7 +44,6 @@ public class TeamController {
     private final TeamMemberService teamMemberService;
     private final MemberService memberService;
     private final TeamRecruitService teamRecruitService;
-    private final TeamResponseUtils teamResponseUtils;
     private final TeamMemberResponseUtils teamMemberResponseUtils;
 
     @PostMapping
@@ -85,7 +83,7 @@ public class TeamController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
 
-        Page<TeamAllResponse> teamAllResponses = teams.map(teamResponseUtils::getTeamAllResponse);
+        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::new);
 
         return ResponseEntity.status(TEAM_TOTAL_DETAILS_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -114,7 +112,7 @@ public class TeamController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Team> teams = teamService.getAllTeamsByKeywordUsingPaging(pageable,keyword);
-        Page<TeamAllResponse> teamAllResponses = teams.map(teamResponseUtils::getTeamAllResponse);
+        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::new);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -126,7 +124,7 @@ public class TeamController {
         List<Team> teamMembers =  teamService.getMyTeams(member);
 
         List<MyTeamResponse> myTeamResponse = teamMembers.stream()
-                .map(teamResponseUtils::getMyTeamResponse)
+                .map(MyTeamResponse::of)
                 .collect(Collectors.toList());
 
         return ResponseEntity.status(MY_TEAM_DETAILS_SUCCESS.getStatusCode())
@@ -157,11 +155,11 @@ public class TeamController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
-        Page<TeamAllResponse> teamAllResponses = teams.map(teamResponseUtils::getTeamAllResponse);
+        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::new);
 
         List<Team> myTeams = teamService.getMyTeams(member);
         List<MyTeamResponse> myTeamResponses = myTeams.stream()
-                .map(teamResponseUtils::getMyTeamResponse)
+                .map(MyTeamResponse::of)
                 .collect(Collectors.toList());
 
         TeamCombinedResponse teamCombinedResponse = new TeamCombinedResponse(myTeamResponses, teamAllResponses);
@@ -238,7 +236,7 @@ public class TeamController {
 
         return ResponseEntity.status(TEAM_EDIT_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(teamResponseUtils.getTeamInfoResponse(updatedTeam)));
+                .body(ApiResponse.successResponseWithData(new TeamInfoResponse(updatedTeam)));
     }
 
     @DeleteMapping("/{teamId}")
@@ -263,7 +261,7 @@ public class TeamController {
         Team team = teamService.getTeamInfo(teamId, member);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(teamResponseUtils.getTeamInfoResponse(team)));
+                .body(ApiResponse.successResponseWithData(new TeamInfoResponse(team)));
     }
 
     @PostMapping("/{teamId}/team-manager")

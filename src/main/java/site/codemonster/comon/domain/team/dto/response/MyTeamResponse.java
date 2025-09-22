@@ -3,6 +3,7 @@ package site.codemonster.comon.domain.team.dto.response;
 import site.codemonster.comon.domain.team.entity.Team;
 
 import java.time.LocalDate;
+import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 public record MyTeamResponse(Long teamId,
                               String teamName,
@@ -19,7 +20,7 @@ public record MyTeamResponse(Long teamId,
 
     public static MyTeamResponse of(Team team){
         Long teamRecruitId = null;
-        if(team.getTeamRecruit() != null){
+        if (team.getTeamRecruit() != null){
             teamRecruitId = team.getTeamRecruit().getTeamRecruitId();
         }
 
@@ -27,7 +28,7 @@ public record MyTeamResponse(Long teamId,
                 team.getTeamId(),
                 team.getTeamName(),
                 team.getTeamExplain(),
-                team.getTeamIconUrl(),
+                S3ImageUtil.convertObjectKeyToImageUrl(team.getTeamIconUrl()),
                 team.getTeamTopic().getName(),
                 team.getMaxParticipant(),
                 team.getTeamMembers().size(),

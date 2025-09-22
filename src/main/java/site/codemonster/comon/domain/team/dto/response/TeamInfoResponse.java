@@ -1,6 +1,7 @@
 package site.codemonster.comon.domain.team.dto.response;
 
 import site.codemonster.comon.domain.team.entity.Team;
+import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 public record TeamInfoResponse(Long teamId,
                                String teamName,
@@ -8,5 +9,17 @@ public record TeamInfoResponse(Long teamId,
                                String topic,
                                int memberLimit,
                                String password,
-                               String teamIconUrl) {
+                               String teamIconUrl)
+{
+    public TeamInfoResponse(Team team) {
+        this(
+                team.getTeamId(),
+                team.getTeamName(),
+                team.getTeamExplain(),
+                team.getTeamTopic().getName(),
+                team.getMaxParticipant(),
+                team.getTeamPassword(),
+                S3ImageUtil.convertObjectKeyToImageUrl(team.getTeamIconUrl())
+        );
+    }
 }
