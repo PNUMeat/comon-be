@@ -125,7 +125,6 @@ public class ArticleController {
         Page<ArticleParticularDateResponse> responsePage = articlePage.map(article ->
                 ArticleParticularDateResponse.of(article, member, isMyTeam));
 
-
         return ResponseEntity.status(GET_ARTICLE_PARTICULAR_TEAM_AND_DATE.getStatusCode())
             .contentType(MediaType.APPLICATION_JSON)
             .body(ApiResponse.successResponse(responsePage, GET_ARTICLE_PARTICULAR_TEAM_AND_DATE.getMessage()));

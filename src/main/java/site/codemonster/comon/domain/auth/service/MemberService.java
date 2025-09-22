@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
+import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 @Service
 @Transactional(readOnly = true)
@@ -46,7 +47,7 @@ public class MemberService {
     ){
         member.updateProfile(
             memberProfileCreateRequest.memberName(), memberProfileCreateRequest.memberExplain(),
-                imageFieldConvertUtils.convertImageUrlToObjectKey(memberProfileCreateRequest.imageUrl())
+                S3ImageUtil.convertImageUrlToObjectKey(memberProfileCreateRequest.imageUrl())
         );
     }
 
@@ -57,7 +58,7 @@ public class MemberService {
     ){
         member.updateProfile(
             memberProfileUpdateRequest.memberName(), memberProfileUpdateRequest.memberExplain(),
-                imageFieldConvertUtils.convertImageUrlToObjectKey(memberProfileUpdateRequest.imageUrl())
+                S3ImageUtil.convertImageUrlToObjectKey(memberProfileUpdateRequest.imageUrl())
         );
         return member;
     }

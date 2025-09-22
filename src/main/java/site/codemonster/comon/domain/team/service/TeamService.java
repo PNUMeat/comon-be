@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import site.codemonster.comon.global.util.convertUtils.ImageFieldConvertUtils;
+import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 @Service
 @Transactional(readOnly = true)
@@ -51,7 +52,7 @@ public class TeamService {
         Team savedTeam = teamRepository.save(team);
 
 		if (teamRequest.teamIconUrl() != null){ // null이라면 기본 이미지!
-			team.updateTeamIconUrl(imageFieldConvertUtils.convertImageUrlToObjectKey(teamRequest.teamIconUrl()));
+			team.updateTeamIconUrl(S3ImageUtil.convertImageUrlToObjectKey(teamRequest.teamIconUrl()));
 		}
 
         teamMemberService.saveTeamMember(savedTeam, manager, true);
@@ -166,7 +167,7 @@ public class TeamService {
         team.updateTeamInfo(teamInfoEditRequest);
 
         if (teamInfoEditRequest.teamIconUrl() != null){
-            team.updateTeamIconUrl(imageFieldConvertUtils.convertImageUrlToObjectKey(teamInfoEditRequest.teamIconUrl()));
+            team.updateTeamIconUrl(S3ImageUtil.convertImageUrlToObjectKey(teamInfoEditRequest.teamIconUrl()));
         }
 
         return team;
