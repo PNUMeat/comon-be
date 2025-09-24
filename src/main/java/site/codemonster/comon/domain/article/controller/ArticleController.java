@@ -42,7 +42,7 @@ public class ArticleController {
     private final TeamMemberService teamMemberService;
 
     @PostMapping
-    public ResponseEntity<?> createArticle(
+    public ResponseEntity<ApiResponse<ArticleCreateResponse>> createArticle(
             @LoginMember Member member,
             @RequestBody @Valid ArticleCreateRequest articleCreateRequest
     ) {
@@ -58,7 +58,7 @@ public class ArticleController {
     }
 
     @GetMapping("/{teamId}/my-page")
-    public ResponseEntity<?> getMyArticlesAtTeam(
+    public ResponseEntity<ApiResponse<Page<ArticleResponse>>> getMyArticlesAtTeam(
             @LoginMember Member member,
             @PathVariable("teamId") Long teamId,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -76,7 +76,7 @@ public class ArticleController {
     }
 
     @GetMapping("/team/{teamId}")
-    public ResponseEntity<?> getArticlesByTeam(@PathVariable Long teamId) {
+    public ResponseEntity<ApiResponse<List<ArticleResponse>>> getArticlesByTeam(@PathVariable Long teamId) {
         List<Article> articles = articleService.getAllArticlesByTeam(teamId);
         List<ArticleResponse> responses = articles.stream()
                 .map(ArticleResponse::new)
@@ -88,7 +88,7 @@ public class ArticleController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteArticle(
+    public ResponseEntity<ApiResponse<Void>> deleteArticle(
             @PathVariable(name = "id") Long articleId,
             @LoginMember Member member
     ) {
@@ -100,7 +100,7 @@ public class ArticleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateArticle(
+    public ResponseEntity<ApiResponse<Void>> updateArticle(
             @PathVariable(name = "id") Long articleId,
             @RequestBody ArticleUpdateRequest articleUpdateRequest,
             @LoginMember Member member
@@ -113,7 +113,7 @@ public class ArticleController {
     }
 
     @GetMapping("/{teamId}/by-date")
-    public ResponseEntity<?> getArticlesByTeamAndDate(
+    public ResponseEntity<ApiResponse<Page<ArticleParticularDateResponse>>> getArticlesByTeamAndDate(
         @PathVariable("teamId") Long teamId,
         @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
         @LoginMember Member member,
@@ -132,7 +132,7 @@ public class ArticleController {
 
 
     @PostMapping("/teams/{teamId}/subjects")
-    public ResponseEntity<?> createTeamSubject(
+    public ResponseEntity<ApiResponse<Void>> createTeamSubject(
             @LoginMember Member member,
             @PathVariable("teamId") Long teamId,
             @ModelAttribute @Valid TeamSubjectRequest teamSubjectRequest
@@ -145,7 +145,7 @@ public class ArticleController {
     }
 
     @GetMapping("/teams/{teamId}/subjects")
-    public ResponseEntity<?> getTeamSubjectsByDate( // 특정 날짜에 팀 공지사항 조회
+    public ResponseEntity<ApiResponse<TeamSubjectResponse>> getTeamSubjectsByDate( // 특정 날짜에 팀 공지사항 조회
             @PathVariable("teamId") Long teamId,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
@@ -162,7 +162,7 @@ public class ArticleController {
     }
 
     @DeleteMapping ("/teams/{teamId}/subjects/{articleId}")
-    public ResponseEntity<?> deleteTeamSubjectsByArticleId(
+    public ResponseEntity<ApiResponse<Void>> deleteTeamSubjectsByArticleId(
             @LoginMember Member member,
             @PathVariable("teamId") Long teamId,
             @PathVariable("articleId") Long articleId
@@ -175,7 +175,7 @@ public class ArticleController {
     }
 
     @PutMapping("/teams/{teamId}/subjects/{articleId}")
-    public ResponseEntity<?> updateTeamSubjectsByArticleId(
+    public ResponseEntity<ApiResponse<Void>> updateTeamSubjectsByArticleId(
             @LoginMember Member member,
             @PathVariable("teamId") Long teamId,
             @PathVariable("articleId") Long articleId,
