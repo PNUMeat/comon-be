@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import site.codemonster.comon.domain.article.service.ArticleService;
+import site.codemonster.comon.domain.article.service.ArticleHighService;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.service.ProblemLowService;
 import site.codemonster.comon.domain.recommendation.dto.request.ManualRecommendationRequest;
@@ -43,7 +43,7 @@ public class TeamRecommendationHighService {
     private final PlatformRecommendationLowService platformRecommendationLowService;
     private final RecommendationHistoryLowService recommendationHistoryLowService;
     private final ProblemLowService problemQueryService;
-    private final ArticleService articleService;
+    private final ArticleHighService articleHighService;
     private final TeamMemberService teamMemberService;
 
     public TeamRecommendation saveRecommendationSettings(TeamRecommendationRequest teamRecommendationRequest) {
@@ -209,7 +209,7 @@ public class TeamRecommendationHighService {
         TeamMember findTeamManager = teamMemberService.getTeamManagerByTeamId(teamRecommendation.getTeam().getTeamId());
 
         // 추천 글 생성
-        String articleTitle = articleService.createRecommendationArticle(
+        String articleTitle = articleHighService.createRecommendationArticle(
                 teamRecommendation.getTeam(), findTeamManager.getMember(), recommendationProblems, selectedDate);
 
         // 추천 기록 저장

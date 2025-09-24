@@ -9,7 +9,8 @@ import site.codemonster.comon.domain.article.dto.response.ArticleParticularDateR
 import site.codemonster.comon.domain.article.dto.response.ArticleResponse;
 import site.codemonster.comon.domain.article.dto.response.TeamSubjectResponse;
 import site.codemonster.comon.domain.article.entity.Article;
-import site.codemonster.comon.domain.article.service.ArticleService;
+import site.codemonster.comon.domain.article.service.ArticleHighService;
+import site.codemonster.comon.domain.article.service.ArticleLowService;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
@@ -38,7 +39,8 @@ import static site.codemonster.comon.domain.article.controller.ArticleResponseEn
 @RequiredArgsConstructor
 public class ArticleController {
 
-    private final ArticleService articleService;
+    private final ArticleHighService articleHighService;
+    private final ArticleLowService articleLowService;
     private final TeamMemberService teamMemberService;
 
     @PostMapping
@@ -48,7 +50,7 @@ public class ArticleController {
     ) {
         teamMemberService.getTeamMemberByTeamIdAndMemberId(articleCreateRequest.teamId(), member);
 
-        Article savedArticle = articleService.articleCreate(member, articleCreateRequest);
+        Article savedArticle = articleHighService.articleCreate(member, articleCreateRequest);
 
         ArticleCreateResponse articleCreateResponse = ArticleCreateResponse.of(savedArticle);
 
@@ -66,7 +68,7 @@ public class ArticleController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        Page<Article> myArticles = articleService.getMyArticlesUsingPaging(member.getId(), teamId, pageable);
+        Page<Article> myArticles = articleLowService.getMyArticles(member.getId(), teamId, pageable);
 
         Page<ArticleResponse> responses = myArticles.map(ArticleResponse::new);
 
@@ -77,7 +79,7 @@ public class ArticleController {
 
     @GetMapping("/team/{teamId}")
     public ResponseEntity<ApiResponse<List<ArticleResponse>>> getArticlesByTeam(@PathVariable Long teamId) {
-        List<Article> articles = articleService.getAllArticlesByTeam(teamId);
+        List<Article> articles = articleLowService.getTeamArticles(teamId);
         List<ArticleResponse> responses = articles.stream()
                 .map(ArticleResponse::new)
                 .toList();
@@ -92,7 +94,7 @@ public class ArticleController {
             @PathVariable(name = "id") Long articleId,
             @LoginMember Member member
     ) {
-        articleService.deleteArticle(articleId, member);
+        articleHighService.deleteArticle(articleId, member);
 
         return ResponseEntity.status(ARTICLE_DELETE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +107,7 @@ public class ArticleController {
             @RequestBody ArticleUpdateRequest articleUpdateRequest,
             @LoginMember Member member
     ) {
-        articleService.updateArticle(articleId, articleUpdateRequest, member);
+        articleHighService.updateArticle(articleId, articleUpdateRequest, member);
 
         return ResponseEntity.status(ARTICLE_PUT_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +122,7 @@ public class ArticleController {
         @PageableDefault(size = 6, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         boolean isMyTeam = teamMemberService.existsByTeamIdAndMemberId(teamId, member);
-        Page<Article> articlePage = articleService.getArticlesByTeamAndDate(teamId, date, pageable);
+        Page<Article> articlePage = articleLowService.getArticlesByDate(teamId, date, pageable);
 
         Page<ArticleParticularDateResponse> responsePage = articlePage.map(article ->
                 ArticleParticularDateResponse.of(article, member, isMyTeam));
@@ -137,7 +139,7 @@ public class ArticleController {
             @PathVariable("teamId") Long teamId,
             @ModelAttribute @Valid TeamSubjectRequest teamSubjectRequest
     ) {
-        articleService.saveTeamSubject(member, teamId, teamSubjectRequest);
+        articleHighService.saveTeamSubject(member, teamId, teamSubjectRequest);
 
         return ResponseEntity.status(SUBJECT_CREATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +151,7 @@ public class ArticleController {
             @PathVariable("teamId") Long teamId,
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        Article subject = articleService.getTeamSubjectByDate(teamId, date);
+        Article subject = articleHighService.getTeamSubjectByDate(teamId, date);
 
         TeamSubjectResponse teamSubjectResponse = null;
         if(subject!= null){
@@ -167,7 +169,7 @@ public class ArticleController {
             @PathVariable("teamId") Long teamId,
             @PathVariable("articleId") Long articleId
     ) {
-        articleService.deleteTeamSubjectByArticleId(member, teamId, articleId);
+        articleHighService.deleteTeamSubjectByArticleId(member, teamId, articleId);
 
         return ResponseEntity.status(SUBJECT_DELETE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -181,7 +183,7 @@ public class ArticleController {
             @PathVariable("articleId") Long articleId,
             @RequestBody TeamSubjectUpdateRequest teamSubjectUpdateRequest
     ) {
-        articleService.updateTeamSubjectByArticleId(member, teamId, articleId, teamSubjectUpdateRequest);
+        articleHighService.updateTeamSubjectByArticleId(member, teamId, articleId, teamSubjectUpdateRequest);
 
         return ResponseEntity.status(SUBJECT_UPDATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)

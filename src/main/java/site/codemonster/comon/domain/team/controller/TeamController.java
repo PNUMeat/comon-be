@@ -1,7 +1,7 @@
 package site.codemonster.comon.domain.team.controller;
 
 import site.codemonster.comon.domain.article.dto.request.CalenderSubjectRequest;
-import site.codemonster.comon.domain.article.service.ArticleService;
+import site.codemonster.comon.domain.article.service.ArticleHighService;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.domain.team.dto.request.*;
@@ -39,7 +39,7 @@ import static site.codemonster.comon.global.response.ResponseMessageEnum.*;
 public class TeamController {
 
     private final TeamService teamService;
-    private final ArticleService articleService;
+    private final ArticleHighService articleHighService;
     private final TeamMemberService teamMemberService;
     private final MemberService memberService;
     private final TeamRecruitService teamRecruitService;
@@ -201,7 +201,7 @@ public class TeamController {
             @ModelAttribute @Valid CalenderSubjectRequest calenderSubjectRequest,
             @PathVariable("teamId") Long teamId
     ) {
-        TeamPageResponse subjectArticlesUsingCalender = articleService.getSubjectArticlesUsingCalender(
+        TeamPageResponse subjectArticlesUsingCalender = articleHighService.getSubjectArticlesUsingCalender(
                 member,
                 teamId,
                 calenderSubjectRequest

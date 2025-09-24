@@ -8,7 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import site.codemonster.comon.domain.article.service.ArticleService;
+import site.codemonster.comon.domain.article.service.ArticleHighService;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.service.ProblemLowService;
@@ -62,7 +62,7 @@ class TeamRecommendationServiceTest {
     private ProblemLowService problemQueryService;
 
     @Mock
-    private ArticleService articleService;
+    private ArticleHighService articleService;
 
     @Mock
     private TeamMemberService teamMemberService;
