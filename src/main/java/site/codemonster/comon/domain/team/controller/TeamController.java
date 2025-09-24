@@ -81,7 +81,7 @@ public class TeamController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
 
-        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::of);
+        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::new);
 
         return ResponseEntity.status(TEAM_TOTAL_DETAILS_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +110,7 @@ public class TeamController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Team> teams = teamService.getAllTeamsByKeywordUsingPaging(pageable,keyword);
-        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::of);
+        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::new);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -153,7 +153,7 @@ public class TeamController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
-        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::of);
+        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::new);
 
         List<Team> myTeams = teamService.getMyTeams(member);
         List<MyTeamResponse> myTeamResponses = myTeams.stream()
@@ -234,7 +234,7 @@ public class TeamController {
 
         return ResponseEntity.status(TEAM_EDIT_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(TeamInfoResponse.of(updatedTeam)));
+                .body(ApiResponse.successResponseWithData(new TeamInfoResponse(updatedTeam)));
     }
 
     @DeleteMapping("/{teamId}")
@@ -259,7 +259,7 @@ public class TeamController {
         Team team = teamService.getTeamInfo(teamId, member);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(TeamInfoResponse.of(team)));
+                .body(ApiResponse.successResponseWithData(new TeamInfoResponse(team)));
     }
 
     @PostMapping("/{teamId}/team-manager")
@@ -321,7 +321,7 @@ public class TeamController {
     ){
         List<TeamMemberResponse> teamMemberResponses = teamMemberService.getTeamMembersByTeamId(teamId, member)
                 .stream()
-                .map(TeamMemberResponse::of)
+                .map(TeamMemberResponse::new)
                 .toList();
 
         return ResponseEntity.status(HttpStatus.OK)

@@ -1,10 +1,11 @@
 package site.codemonster.comon.domain.article.dto.response;
 
-import site.codemonster.comon.domain.article.entity.Article;
-import site.codemonster.comon.domain.auth.entity.Member;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
+import site.codemonster.comon.domain.article.entity.Article;
+import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 public record ArticleParticularDateResponse(
         Long articleId,
@@ -12,13 +13,12 @@ public record ArticleParticularDateResponse(
         String articleBody,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdDate,
-        String imageUrl,
         String memberName,
         String memberImage,
         Boolean isAuthor
 ) {
-    public static ArticleParticularDateResponse from(Article article, Member member, boolean isMyTeam) {
-        if(!isMyTeam){
+    public static ArticleParticularDateResponse of(Article article, Member member, boolean isMyTeam) {
+        if (!isMyTeam) {
             return new ArticleParticularDateResponse(
                     article.getArticleId(),
                     article.getArticleTitle(),
@@ -26,14 +26,8 @@ public record ArticleParticularDateResponse(
                     article.getCreatedDate(),
                     null,
                     article.getMember().getMemberName(),
-                    article.getMember().getImageUrl(),
                     member.getUuid().equals(article.getMember().getUuid())
             );
-        }
-
-        String imageUrl = null;
-        if(!article.getImages().isEmpty()){
-            imageUrl = article.getImages().get(0).getImageUrl();
         }
 
         return new ArticleParticularDateResponse(
@@ -41,9 +35,8 @@ public record ArticleParticularDateResponse(
                 article.getArticleTitle(),
                 article.getArticleBody(),
                 article.getCreatedDate(),
-                imageUrl,
                 article.getMember().getMemberName(),
-                article.getMember().getImageUrl(),
+                S3ImageUtil.convertObjectKeyToImageUrl(article.getMember().getImageUrl()),
                 member.getUuid().equals(article.getMember().getUuid())
         );
     }

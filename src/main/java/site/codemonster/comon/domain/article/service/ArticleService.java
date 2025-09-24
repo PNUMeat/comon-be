@@ -9,6 +9,7 @@ import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
+import site.codemonster.comon.domain.team.dto.response.MyTeamResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamPageResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamService;
@@ -146,7 +147,7 @@ public class ArticleService {
 
         List<Article> subjectArticles = articleRepository.findSubjectArticlesByTeamIdAndYearAndMonth(teamId, calenderSubjectRequest.year(), calenderSubjectRequest.month(), getSubjectCategories());
         boolean isTeamManager = teamMemberService.checkMemberIsTeamManager(teamId, member);
-        return TeamPageResponse.from(team, isTeamManager, subjectArticles);
+        return TeamPageResponse.from(MyTeamResponse.of(team), isTeamManager, subjectArticles);
     }
 
     private void validateTeamManager(Member member, Team team) {

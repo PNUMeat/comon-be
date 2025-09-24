@@ -30,6 +30,7 @@ public class TeamRecruit extends TimeStamp {
 
     private String teamRecruitTitle;
 
+    @Column(columnDefinition = "TEXT")
     private String teamRecruitBody;
 
     private String chatUrl;

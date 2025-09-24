@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 @Service
 @Transactional(readOnly = true)
@@ -35,14 +36,14 @@ public class MemberService {
     private final TeamRecruitImageRepository teamRecruitImageRepository;
 
     @Transactional
-    public Member createMemberProfile(
+    public void createMemberProfile(
         MemberProfileCreateRequest memberProfileCreateRequest,
         Member member
     ){
         member.updateProfile(
-            memberProfileCreateRequest.memberName(), memberProfileCreateRequest.memberExplain(), memberProfileCreateRequest.imageUrl()
+            memberProfileCreateRequest.memberName(), memberProfileCreateRequest.memberExplain(),
+                S3ImageUtil.convertImageUrlToObjectKey(memberProfileCreateRequest.imageUrl())
         );
-        return member;
     }
 
     @Transactional
@@ -51,7 +52,8 @@ public class MemberService {
         Member member
     ){
         member.updateProfile(
-            memberProfileUpdateRequest.memberName(), memberProfileUpdateRequest.memberExplain(), memberProfileUpdateRequest.imageUrl()
+            memberProfileUpdateRequest.memberName(), memberProfileUpdateRequest.memberExplain(),
+                S3ImageUtil.convertImageUrlToObjectKey(memberProfileUpdateRequest.imageUrl())
         );
         return member;
     }

@@ -1,9 +1,10 @@
 package site.codemonster.comon.domain.article.dto.response;
 
-import site.codemonster.comon.domain.article.entity.Article;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
+import site.codemonster.comon.domain.article.entity.Article;
+import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 public record ArticleResponse(
     Long articleId,
@@ -11,24 +12,17 @@ public record ArticleResponse(
     String articleBody,
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdDate,
-    String imageUrl,
     String memberName,
     String memberImage
 ) {
-    public static ArticleResponse of(Article article) {
-        String imageUrl = null;
-        if(!article.getImages().isEmpty()){
-            imageUrl = article.getImages().get(0).getImageUrl();
-        }
-
-        return new ArticleResponse(
-            article.getArticleId(),
-            article.getArticleTitle(),
-            article.getArticleBody(),
-            article.getCreatedDate(),
-            imageUrl,
-            article.getMember().getMemberName(),
-            article.getMember().getImageUrl()
+    public ArticleResponse(Article article) {
+        this(
+                article.getArticleId(),
+                article.getArticleTitle(),
+                article.getArticleBody(),
+                article.getCreatedDate(),
+                article.getMember().getMemberName(),
+                S3ImageUtil.convertObjectKeyToImageUrl(article.getMember().getImageUrl())
         );
     }
 }

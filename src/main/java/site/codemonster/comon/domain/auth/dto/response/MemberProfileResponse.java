@@ -1,6 +1,7 @@
 package site.codemonster.comon.domain.auth.dto.response;
 
 import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 public record MemberProfileResponse(
         String memberName,
@@ -8,12 +9,12 @@ public record MemberProfileResponse(
         String memberExplain,
         String uuid
 ) {
-    public static MemberProfileResponse of(Member member){
-        return new MemberProfileResponse(
+    public MemberProfileResponse(Member member) {
+        this(
                 member.getMemberName(),
-                member.getImageUrl(),
+                S3ImageUtil.convertObjectKeyToImageUrl(member.getImageUrl()),
                 member.getDescription(),
                 member.getUuid()
-                );
+        );
     }
 }
