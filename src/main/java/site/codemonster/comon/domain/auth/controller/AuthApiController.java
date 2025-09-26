@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.auth.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.auth.constant.AuthConstant;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.RefreshTokenService;
@@ -29,8 +30,8 @@ public class AuthApiController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<?>> logout(
-            @LoginMember Member member,
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @AuthenticationPrincipal Member member,
             HttpServletResponse response
     ){
         refreshTokenService.deleteTokenByMember(member);
@@ -42,7 +43,7 @@ public class AuthApiController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<?>> reissue(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<Void>> reissue(HttpServletRequest request, HttpServletResponse response) {
 
         String refresh = (String) request.getAttribute(AuthConstant.REFRESH_TOKEN);
         JWTInformation jwtInformation = jwtUtil.getJWTInformation(refresh);

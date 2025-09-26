@@ -1,7 +1,10 @@
 package site.codemonster.comon.global.security.filter;
 
 import site.codemonster.comon.domain.auth.constant.AuthConstant;
+import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.global.error.ErrorCode;
+import site.codemonster.comon.global.error.Member.MemberNotFoundException;
 import site.codemonster.comon.global.security.jwt.JWTInformation;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
 import site.codemonster.comon.global.util.responseUtils.ResponseUtils;
@@ -29,6 +32,7 @@ public class JWTAccessFilter extends OncePerRequestFilter {
 
     private final JWTUtils jwtUtils;
     private final ResponseUtils responseUtils;
+    private final MemberService memberService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -43,11 +47,7 @@ public class JWTAccessFilter extends OncePerRequestFilter {
 
         //Authorization 헤더 검증
         if (checkContainAuthorizationHeader(authorization)) {
-            if (filterPassUrl(request)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-            responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.UNAUTHORIZED_MEMBER_ERROR, response);
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -69,7 +69,19 @@ public class JWTAccessFilter extends OncePerRequestFilter {
 
         //토큰에서 username과 role 획득
         Collection<GrantedAuthority> collection = getGrantedAuthorities(jwtInformation);
-        Authentication authToken = new UsernamePasswordAuthenticationToken(token, null, collection);
+
+        Member member = null;
+
+        try {
+            member = memberService.getMemberByUUID(jwtInformation.uuid());
+        } catch (MemberNotFoundException e) {
+                responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.NOT_COMPLETE_SIGN_UP_ERROR, response);
+        }
+
+        if(member.getMemberName() == null)
+            responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.NOT_COMPLETE_SIGN_UP_ERROR, response);
+
+        Authentication authToken = new UsernamePasswordAuthenticationToken(member, null, collection);
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);

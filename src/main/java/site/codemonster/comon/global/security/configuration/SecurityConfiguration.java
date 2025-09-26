@@ -1,6 +1,9 @@
 package site.codemonster.comon.global.security.configuration;
 
+import jakarta.servlet.http.HttpServletResponse;
 import site.codemonster.comon.domain.auth.repository.RefreshTokenRepository;
+import site.codemonster.comon.domain.auth.service.MemberService;
+import site.codemonster.comon.global.error.ErrorCode;
 import site.codemonster.comon.global.security.filter.JWTAccessFilter;
 import site.codemonster.comon.global.security.filter.JWTRefreshFilter;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
@@ -33,6 +36,8 @@ public class SecurityConfiguration {
 
     private final ResponseUtils responseUtils;
 
+    private final MemberService memberService;
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
 
@@ -46,7 +51,7 @@ public class SecurityConfiguration {
             .formLogin((auth) -> auth.disable())
             .httpBasic((auth) -> auth.disable())
 
-            .addFilterAfter(new JWTAccessFilter(jwtUtil, responseUtils), OAuth2LoginAuthenticationFilter.class)
+            .addFilterAfter(new JWTAccessFilter(jwtUtil, responseUtils, memberService), OAuth2LoginAuthenticationFilter.class)
             .addFilterAfter(new JWTRefreshFilter(jwtUtil, refreshTokenRepository, responseUtils), OAuth2LoginAuthenticationFilter.class)
 
             .oauth2Login(
@@ -74,6 +79,15 @@ public class SecurityConfiguration {
 
             .sessionManagement((session) -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http.exceptionHandling(e->e
+                .authenticationEntryPoint((request, response, authException)-> {
+                    responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.UNAUTHORIZED_MEMBER_ERROR, response);
+                })
+                .accessDeniedHandler((request, response, authException)-> {
+                    responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.FORBIDDEN_MEMBER_ERROR, response);
+                }));
+
 
         return http.build();
     }
