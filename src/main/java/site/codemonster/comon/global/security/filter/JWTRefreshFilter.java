@@ -26,6 +26,7 @@ public class JWTRefreshFilter extends OncePerRequestFilter {
     private final JWTUtils jwtUtils;
     private final RefreshTokenRepository refreshRepository;
     private final ResponseUtils responseUtils;
+    private final CookieUtils cookieUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -37,25 +38,25 @@ public class JWTRefreshFilter extends OncePerRequestFilter {
             return;
         }
 
-        String refresh = CookieUtils.checkRefreshTokenInCookie(request);
+        String refresh = cookieUtils.checkRefreshTokenInCookie(request);
 
         if (refresh == null || !refreshRepository.existsByToken(refresh)) {
             responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.TOKEN_ERROR, response);
-            CookieUtils.clearCookie(response);
+            cookieUtils.clearCookie(response);
             return;
         }
 
         Optional<ErrorCode> validationToken = jwtUtils.validationToken(refresh);
         if (validationToken.isPresent()) {
             responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.TOKEN_ERROR, response);
-            CookieUtils.clearCookie(response);
+            cookieUtils.clearCookie(response);
             return;
         }
 
         JWTInformation jwtInformation = jwtUtils.getJWTInformation(refresh);
         if (!AuthConstant.REFRESH_TOKEN.equals(jwtInformation.category())) {
             responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.TOKEN_ERROR, response);
-            CookieUtils.clearCookie(response);
+            cookieUtils.clearCookie(response);
             return;
         }
         request.setAttribute(AuthConstant.REFRESH_TOKEN, refresh);

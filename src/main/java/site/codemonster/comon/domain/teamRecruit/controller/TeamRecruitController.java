@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.teamRecruit.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.domain.team.entity.Team;
@@ -19,7 +20,6 @@ import site.codemonster.comon.domain.teamRecruit.dto.response.TeamRecruitUpdateR
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
 import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
-import site.codemonster.comon.global.security.annotation.LoginMember;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -49,7 +49,7 @@ public class TeamRecruitController {
 
     @PostMapping
     public ResponseEntity<?> createTeamRecruitment(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamRecruitCreateRequest teamRecruitCreateRequest
     ) {
         Team team = null;
@@ -88,7 +88,7 @@ public class TeamRecruitController {
     @GetMapping("/{recruitId}")
     public ResponseEntity<?> getParticularTeamRecruitId(
             @PathVariable("recruitId") Long recruitId,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ){
         TeamRecruit teamRecruit = teamRecruitService.findByTeamRecruitIdWithMemberOrThrow(recruitId);
         List<TeamApply> teamApplies = teamApplyService.getTeamApplies(teamRecruit, member);
@@ -113,7 +113,7 @@ public class TeamRecruitController {
     @PatchMapping("/{recruitId}")
     public ResponseEntity<?> changeTeamRecruitStatus(
             @PathVariable("recruitId") Long recruitId,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ){
         teamRecruitService.changeTeamRecruitStatus(recruitId, member);
 
@@ -125,7 +125,7 @@ public class TeamRecruitController {
     @PutMapping("/{recruitId}")
     public ResponseEntity<?> updateTeamRecruit(
             @PathVariable("recruitId") Long recruitId,
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamRecruitUpdateRequest teamRecruitUpdateRequest
     ){
         teamRecruitService.updateTeamRecruit(recruitId, member, teamRecruitUpdateRequest);
@@ -140,7 +140,7 @@ public class TeamRecruitController {
     @DeleteMapping("/{recruitId}")
     public ResponseEntity<?> deleteTeamRecruit(
             @PathVariable("recruitId") Long recruitId,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ){
         TeamRecruit teamRecruit = teamRecruitService.findByTeamRecruitIdOrThrow(recruitId);
         teamRecruitService.deleteTeamRecruit(teamRecruit, member);
@@ -153,7 +153,7 @@ public class TeamRecruitController {
     @PostMapping("/invite")
     public ResponseEntity<?> inviteTeamMember(
             @RequestBody @Valid TeamRecruitInviteRequest teamRecruitInviteRequest,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ){
         TeamRecruit teamRecruit = teamRecruitService.findByTeamRecruitIdOrThrow(teamRecruitInviteRequest.recruitId());
         teamRecruitService.isAuthorOrThrow(teamRecruit, member);

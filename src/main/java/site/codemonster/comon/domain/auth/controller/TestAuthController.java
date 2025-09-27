@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestAuthController {
 
     @GetMapping("/auth")
-    public ResponseEntity<ApiResponse<?>> authorization() {
+    public ResponseEntity<ApiResponse<Void>> authorization() {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponseWithMessage("인증된 회원입니다."));
     }
 
     @GetMapping("/no-auth")
-    public ResponseEntity<ApiResponse<?>> noAuthorization() {
+    public ResponseEntity<ApiResponse<Void>> noAuthorization() {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponseWithMessage("인증 필요없는 컨트롤러 입니다."));

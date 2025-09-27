@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.auth.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileCreateRequest;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileUpdateRequest;
 import site.codemonster.comon.domain.auth.dto.response.MemberInfoResponse;
@@ -11,7 +12,6 @@ import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
-import site.codemonster.comon.global.security.annotation.LoginMember;
 import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -33,11 +33,12 @@ public class MemberController {
 
     private final MemberService memberService;
     private final TeamMemberService teamMemberService;
+    private final CookieUtils cookieUtils;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createMemberProfile(
+    public ResponseEntity<ApiResponse<String>> createMemberProfile(
         @RequestBody @Valid MemberProfileCreateRequest memberProfileCreateRequest,
-        @LoginMember Member member
+        @AuthenticationPrincipal Member member
     ){
         memberService.createMemberProfile(memberProfileCreateRequest, member);
 
@@ -47,9 +48,9 @@ public class MemberController {
     }
 
     @PutMapping
-    public ResponseEntity<ApiResponse<?>> updateMemberProfile(
+    public ResponseEntity<ApiResponse<MemberProfileResponse>> updateMemberProfile(
         @RequestBody @Valid MemberProfileUpdateRequest memberProfileUpdateRequest,
-        @LoginMember Member member
+        @AuthenticationPrincipal Member member
     ){
         Member updatedMember = memberService.updateMemberProfile(memberProfileUpdateRequest, member);
 
@@ -59,7 +60,7 @@ public class MemberController {
     }
 
     @GetMapping("/own-profile") // 자신의 회원 프로필 조회
-    public ResponseEntity<ApiResponse<?>> getOwnProfile(@LoginMember Member member){
+    public ResponseEntity<ApiResponse<MemberProfileResponse>> getOwnProfile(@AuthenticationPrincipal Member member){
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -67,7 +68,7 @@ public class MemberController {
     }
 
     @GetMapping("/profile/{uuid}") // uuid로 회원 프로필 조회
-    public ResponseEntity<ApiResponse<?>> getMemberProfile(@PathVariable("uuid") String uuid){
+    public ResponseEntity<ApiResponse<MemberProfileResponse>> getMemberProfile(@PathVariable("uuid") String uuid){
 
         Member findMember = memberService.getMemberByUUID(uuid);
 
@@ -78,7 +79,7 @@ public class MemberController {
 
 
     @GetMapping("/info") // 내 정보 눌렀을 때 팀까지 조회도록하는 API
-    public ResponseEntity<ApiResponse<?>> getMemberInfo(@LoginMember Member member) {
+    public ResponseEntity<ApiResponse<MemberInfoResponse>> getMemberInfo(@AuthenticationPrincipal Member member) {
 
         List<TeamMember> teamMemberAndTeamByMember = teamMemberService.getTeamMemberAndTeamByMember(member);
 
@@ -95,10 +96,10 @@ public class MemberController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<ApiResponse<?>> deleteMember(@LoginMember Member member, HttpServletResponse response){
+    public ResponseEntity<ApiResponse<Void>> deleteMember(@AuthenticationPrincipal Member member, HttpServletResponse response){
         memberService.deleteMember(member.getId());
 
-        CookieUtils.clearCookie(response);
+        cookieUtils.clearCookie(response);
 
         return ResponseEntity.status(MEMBER_DELETE_SUCCESS.getStatusCode())
             .contentType(MediaType.APPLICATION_JSON)

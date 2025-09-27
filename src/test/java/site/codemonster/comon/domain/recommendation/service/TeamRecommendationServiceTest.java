@@ -81,7 +81,7 @@ class TeamRecommendationServiceTest {
         given(teamRecommendationLowService.isExistByTeam(any()))
                 .willReturn(false);
 
-        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendation(team);
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
 
         given(teamRecommendationLowService.save(any(), any()))
                 .willReturn(teamRecommendation);
@@ -111,7 +111,7 @@ class TeamRecommendationServiceTest {
     void saveRecommendationSettingsFail() {
 
         // given
-        Team team = TestUtil.createTeam();
+        Team team = TestUtil.createTeamWithId();
 
         given(teamLowService.findById(any()))
                 .willReturn(team);
@@ -119,7 +119,7 @@ class TeamRecommendationServiceTest {
         given(teamRecommendationLowService.isExistByTeam(any()))
                 .willReturn(true);
 
-        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendation(team);
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
 
         // when & then
         assertThatThrownBy(()->teamRecommendationService.saveRecommendationSettings(
@@ -137,10 +137,10 @@ class TeamRecommendationServiceTest {
     void getRecommendationSettingsSuccess() {
 
         // given
-        Team team = TestUtil.createTeam();
-        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendation(team);
-        TeamRecommendationDay teamRecommendationDay = TestUtil.createTeamRecommendationDay(teamRecommendation);
-        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendation(teamRecommendation);
+        Team team = TestUtil.createTeamWithId();
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
+        TeamRecommendationDay teamRecommendationDay = TestUtil.createTeamRecommendationDayWithId(teamRecommendation);
+        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
 
 
         ReflectionTestUtils.setField(team, "teamRecommendation", teamRecommendation);
@@ -170,13 +170,13 @@ class TeamRecommendationServiceTest {
     void executeManualRecommendationSuccess() {
 
         // given
-        Team team = TestUtil.createTeam();
+        Team team = TestUtil.createTeamWithId();
         Problem problem = TestUtil.createProblem();
-        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendation(team);
-        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendation(teamRecommendation);
-        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistory(team, problem);
-        Member member = TestUtil.createMember();
-        TeamMember teamMember = TestUtil.createTeamManager(team, member);
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
+        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
+        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistoryWithId(team, problem);
+        Member member = TestUtil.createMemberWithId();
+        TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
 
         ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
@@ -225,13 +225,13 @@ class TeamRecommendationServiceTest {
     void executeManualRecommendationSuccess2() {
 
         // given
-        Team team = TestUtil.createTeam();
-        Problem problem = TestUtil.createProblem();
-        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendation(team);
-        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendation(teamRecommendation);
-        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistory(team, problem);
-        Member member = TestUtil.createMember();
-        TeamMember teamMember = TestUtil.createTeamManager(team, member);
+        Team team = TestUtil.createTeamWithId();
+        Problem problem = TestUtil.createProblemWithId();
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
+        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
+        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistoryWithId(team, problem);
+        Member member = TestUtil.createMemberWithId();
+        TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
 
         ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
@@ -280,13 +280,13 @@ class TeamRecommendationServiceTest {
     void executeRecommendationSuccess() {
 
         // given
-        Team team = TestUtil.createTeam();
-        Problem problem = TestUtil.createProblem();
-        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendation(team);
-        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendation(teamRecommendation);
-        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistory(team, problem);
-        Member member = TestUtil.createMember();
-        TeamMember teamMember = TestUtil.createTeamManager(team, member);
+        Team team = TestUtil.createTeamWithId();
+        Problem problem = TestUtil.createProblemWithId();
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
+        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
+        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistoryWithId(team, problem);
+        Member member = TestUtil.createMemberWithId();
+        TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
         ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
 
@@ -322,11 +322,11 @@ class TeamRecommendationServiceTest {
     void executeRecommendationFail() {
 
         // given
-        Team team = TestUtil.createTeam();
-        Problem problem = TestUtil.createProblem();
-        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendation(team);
-        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendation(teamRecommendation);
-        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistory(team, problem);
+        Team team = TestUtil.createTeamWithId();
+        Problem problem = TestUtil.createProblemWithId();
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
+        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
+        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistoryWithId(team, problem);
         ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
 
@@ -355,12 +355,12 @@ class TeamRecommendationServiceTest {
     @DisplayName("자동 추천 실행 성공")
     void executeAutoRecommendation() {
         // given
-        Team team = TestUtil.createTeam();
-        Problem problem = TestUtil.createProblem();
-        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendation(team);
-        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendation(teamRecommendation);
-        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistory(team, problem);
-        TeamRecommendationDay teamRecommendationDay = TestUtil.createTeamRecommendationDay(teamRecommendation);
+        Team team = TestUtil.createTeamWithId();
+        Problem problem = TestUtil.createProblemWithId();
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
+        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
+        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistoryWithId(team, problem);
+        TeamRecommendationDay teamRecommendationDay = TestUtil.createTeamRecommendationDayWithId(teamRecommendation);
 
         ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));

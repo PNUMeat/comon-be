@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.article.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.article.dto.request.ArticleCreateRequest;
 import site.codemonster.comon.domain.article.dto.request.ArticleUpdateRequest;
 import site.codemonster.comon.domain.article.dto.request.TeamSubjectRequest;
@@ -14,7 +15,6 @@ import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
-import site.codemonster.comon.global.security.annotation.LoginMember;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,7 +43,7 @@ public class ArticleController {
 
     @PostMapping
     public ResponseEntity<?> createArticle(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @RequestBody @Valid ArticleCreateRequest articleCreateRequest
     ) {
         teamMemberService.getTeamMemberByTeamIdAndMemberId(articleCreateRequest.teamId(), member);
@@ -59,7 +59,7 @@ public class ArticleController {
 
     @GetMapping("/{teamId}/my-page")
     public ResponseEntity<?> getMyArticlesAtTeam(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "6") int size
@@ -90,7 +90,7 @@ public class ArticleController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteArticle(
             @PathVariable(name = "id") Long articleId,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ) {
         articleService.deleteArticle(articleId, member);
 
@@ -103,7 +103,7 @@ public class ArticleController {
     public ResponseEntity<?> updateArticle(
             @PathVariable(name = "id") Long articleId,
             @RequestBody ArticleUpdateRequest articleUpdateRequest,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ) {
         articleService.updateArticle(articleId, articleUpdateRequest, member);
 
@@ -116,7 +116,7 @@ public class ArticleController {
     public ResponseEntity<?> getArticlesByTeamAndDate(
         @PathVariable("teamId") Long teamId,
         @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-        @LoginMember Member member,
+        @AuthenticationPrincipal Member member,
         @PageableDefault(size = 6, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         boolean isMyTeam = teamMemberService.existsByTeamIdAndMemberId(teamId, member);
@@ -133,7 +133,7 @@ public class ArticleController {
 
     @PostMapping("/teams/{teamId}/subjects")
     public ResponseEntity<?> createTeamSubject(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId,
             @ModelAttribute @Valid TeamSubjectRequest teamSubjectRequest
     ) {
@@ -163,7 +163,7 @@ public class ArticleController {
 
     @DeleteMapping ("/teams/{teamId}/subjects/{articleId}")
     public ResponseEntity<?> deleteTeamSubjectsByArticleId(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId,
             @PathVariable("articleId") Long articleId
     ) {
@@ -176,7 +176,7 @@ public class ArticleController {
 
     @PutMapping("/teams/{teamId}/subjects/{articleId}")
     public ResponseEntity<?> updateTeamSubjectsByArticleId(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId,
             @PathVariable("articleId") Long articleId,
             @RequestBody TeamSubjectUpdateRequest teamSubjectUpdateRequest

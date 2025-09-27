@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.team.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.article.dto.request.CalenderSubjectRequest;
 import site.codemonster.comon.domain.article.service.ArticleService;
 import site.codemonster.comon.domain.auth.entity.Member;
@@ -14,7 +15,6 @@ import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
 import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
-import site.codemonster.comon.global.security.annotation.LoginMember;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -47,7 +47,7 @@ public class TeamController {
     @PostMapping
     public ResponseEntity<ApiResponse<?>> createTeam(
             @RequestBody @Valid TeamRequest teamRequest,
-            @LoginMember Member manager
+            @AuthenticationPrincipal Member manager
     ){
         List<String> memberUuids = teamRequest.teamMemberUuids();
 
@@ -118,7 +118,7 @@ public class TeamController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<ApiResponse<?>> getMyTeam(@LoginMember Member member){
+    public ResponseEntity<ApiResponse<?>> getMyTeam(@AuthenticationPrincipal Member member){
         List<Team> teamMembers =  teamService.getMyTeams(member);
 
         List<MyTeamResponse> myTeamResponse = teamMembers.stream()
@@ -131,7 +131,7 @@ public class TeamController {
     }
 
     @GetMapping("/my-page")
-    public ResponseEntity<ApiResponse<?>> getMyTeamAtMyPage(@LoginMember Member member){
+    public ResponseEntity<ApiResponse<?>> getMyTeamAtMyPage(@AuthenticationPrincipal Member member){
         List<TeamMember> teamMembers =  teamMemberService.getTeamMemberAndTeamByMember(member);
 
         List<MyTeamMyPageResponse> myTeamMyPageResponse = teamMembers.stream()
@@ -148,7 +148,7 @@ public class TeamController {
             @RequestParam(name = "sort", defaultValue = "recent") String sort,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "6") int size,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
@@ -171,7 +171,7 @@ public class TeamController {
     public ResponseEntity<ApiResponse<?>> joinTeam(
             @PathVariable("teamId") Long teamId,
             @RequestBody TeamJoinRequest teamJoinRequest,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ){
         TeamMember teamMember = teamService.joinTeam(member, teamJoinRequest.password(), teamId);
 
@@ -186,7 +186,7 @@ public class TeamController {
     public ResponseEntity<ApiResponse<?>> updateTeamAnnouncement(
             @PathVariable("teamId") Long teamId,
             @RequestBody @Valid TeamAnnouncementRequest teamAnnouncementRequest,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ) {
         teamService.updateTeamAnnouncement(member, teamAnnouncementRequest.teamAnnouncement(), teamId);
 
@@ -197,7 +197,7 @@ public class TeamController {
 
     @GetMapping("/{teamId}/team-page")
     public ResponseEntity<ApiResponse<?>> getCalenderInformation(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @ModelAttribute @Valid CalenderSubjectRequest calenderSubjectRequest,
             @PathVariable("teamId") Long teamId
     ) {
@@ -214,7 +214,7 @@ public class TeamController {
 
     @DeleteMapping("/{teamId}/members/me")
     public ResponseEntity<ApiResponse<?>> removeMemberFromTeam(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId
     ){
         teamMemberService.removeTeamMember(member, teamId);
@@ -227,7 +227,7 @@ public class TeamController {
     @PutMapping("/{teamId}")
     public ResponseEntity<ApiResponse<?>> editTeamInfo(
             @RequestBody @Valid TeamInfoEditRequest teamInfoEditRequest,
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId
     ){
          Team updatedTeam = teamService.updateTeamInfo(teamInfoEditRequest, member, teamId);
@@ -240,7 +240,7 @@ public class TeamController {
     @DeleteMapping("/{teamId}")
     public ResponseEntity<ApiResponse<?>> deleteTeam(
             @PathVariable("teamId") Long teamId,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ) {
         Team team = teamService.getTeamByTeamId(teamId);
         teamService.deleteTeamByOwner(member, team);
@@ -254,7 +254,7 @@ public class TeamController {
     @GetMapping("/{teamId}")
     public ResponseEntity<ApiResponse<?>> getTeamInfo(
             @PathVariable("teamId") Long teamId,
-            @LoginMember Member member
+            @AuthenticationPrincipal Member member
     ){
         Team team = teamService.getTeamInfo(teamId, member);
         return ResponseEntity.status(HttpStatus.OK)
@@ -264,7 +264,7 @@ public class TeamController {
 
     @PostMapping("/{teamId}/team-manager")
     public ResponseEntity<ApiResponse<?>> addTeamManager(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamManagerUpdateRequest teamManagerUpdateRequest,
             @PathVariable("teamId") Long teamId
     ){
@@ -277,7 +277,7 @@ public class TeamController {
 
     @PostMapping("/{teamId}/team-manager/demotion")
     public ResponseEntity<ApiResponse<?>> demoteTeamManager(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamManagerUpdateRequest teamManagerUpdateRequest,
             @PathVariable("teamId") Long teamId
     ){
@@ -290,7 +290,7 @@ public class TeamController {
 
     @PutMapping("/{teamId}/team-manager")
     public ResponseEntity<ApiResponse<?>> transferTeamManager(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamManagerUpdateRequest teamManagerUpdateRequest,
             @PathVariable("teamId") Long teamId
     ){
@@ -303,7 +303,7 @@ public class TeamController {
 
     @PostMapping("/{teamId}/remove/team-member")
     public ResponseEntity<ApiResponse<?>> removeTeamMember(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamManagerUpdateRequest teamManagerUpdateRequest,
             @PathVariable("teamId") Long teamId
     ){
@@ -316,7 +316,7 @@ public class TeamController {
 
     @GetMapping("/{teamId}/members")
     public ResponseEntity<ApiResponse<?>> getTeamMembers(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId
     ){
         List<TeamMemberResponse> teamMemberResponses = teamMemberService.getTeamMembersByTeamId(teamId, member)

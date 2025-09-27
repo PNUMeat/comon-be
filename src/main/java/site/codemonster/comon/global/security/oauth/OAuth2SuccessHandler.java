@@ -32,8 +32,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JWTUtils jwtUtil;
     private final RefreshTokenService refreshTokenService;
-    private final MemberRepository memberRepository;
-    private final ObjectMapper objectMapper;
+    private final CookieUtils cookieUtils;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -69,8 +68,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     private void setInformationInResponse(HttpServletResponse response, String accessToken, String refreshToken) {
-        Cookie access = CookieUtils.createCookie(ACCESS_TOKEN, accessToken);
-        Cookie refresh = CookieUtils.createCookieWithHttpOnly(REFRESH_TOKEN, refreshToken);
+        Cookie access = cookieUtils.createCookieForAccessToken(accessToken);
+        Cookie refresh = cookieUtils.createCookieForRefreshToken(refreshToken);
 
         response.addCookie(access);
         response.addCookie(refresh);
