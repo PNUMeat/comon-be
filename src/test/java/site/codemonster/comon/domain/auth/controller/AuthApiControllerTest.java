@@ -53,6 +53,9 @@ class AuthApiControllerTest {
     @Autowired
     private JWTUtils jwtUtil;
 
+    @Autowired
+    private CookieUtils cookieUtils;
+
     @Test
     @DisplayName("로그아웃 성공")
     void logoutSuccess() throws Exception {
@@ -82,7 +85,7 @@ class AuthApiControllerTest {
 
         RefreshToken oldRefreshToken = refreshTokenRepository.save(new RefreshToken(member, token, jwtUtil.getREFRESH_TOKEN_TIME().toString()));
 
-        Cookie refreshCookie = CookieUtils.createCookieWithHttpOnly(AuthConstant.REFRESH_TOKEN, token);
+        Cookie refreshCookie = cookieUtils.createCookieForRefreshToken(token);
 
         String response = mockMvc.perform(post("/api/v1/reissue")
                         .cookie(refreshCookie))

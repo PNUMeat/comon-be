@@ -12,6 +12,7 @@ import site.codemonster.comon.global.security.filter.JWTRefreshFilter;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
 import site.codemonster.comon.global.security.oauth.OAuth2SuccessHandler;
 import site.codemonster.comon.global.security.oauth.OAuth2UserServiceImpl;
+import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
 import site.codemonster.comon.global.util.responseUtils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +46,8 @@ public class SecurityConfiguration {
 
     private final DomainProperties domainProperties;
 
+    private final CookieUtils cookieUtils;
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
 
@@ -58,8 +61,8 @@ public class SecurityConfiguration {
                 .formLogin((auth) -> auth.disable())
                 .httpBasic((auth) -> auth.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .addFilterAfter(new JWTAccessFilter(jwtUtil, responseUtils, memberService), OAuth2LoginAuthenticationFilter.class)
-                .addFilterAfter(new JWTRefreshFilter(jwtUtil, refreshTokenRepository, responseUtils), OAuth2LoginAuthenticationFilter.class)
+                .addFilterAfter(new JWTAccessFilter(jwtUtil, responseUtils, memberService, cookieUtils), OAuth2LoginAuthenticationFilter.class)
+                .addFilterAfter(new JWTRefreshFilter(jwtUtil, refreshTokenRepository, responseUtils,cookieUtils), OAuth2LoginAuthenticationFilter.class)
                 .oauth2Login(
                     (oauth2) -> oauth2
                     .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig.userService(oAuth2UserService))

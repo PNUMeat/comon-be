@@ -13,4 +13,5 @@ public class DomainProperties {
 
     private String frontend;
     private String backend;
+    private String domainName;
 }

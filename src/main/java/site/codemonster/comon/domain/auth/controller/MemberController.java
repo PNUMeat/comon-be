@@ -33,6 +33,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final TeamMemberService teamMemberService;
+    private final CookieUtils cookieUtils;
 
     @PostMapping
     public ResponseEntity<ApiResponse<String>> createMemberProfile(
@@ -98,7 +99,7 @@ public class MemberController {
     public ResponseEntity<ApiResponse<Void>> deleteMember(@AuthenticationPrincipal Member member, HttpServletResponse response){
         memberService.deleteMember(member.getId());
 
-        CookieUtils.clearCookie(response);
+        cookieUtils.clearCookie(response);
 
         return ResponseEntity.status(MEMBER_DELETE_SUCCESS.getStatusCode())
             .contentType(MediaType.APPLICATION_JSON)

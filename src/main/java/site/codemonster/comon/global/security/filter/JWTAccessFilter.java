@@ -7,6 +7,7 @@ import site.codemonster.comon.global.error.ErrorCode;
 import site.codemonster.comon.global.error.Member.MemberNotFoundException;
 import site.codemonster.comon.global.security.jwt.JWTInformation;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
+import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
 import site.codemonster.comon.global.util.responseUtils.ResponseUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,26 +34,26 @@ public class JWTAccessFilter extends OncePerRequestFilter {
     private final JWTUtils jwtUtils;
     private final ResponseUtils responseUtils;
     private final MemberService memberService;
+    private final CookieUtils cookieUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (isUrlOAuth2(request) || isReissue(request)) {
+        if (isUrlOAuth2(request) || isReissue(request) || filterPassUrl(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String authorization = request.getHeader(AuthConstant.AUTHORIZATION);
+        String token = cookieUtils.checkAccessTokenInCookie(request);
 
-        //Authorization 헤더 검증
-        if (checkContainAuthorizationHeader(authorization)) {
+        // accessToken 검증
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
         //Bearer 부분 제거 후 순수 토큰만 획득
-        String token = authorization.split(" ")[1];
         Optional<ErrorCode> validationToken = jwtUtils.validationToken(token);
         if (validationToken.isPresent()) {
             ErrorCode errorCode = validationToken.get();
@@ -93,10 +94,6 @@ public class JWTAccessFilter extends OncePerRequestFilter {
         Collection<GrantedAuthority> collection = new ArrayList<>();
         collection.add(new SimpleGrantedAuthority(role));
         return collection;
-    }
-
-    private boolean checkContainAuthorizationHeader(String authorization) {
-        return authorization == null || !authorization.startsWith(AuthConstant.BEARER);
     }
 
     private boolean isUrlOAuth2(HttpServletRequest request) {

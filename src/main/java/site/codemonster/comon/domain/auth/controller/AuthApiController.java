@@ -27,6 +27,7 @@ public class AuthApiController {
 
     private final JWTUtils jwtUtil;
     private final RefreshTokenService refreshTokenService;
+    private final CookieUtils cookieUtils;
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(
@@ -34,7 +35,7 @@ public class AuthApiController {
             HttpServletResponse response
     ){
         refreshTokenService.deleteTokenByMember(member);
-        CookieUtils.clearCookie(response);
+        cookieUtils.clearCookie(response);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -52,8 +53,8 @@ public class AuthApiController {
         refreshTokenService.renewalRefreshToken(refresh, newRefresh, jwtUtil.getREFRESH_TOKEN_TIME());
 
         response.setHeader(AuthConstant.AUTHORIZATION, AuthConstant.BEARER + newAccess);
-        response.addCookie(CookieUtils.createCookie(AuthConstant.ACCESS_TOKEN, newAccess));
-        response.addCookie(CookieUtils.createCookieWithHttpOnly(AuthConstant.REFRESH_TOKEN, newRefresh));
+        response.addCookie(cookieUtils.createCookieForAccessToken(newAccess));
+        response.addCookie(cookieUtils.createCookieForRefreshToken(newRefresh));
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
