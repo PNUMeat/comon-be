@@ -1,9 +1,12 @@
 package site.codemonster.comon.global.security.configuration;
 
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import site.codemonster.comon.domain.auth.repository.RefreshTokenRepository;
 import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.global.error.ErrorCode;
+import site.codemonster.comon.global.globalConfig.DomainProperties;
 import site.codemonster.comon.global.security.filter.JWTAccessFilter;
 import site.codemonster.comon.global.security.filter.JWTRefreshFilter;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
@@ -20,6 +23,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -38,6 +43,8 @@ public class SecurityConfiguration {
 
     private final MemberService memberService;
 
+    private final DomainProperties domainProperties;
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
 
@@ -48,19 +55,17 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http.csrf((auth) -> auth.disable())
-            .formLogin((auth) -> auth.disable())
-            .httpBasic((auth) -> auth.disable())
-
-            .addFilterAfter(new JWTAccessFilter(jwtUtil, responseUtils, memberService), OAuth2LoginAuthenticationFilter.class)
-            .addFilterAfter(new JWTRefreshFilter(jwtUtil, refreshTokenRepository, responseUtils), OAuth2LoginAuthenticationFilter.class)
-
-            .oauth2Login(
+                .formLogin((auth) -> auth.disable())
+                .httpBasic((auth) -> auth.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .addFilterAfter(new JWTAccessFilter(jwtUtil, responseUtils, memberService), OAuth2LoginAuthenticationFilter.class)
+                .addFilterAfter(new JWTRefreshFilter(jwtUtil, refreshTokenRepository, responseUtils), OAuth2LoginAuthenticationFilter.class)
+                .oauth2Login(
                     (oauth2) -> oauth2
                     .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig.userService(oAuth2UserService))
                     .successHandler(oAuth2SuccessHandler)
-            )
-
-            .authorizeHttpRequests((auth) -> auth
+                )
+                .authorizeHttpRequests((auth) -> auth
                     .requestMatchers(
                             "api/v1/test/no-auth",
                             "/api/v1/reissue",
@@ -76,20 +81,33 @@ public class SecurityConfiguration {
                             "/actuator/health"
                     ).permitAll()
                     .anyRequest().authenticated())
-
-            .sessionManagement((session) -> session
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        http.exceptionHandling(e->e
-                .authenticationEntryPoint((request, response, authException)-> {
-                    responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.UNAUTHORIZED_MEMBER_ERROR, response);
-                })
-                .accessDeniedHandler((request, response, authException)-> {
-                    responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.FORBIDDEN_MEMBER_ERROR, response);
-                }));
+                .sessionManagement((session) -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(e->e
+                    .authenticationEntryPoint((request, response, authException)-> {
+                        responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.UNAUTHORIZED_MEMBER_ERROR, response);
+                    })
+                    .accessDeniedHandler((request, response, authException)-> {
+                        responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.FORBIDDEN_MEMBER_ERROR, response);
+                    }));
 
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(List.of(domainProperties.getBackend(), domainProperties.getFrontend()));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Cookie", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(List.of("Authorization", "Set-Cookie"));
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean

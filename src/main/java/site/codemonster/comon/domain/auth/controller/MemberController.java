@@ -12,7 +12,6 @@ import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
-import site.codemonster.comon.global.security.annotation.LoginMember;
 import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

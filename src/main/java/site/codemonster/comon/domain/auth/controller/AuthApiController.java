@@ -6,7 +6,6 @@ import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.RefreshTokenService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
-import site.codemonster.comon.global.security.annotation.LoginMember;
 import site.codemonster.comon.global.security.jwt.JWTInformation;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
 import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
