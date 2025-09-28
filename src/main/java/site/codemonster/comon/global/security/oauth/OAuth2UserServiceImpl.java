@@ -40,7 +40,7 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
 
         String memberUniqueId = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
 
-        Optional<Member> memberOptional = memberRepository.findByMemberUniqueId(memberUniqueId);
+        Optional<Member> memberOptional = memberRepository.findByEmail(oAuth2Response.getEmail());
 
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
