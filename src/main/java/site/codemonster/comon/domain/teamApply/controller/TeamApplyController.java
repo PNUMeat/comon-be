@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.teamApply.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.teamApply.dto.request.TeamApplyCreateRequest;
@@ -10,7 +11,6 @@ import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
 import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
-import site.codemonster.comon.global.security.annotation.LoginMember;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -30,7 +30,7 @@ public class TeamApplyController {
 
     @PostMapping
     public ResponseEntity<?> createTeamApply(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamApplyCreateRequest teamApplyCreateRequest
     ){
         TeamRecruit foundTeamRecruit = teamRecruitService.findByTeamRecruitIdOrThrow(teamApplyCreateRequest.recruitmentId());
@@ -48,7 +48,7 @@ public class TeamApplyController {
 
     @DeleteMapping("/{applyId}")
     public ResponseEntity<?> deleteTeamApply(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @PathVariable("applyId") Long applyId
     ) {
         TeamApply teamApply = teamApplyService.findTeamApplyByIdOrThrow(applyId);
@@ -61,7 +61,7 @@ public class TeamApplyController {
 
     @PatchMapping("/{applyId}")
     public ResponseEntity<?> updateTeamApply(
-            @LoginMember Member member,
+            @AuthenticationPrincipal Member member,
             @PathVariable("applyId") Long applyId,
             @RequestBody @Valid TeamApplyUpdateRequest teamApplyUpdateRequest
     ) {

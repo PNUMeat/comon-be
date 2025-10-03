@@ -1,11 +1,11 @@
 package site.codemonster.comon.domain.auth.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.auth.constant.AuthConstant;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.RefreshTokenService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
-import site.codemonster.comon.global.security.annotation.LoginMember;
 import site.codemonster.comon.global.security.jwt.JWTInformation;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
 import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
@@ -27,14 +27,15 @@ public class AuthApiController {
 
     private final JWTUtils jwtUtil;
     private final RefreshTokenService refreshTokenService;
+    private final CookieUtils cookieUtils;
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<?>> logout(
-            @LoginMember Member member,
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @AuthenticationPrincipal Member member,
             HttpServletResponse response
     ){
         refreshTokenService.deleteTokenByMember(member);
-        CookieUtils.clearCookie(response);
+        cookieUtils.clearCookie(response);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -42,7 +43,7 @@ public class AuthApiController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<?>> reissue(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<Void>> reissue(HttpServletRequest request, HttpServletResponse response) {
 
         String refresh = (String) request.getAttribute(AuthConstant.REFRESH_TOKEN);
         JWTInformation jwtInformation = jwtUtil.getJWTInformation(refresh);
@@ -52,8 +53,8 @@ public class AuthApiController {
         refreshTokenService.renewalRefreshToken(refresh, newRefresh, jwtUtil.getREFRESH_TOKEN_TIME());
 
         response.setHeader(AuthConstant.AUTHORIZATION, AuthConstant.BEARER + newAccess);
-        response.addCookie(CookieUtils.createCookie(AuthConstant.ACCESS_TOKEN, newAccess));
-        response.addCookie(CookieUtils.createCookieWithHttpOnly(AuthConstant.REFRESH_TOKEN, newRefresh));
+        response.addCookie(cookieUtils.createCookieForAccessToken(newAccess));
+        response.addCookie(cookieUtils.createCookieForRefreshToken(newRefresh));
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)

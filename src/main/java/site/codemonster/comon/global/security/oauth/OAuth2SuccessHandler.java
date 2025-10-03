@@ -3,6 +3,7 @@ package site.codemonster.comon.global.security.oauth;
 import site.codemonster.comon.domain.auth.entity.RefreshToken;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
 import site.codemonster.comon.domain.auth.service.RefreshTokenService;
+import site.codemonster.comon.global.globalConfig.DomainProperties;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
 import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,8 +33,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JWTUtils jwtUtil;
     private final RefreshTokenService refreshTokenService;
-    private final MemberRepository memberRepository;
-    private final ObjectMapper objectMapper;
+    private final CookieUtils cookieUtils;
+    private final DomainProperties domainProperties;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -62,15 +63,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         setInformationInResponse(response, accessToken, refreshToken);
 
         if(customUserDetails.getMemberName() == null){
-            response.sendRedirect("https://codemonster.site/enroll");
+            response.sendRedirect(domainProperties.getFrontend() + "/enroll");
         }else{
-            response.sendRedirect("https://codemonster.site/");
+            response.sendRedirect(domainProperties.getFrontend());
         }
     }
 
     private void setInformationInResponse(HttpServletResponse response, String accessToken, String refreshToken) {
-        Cookie access = CookieUtils.createCookie(ACCESS_TOKEN, accessToken);
-        Cookie refresh = CookieUtils.createCookieWithHttpOnly(REFRESH_TOKEN, refreshToken);
+        Cookie access = cookieUtils.createCookieForAccessToken(accessToken);
+        Cookie refresh = cookieUtils.createCookieForRefreshToken(refreshToken);
 
         response.addCookie(access);
         response.addCookie(refresh);

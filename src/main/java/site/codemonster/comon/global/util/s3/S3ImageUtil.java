@@ -29,6 +29,10 @@ public final class S3ImageUtil {
         }
     }
 
+    public static String getBucketUrl() {
+        return bucketUrl;
+    }
+
     private S3ImageUtil() {
     }
 }
