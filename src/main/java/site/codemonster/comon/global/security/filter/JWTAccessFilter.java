@@ -40,7 +40,7 @@ public class JWTAccessFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        if (isUrlOAuth2(request) || isReissue(request) || filterPassUrl(request)) {
+        if (isReissue(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -77,10 +77,13 @@ public class JWTAccessFilter extends OncePerRequestFilter {
             member = memberService.getMemberByUUID(jwtInformation.uuid());
         } catch (MemberNotFoundException e) {
                 responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.NOT_COMPLETE_SIGN_UP_ERROR, response);
+                return;
         }
 
-        if(member.getMemberName() == null)
+        if(member.getMemberName() == null) {
             responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.NOT_COMPLETE_SIGN_UP_ERROR, response);
+            return;
+        }
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(member, null, collection);
         SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -96,26 +99,8 @@ public class JWTAccessFilter extends OncePerRequestFilter {
         return collection;
     }
 
-    private boolean isUrlOAuth2(HttpServletRequest request) {
-        return request.getRequestURI().contains("oauth2");
-    }
-
     private boolean isReissue(HttpServletRequest request) {
-        return request.getRequestURI().contains("api/v1/reissue");
+        return request.getRequestURI().contains("/api/v1/reissue");
     }
 
-    private boolean filterPassUrl(HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
-
-        return requestURI.contains("api/v1/teams/combined")
-                || requestURI.contains("api/v1/test/no-auth")
-                || requestURI.contains("team-page")
-                || requestURI.contains("by-date")
-                || (requestURI.contains("subjects") && request.getMethod().equals("GET"))
-                || (request.getRequestURI().contains("api/v1/recruitments") && request.getMethod().equals("GET"))
-                || requestURI.contains("api/v1/teams/search")
-                || requestURI.startsWith("/admin/")
-                || requestURI.equals("/actuator/health")
-                || requestURI.equals("/admin");
-    }
 }
