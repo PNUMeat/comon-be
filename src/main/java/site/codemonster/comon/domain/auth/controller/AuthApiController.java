@@ -55,9 +55,8 @@ public class AuthApiController {
 
         refreshTokenService.renewalRefreshToken(refresh, newRefresh, jwtUtil.getREFRESH_TOKEN_TIME());
 
-        response.setHeader(AuthConstant.AUTHORIZATION, AuthConstant.BEARER + newAccess);
-        response.addCookie(cookieUtils.createCookieForAccessToken(newAccess));
-        response.addCookie(cookieUtils.createCookieForRefreshToken(newRefresh));
+        response.addHeader("Set-Cookie", cookieUtils.createCookieForAccessToken(newAccess));
+        response.addHeader("Set-Cookie", cookieUtils.createCookieForRefreshToken(newRefresh));
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)

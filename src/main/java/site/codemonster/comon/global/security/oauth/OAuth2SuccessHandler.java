@@ -70,11 +70,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
 
     private void setInformationInResponse(HttpServletResponse response, String accessToken, String refreshToken) {
-        Cookie access = cookieUtils.createCookieForAccessToken(accessToken);
-        Cookie refresh = cookieUtils.createCookieForRefreshToken(refreshToken);
+        String access = cookieUtils.createCookieForAccessToken(accessToken);
+        String refresh = cookieUtils.createCookieForRefreshToken(refreshToken);
 
-        response.addCookie(access);
-        response.addCookie(refresh);
+        response.addHeader("Set-Cookie", access);
+        response.addHeader("Set-Cookie", refresh);
     }
 
     private String getRole(Authentication authentication) {

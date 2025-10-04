@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.auth.constant.AuthConstant;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
 import site.codemonster.comon.domain.util.TestUtil;
@@ -25,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static site.codemonster.comon.domain.auth.constant.AuthConstant.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -54,10 +56,9 @@ class TestAuthControllerTest {
         member.updateProfile("testName", "testDescription", "testImageUrl");
 
         String accessToken = jwtUtils.generateAccessToken(member.getUuid(), member.getRole());
-        Cookie cookieForAccessToken = cookieUtils.createCookieForAccessToken(accessToken);
 
         String response = mockMvc.perform(get("/api/v1/test/auth")
-                        .cookie(cookieForAccessToken)
+                        .cookie(new Cookie(ACCESS_TOKEN, accessToken))
                 )
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 

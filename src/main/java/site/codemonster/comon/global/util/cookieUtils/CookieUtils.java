@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import site.codemonster.comon.domain.auth.constant.AuthConstant;
 import site.codemonster.comon.global.globalConfig.DomainProperties;
@@ -18,46 +20,56 @@ import static site.codemonster.comon.domain.auth.constant.AuthConstant.REFRESH_T
 @RequiredArgsConstructor
 public class CookieUtils {
 
+    private String domain;
+    @Value("${spring.cookie.secure}")
+    private boolean secure;
+    @Value("${spring.cookie.same}")
+    private String same;
     private final DomainProperties domainProperties;
 
-    public Cookie createCookieForRefreshToken(String value) {
-        Cookie cookie = new Cookie(REFRESH_TOKEN, value);
-        cookie.setMaxAge(20 * 60 * 60);
-        cookie.setSecure(true);
-        cookie.setDomain(domainProperties.getDomainName());
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
+    public String createCookieForRefreshToken(String value) {
 
-        return cookie;
+        return ResponseCookie.from(REFRESH_TOKEN, value)
+                .path("/")
+                .secure(secure)
+                .maxAge(20 * 60 * 60)
+                .domain(domainProperties.getDomainName())
+                .httpOnly(true)
+                .sameSite(same).build().toString();
+
     }
 
-    public Cookie createCookieForAccessToken(String value) {
-        Cookie cookie = new Cookie(ACCESS_TOKEN, value);
-        cookie.setMaxAge(24 * 60);
-        cookie.setDomain(domainProperties.getDomainName());
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
+    public String createCookieForAccessToken(String value) {
 
-        return cookie;
+        return ResponseCookie.from(ACCESS_TOKEN, value)
+                .path("/")
+                .secure(secure)
+                .maxAge(24 * 60)
+                .domain(domainProperties.getDomainName())
+                .httpOnly(true)
+                .sameSite(same).build().toString();
     }
 
     public void clearCookie(HttpServletResponse response) {
-        Cookie accessCookie = new Cookie(ACCESS_TOKEN, null);
-        Cookie refreshCookie = new Cookie(REFRESH_TOKEN, null);
-        accessCookie.setDomain(domainProperties.getDomainName());
-        accessCookie.setSecure(true);
-        accessCookie.setHttpOnly(true);
-        accessCookie.setMaxAge(0);
-        accessCookie.setPath("/");
-        response.addCookie(accessCookie);
+        String refreshCookie = ResponseCookie.from(REFRESH_TOKEN, null)
+                .path("/")
+                .secure(secure)
+                .maxAge(0)
+                .domain(domainProperties.getDomainName())
+                .httpOnly(true)
+                .sameSite(same).build().toString();
+        response.addHeader("Set-Cookie", refreshCookie);
 
-        refreshCookie.setDomain(domainProperties.getDomainName());
-        refreshCookie.setSecure(true);
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setMaxAge(0);
-        refreshCookie.setPath("/");
-        response.addCookie(refreshCookie);
+        String accessCookie = ResponseCookie.from(ACCESS_TOKEN, null)
+                .path("/")
+                .secure(secure)
+                .maxAge(0)
+                .domain(domainProperties.getDomainName())
+                .httpOnly(true)
+                .sameSite(same).build().toString();
+
+        response.addHeader("Set-Cookie", accessCookie);
+
     }
 
     public String checkRefreshTokenInCookie(HttpServletRequest request) {
