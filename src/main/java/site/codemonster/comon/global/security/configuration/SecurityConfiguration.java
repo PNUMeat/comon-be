@@ -70,6 +70,7 @@ public class SecurityConfiguration {
                 )
                 .authorizeHttpRequests((auth) -> auth
                     .requestMatchers(
+                            "/api/v1/teams/combined",
                             "/api/v1/test/no-auth",
                             "/api/v1/reissue",
                             "/api/v1/teams/{teamId}/team-page",
