@@ -70,13 +70,13 @@ public class SecurityConfiguration {
                 )
                 .authorizeHttpRequests((auth) -> auth
                     .requestMatchers(
-                            "api/v1/test/no-auth",
+                            "/api/v1/teams/combined",
+                            "/api/v1/test/no-auth",
                             "/api/v1/reissue",
-                            "api/v1/teams/combined",
-                            "api/v1/teams/{teamId}/team-page",
-                            "api/v1/articles/{teamId}/by-date",
-                            "api/v1/articles/teams/{teamId}/subjects",
-                            "api/v1/teams/search",
+                            "/api/v1/teams/{teamId}/team-page",
+                            "/api/v1/articles/{teamId}/by-date",
+                            "/api/v1/articles/teams/{teamId}/subjects",
+                            "/api/v1/teams/search",
                             "/api/v1/recruitments",
                             "/api/v1/recruitments/{recruitId}",
                             "/admin/**",

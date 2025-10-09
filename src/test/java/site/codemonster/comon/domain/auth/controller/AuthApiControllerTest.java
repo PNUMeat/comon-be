@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static site.codemonster.comon.domain.auth.constant.AuthConstant.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -85,12 +86,11 @@ class AuthApiControllerTest {
 
         RefreshToken oldRefreshToken = refreshTokenRepository.save(new RefreshToken(member, token, jwtUtil.getREFRESH_TOKEN_TIME().toString()));
 
-        Cookie refreshCookie = cookieUtils.createCookieForRefreshToken(token);
 
         String response = mockMvc.perform(post("/api/v1/reissue")
-                        .cookie(refreshCookie))
-                .andExpect(cookie().exists(AuthConstant.REFRESH_TOKEN))
-                .andExpect(cookie().exists(AuthConstant.ACCESS_TOKEN))
+                        .cookie(new Cookie(REFRESH_TOKEN, token)))
+                .andExpect(cookie().exists(REFRESH_TOKEN))
+                .andExpect(cookie().exists(ACCESS_TOKEN))
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         ApiResponse<Void> apiResponse = objectMapper.readValue(response, new TypeReference<ApiResponse<Void>>() {
@@ -108,8 +108,8 @@ class AuthApiControllerTest {
     void reissueFail() throws Exception {
 
         String response = mockMvc.perform(post("/api/v1/reissue"))
-                .andExpect(cookie().exists(AuthConstant.REFRESH_TOKEN))
-                .andExpect(cookie().exists(AuthConstant.ACCESS_TOKEN))
+                .andExpect(cookie().exists(REFRESH_TOKEN))
+                .andExpect(cookie().exists(ACCESS_TOKEN))
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         ApiResponse<Void> apiResponse = objectMapper.readValue(response, new TypeReference<ApiResponse<Void>>() {
