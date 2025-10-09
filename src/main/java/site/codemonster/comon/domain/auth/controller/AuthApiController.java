@@ -34,9 +34,6 @@ public class AuthApiController {
             @AuthenticationPrincipal Member member,
             HttpServletResponse response
     ){
-        System.out.println("member = " + member.getId());
-        System.out.println("member = " + member.getMemberName());
-        System.out.println("member = " + member.getEmail());
         refreshTokenService.deleteTokenByMember(member);
         cookieUtils.clearCookie(response);
 
