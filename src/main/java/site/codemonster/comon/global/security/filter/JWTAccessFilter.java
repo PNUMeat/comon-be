@@ -112,10 +112,6 @@ public class JWTAccessFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if (requestURI.equals("/api/v1/members/own-profile")) {
-            return true;
-        }
-
         return false;
     }
 
