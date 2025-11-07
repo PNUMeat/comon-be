@@ -1,5 +1,6 @@
 package site.codemonster.comon.global.security.filter;
 
+import org.springframework.http.HttpMethod;
 import site.codemonster.comon.domain.auth.constant.AuthConstant;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
@@ -76,11 +77,12 @@ public class JWTAccessFilter extends OncePerRequestFilter {
         try {
             member = memberService.getMemberByUUID(jwtInformation.uuid());
         } catch (MemberNotFoundException e) {
-                responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.NOT_COMPLETE_SIGN_UP_ERROR, response);
-                return;
+            responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.NOT_COMPLETE_SIGN_UP_ERROR, response);
+            return;
         }
 
-        if(member.getMemberName() == null) {
+        // 회원가입 요청이면 pass
+        if(!isJoinRequest(request) && member.getMemberName() == null) {
             responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.NOT_COMPLETE_SIGN_UP_ERROR, response);
             return;
         }
@@ -101,6 +103,20 @@ public class JWTAccessFilter extends OncePerRequestFilter {
 
     private boolean isReissue(HttpServletRequest request) {
         return request.getRequestURI().contains("/api/v1/reissue");
+    }
+
+    private boolean isJoinRequest(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+        if (requestURI.equals("/api/v1/members") && method.equals(HttpMethod.POST.name())) {
+            return true;
+        }
+
+        if (requestURI.equals("/api/v1/members/own-profile")) {
+            return true;
+        }
+
+        return false;
     }
 
 }
