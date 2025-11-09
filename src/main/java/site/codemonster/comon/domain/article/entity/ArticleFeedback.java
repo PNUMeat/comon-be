@@ -41,7 +41,7 @@ public class ArticleFeedback extends TimeStamp {
         this.learningPoint = learningPoint;
     }
 
-    public void updateFeedback(String keyPoint, String strengths, String improvements, String learningPoint) {
+    public void updateFeedbackContent(String keyPoint, String strengths, String improvements, String learningPoint) {
         this.keyPoint = keyPoint;
         this.strengths = strengths;
         this.improvements = improvements;

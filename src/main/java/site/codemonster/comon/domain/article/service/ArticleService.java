@@ -218,7 +218,6 @@ public class ArticleService {
 
             result.append("```").append(language.isEmpty() ? "" : language).append("\n");
 
-            // ***핵심 수정: .text()로 추출한 후 문자열 조작을 일체 하지 않음***
             String code = codeBlock.text().trim();
 
             result.append(code).append("\n```\n\n");

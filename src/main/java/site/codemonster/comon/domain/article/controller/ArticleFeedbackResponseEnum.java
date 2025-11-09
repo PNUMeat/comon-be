@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum ArticleFeedbackResponseEnum {
     ARTICLE_FEEDBACK_CREATE_SUCCESS("AI 피드백이 생성되었습니다.",201),
-    ARTICLE_FEEDBACK_REGENERATE_SUCCESS("AI 피드백이 재생성되었습니다.",201),
+    ARTICLE_FEEDBACK_REGENERATE_SUCCESS("AI 피드백이 재생성되었습니다.",200),
     GET_ARTICLE_FEEDBACK("해당 게시물의 AI 피드백을 조회했습니다.", 200)
     ;
 

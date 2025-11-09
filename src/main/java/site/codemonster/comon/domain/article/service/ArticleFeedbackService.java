@@ -51,7 +51,7 @@ public class ArticleFeedbackService {
 
         ArticleFeedback newFeedbackContent = createFeedback(article);
 
-        existingFeedback.updateFeedback(
+        existingFeedback.updateFeedbackContent(
                 newFeedbackContent.getKeyPoint(),
                 newFeedbackContent.getStrengths(),
                 newFeedbackContent.getImprovements(),
@@ -73,8 +73,6 @@ public class ArticleFeedbackService {
         try {
             String systemPrompt = promptProperties.getSystem();
             String userPrompt = promptProperties.getUserPrompt(article.getArticleTitle(), articleService.getPlainArticleBody(article.getArticleBody()));
-            log.info(systemPrompt);
-            log.info(userPrompt);
             Prompt prompt = new Prompt(List.of(new SystemMessage(systemPrompt), new UserMessage(userPrompt)));
 
             String aiResponse = chatModel.call(prompt)
@@ -95,7 +93,7 @@ public class ArticleFeedbackService {
                 .article(article)
                 .keyPoint(extractResponseSection(feedbackText, "1. 문제 핵심 포인트"))
                 .strengths(extractResponseSection(feedbackText, "2. 잘한 부분"))
-                .improvements(extractResponseSection(feedbackText, "3. 개선 사항"))
+                .improvements(extractResponseSection(feedbackText, "3. 개선 제안"))
                 .learningPoint(extractResponseSection(feedbackText, "4. 학습 포인트"))
                 .build();
     }

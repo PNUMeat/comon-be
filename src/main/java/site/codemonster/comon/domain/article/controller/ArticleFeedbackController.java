@@ -34,7 +34,7 @@ public class ArticleFeedbackController {
                 .body(ApiResponse.successResponse(response, ARTICLE_FEEDBACK_CREATE_SUCCESS.getMessage()));
     }
 
-    @PostMapping("/{articleId}/feedback/regenerate")
+    @PutMapping("/{articleId}/feedback/regenerate")
     public ResponseEntity<ApiResponse<ArticleFeedbackResponse>> regenerateFeedback(
             @PathVariable Long articleId,
             @AuthenticationPrincipal Member member
