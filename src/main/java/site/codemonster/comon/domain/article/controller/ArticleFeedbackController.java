@@ -53,7 +53,7 @@ public class ArticleFeedbackController {
             @AuthenticationPrincipal Member member
     ) {
         ArticleFeedbackResponse response =
-                articleFeedbackService.getFeedback(articleId, member);
+                articleFeedbackService.getFeedback(articleId);
 
         return ResponseEntity.status(GET_ARTICLE_FEEDBACK.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
