@@ -11,6 +11,8 @@ import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
 
+import static site.codemonster.comon.domain.article.controller.ArticleFeedbackResponseEnum.*;
+
 @Trace
 @RestController
 @RequestMapping("/api/v1/articles")
@@ -20,41 +22,41 @@ public class ArticleFeedbackController {
     private final ArticleFeedbackService articleFeedbackService;
 
     @PostMapping("/{articleId}/feedback")
-    public ResponseEntity<?> generateFeedback(
+    public ResponseEntity<ApiResponse<ArticleFeedbackResponse>> generateFeedback(
             @PathVariable Long articleId,
             @AuthenticationPrincipal Member member
     ) {
         ArticleFeedbackResponse response =
                 articleFeedbackService.generateFeedback(articleId, member);
 
-        return ResponseEntity.ok()
+        return ResponseEntity.status(ARTICLE_FEEDBACK_CREATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(response, "AI 피드백이 생성되었습니다."));
+                .body(ApiResponse.successResponse(response, ARTICLE_FEEDBACK_CREATE_SUCCESS.getMessage()));
     }
 
     @PostMapping("/{articleId}/feedback/regenerate")
-    public ResponseEntity<?> regenerateFeedback(
+    public ResponseEntity<ApiResponse<ArticleFeedbackResponse>> regenerateFeedback(
             @PathVariable Long articleId,
             @AuthenticationPrincipal Member member
     ) {
         ArticleFeedbackResponse response =
                 articleFeedbackService.regenerateFeedback(articleId, member);
 
-        return ResponseEntity.ok()
+        return ResponseEntity.status(ARTICLE_FEEDBACK_REGENERATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(response, "AI 피드백이 재생성되었습니다."));
+                .body(ApiResponse.successResponse(response, ARTICLE_FEEDBACK_REGENERATE_SUCCESS.getMessage()));
     }
 
     @GetMapping("/{articleId}/feedback")
-    public ResponseEntity<?> getFeedback(
+    public ResponseEntity<ApiResponse<ArticleFeedbackResponse>> getFeedback(
             @PathVariable Long articleId,
             @AuthenticationPrincipal Member member
     ) {
         ArticleFeedbackResponse response =
                 articleFeedbackService.getFeedback(articleId, member);
 
-        return ResponseEntity.ok()
+        return ResponseEntity.status(GET_ARTICLE_FEEDBACK.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(response, "AI 피드백을 조회했습니다."));
+                .body(ApiResponse.successResponse(response, GET_ARTICLE_FEEDBACK.getMessage()));
     }
 }
