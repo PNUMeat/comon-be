@@ -1,7 +1,6 @@
 package site.codemonster.comon.domain.article.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.messages.SystemMessage;
@@ -20,7 +19,6 @@ import site.codemonster.comon.global.error.articles.UnauthorizedActionException;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -78,17 +76,14 @@ public class ArticleFeedbackService {
                 articleFeedbackRepository.findByArticle_ArticleId(articleId);
 
         if (existingFeedback.isPresent()) {
-            log.info("기존 피드백 반환 - Article ID: {}", articleId);
             return new ArticleFeedbackResponse(existingFeedback.get());
         }
 
-        log.info("AI 피드백 생성 시작 - Article ID: {}", articleId);
         String feedbackText = callAI(article);
 
         ArticleFeedback feedback = parseFeedback(feedbackText, article);
         ArticleFeedback savedFeedback = articleFeedbackRepository.save(feedback);
 
-        log.info("AI 피드백 생성 완료 - Feedback ID: {}", savedFeedback.getFeedbackId());
         return new ArticleFeedbackResponse(savedFeedback);
     }
 
@@ -104,13 +99,11 @@ public class ArticleFeedbackService {
         articleFeedbackRepository.findByArticle_ArticleId(articleId)
                 .ifPresent(articleFeedbackRepository::delete);
 
-        log.info("AI 피드백 재생성 시작 - Article ID: {}", articleId);
         String feedbackText = callAI(article);
 
         ArticleFeedback feedback = parseFeedback(feedbackText, article);
         ArticleFeedback savedFeedback = articleFeedbackRepository.save(feedback);
 
-        log.info("AI 피드백 재생성 완료 - Feedback ID: {}", savedFeedback.getFeedbackId());
         return new ArticleFeedbackResponse(savedFeedback);
     }
 
@@ -141,13 +134,9 @@ public class ArticleFeedbackService {
 
             String response = chatModel.call(prompt).getResult().getOutput().getContent();
 
-            log.debug("AI 응답 수신 완료 - Article ID: {}, 응답 길이: {}",
-                    article.getArticleId(), response.length());
-
             return response;
 
         } catch (Exception e) {
-            log.error("AI 피드백 생성 중 오류 발생 - Article ID: {}", article.getArticleId(), e);
             throw new RuntimeException("AI 피드백 생성에 실패했습니다: " + e.getMessage(), e);
         }
     }
@@ -171,7 +160,6 @@ public class ArticleFeedbackService {
         try {
             int startIdx = text.indexOf(sectionHeader);
             if (startIdx == -1) {
-                log.warn("섹션 헤더를 찾을 수 없음: {}", sectionHeader);
                 return "";
             }
 
@@ -200,7 +188,6 @@ public class ArticleFeedbackService {
 
             return section;
         } catch (Exception e) {
-            log.error("섹션 추출 실패: {}", sectionHeader, e);
             return "";
         }
     }
