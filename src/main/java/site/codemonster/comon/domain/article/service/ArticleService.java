@@ -1,6 +1,8 @@
 package site.codemonster.comon.domain.article.service;
 
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import site.codemonster.comon.domain.article.factory.RecommendationArticleFactory;
 import site.codemonster.comon.domain.article.dto.request.*;
 import site.codemonster.comon.domain.article.entity.Article;
@@ -190,8 +192,38 @@ public class ArticleService {
         return content.title();
     }
 
-    public boolean isRecommendationAlreadyExists(Team team, LocalDate date) {
-        return articleRepository.existsByTeamAndSelectedDateAndArticleCategory(
-                team, date, ArticleCategory.CODING_TEST);
+    public Article validateAndGetArticle(Long articleId, Member member) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(ArticleNotFoundException::new);
+
+        if (!article.isAuthor(member)) throw new UnauthorizedActionException();
+
+        return article;
+    }
+
+    public String getPlainArticleBody(String articleBody) {
+        Document doc = Jsoup.parse(articleBody);
+        StringBuilder result = new StringBuilder();
+
+        // 1. 일반 텍스트 추출
+        doc.select("p, li").stream()
+                .map(element -> element.text().trim())
+                .filter(text -> !text.isEmpty())
+                .forEach(text -> result.append(text).append("\n"));
+        result.append("\n");
+
+        // 2. 코드 블록 추출
+        doc.select("pre.codeblock").forEach(codeBlock -> {
+            String language = codeBlock.attr("data-highlight-language");
+
+            result.append("```").append(language.isEmpty() ? "" : language).append("\n");
+
+            // ***핵심 수정: .text()로 추출한 후 문자열 조작을 일체 하지 않음***
+            String code = codeBlock.text().trim();
+
+            result.append(code).append("\n```\n\n");
+        });
+
+        return result.toString().trim();
     }
 }
