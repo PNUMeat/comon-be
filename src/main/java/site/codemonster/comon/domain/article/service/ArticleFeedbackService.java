@@ -1,12 +1,11 @@
 package site.codemonster.comon.domain.article.service;
 
-import com.theokanning.openai.completion.chat.ChatCompletionRequest;
-import com.theokanning.openai.completion.chat.ChatCompletionResult;
-import com.theokanning.openai.completion.chat.ChatMessage;
-import com.theokanning.openai.completion.chat.ChatMessageRole;
-import com.theokanning.openai.service.OpenAiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackResponse;
@@ -18,7 +17,6 @@ import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.global.error.articles.ArticleNotFoundException;
 import site.codemonster.comon.global.error.articles.UnauthorizedActionException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,10 +28,12 @@ public class ArticleFeedbackService {
 
     private final ArticleRepository articleRepository;
     private final ArticleFeedbackRepository articleFeedbackRepository;
-    private final OpenAiService openAiService;
+    private final ChatModel chatModel;
 
-    private static final String FEEDBACK_PROMPT_TEMPLATE = """
-        당신은 알고리즘 문제 풀이를 분석하는 친근한 코딩 멘토입니다.
+    private static final String SYSTEM_PROMPT =
+            "당신은 알고리즘 문제 풀이를 분석하는 친근한 코딩 멘토입니다.";
+
+    private static final String USER_PROMPT_TEMPLATE = """
         아래 코딩테스트 풀이를 분석하고 정해진 형식으로 피드백을 제공하세요.
         
         ## 풀이 정보
@@ -129,24 +129,27 @@ public class ArticleFeedbackService {
     }
 
     private String callAI(Article article) {
-        String promptText = String.format(FEEDBACK_PROMPT_TEMPLATE,
-                article.getArticleTitle(),
-                article.getArticleBody());
+        try {
+            String userPrompt = String.format(USER_PROMPT_TEMPLATE,
+                    article.getArticleTitle(),
+                    article.getArticleBody());
 
-        List<ChatMessage> messages = new ArrayList<>();
-        messages.add(new ChatMessage(ChatMessageRole.SYSTEM.value(),
-                "당신은 알고리즘 문제 풀이를 분석하는 친근한 코딩 멘토입니다."));
-        messages.add(new ChatMessage(ChatMessageRole.USER.value(), promptText));
+            Prompt prompt = new Prompt(List.of(
+                    new SystemMessage(SYSTEM_PROMPT),
+                    new UserMessage(userPrompt)
+            ));
 
-        ChatCompletionRequest request = ChatCompletionRequest.builder()
-                .model("gemini-1.5-flash")
-                .messages(messages)
-                .temperature(0.7)
-                .maxTokens(2048)
-                .build();
+            String response = chatModel.call(prompt).getResult().getOutput().getContent();
 
-        ChatCompletionResult result = openAiService.createChatCompletion(request);
-        return result.getChoices().get(0).getMessage().getContent();
+            log.debug("AI 응답 수신 완료 - Article ID: {}, 응답 길이: {}",
+                    article.getArticleId(), response.length());
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("AI 피드백 생성 중 오류 발생 - Article ID: {}", article.getArticleId(), e);
+            throw new RuntimeException("AI 피드백 생성에 실패했습니다: " + e.getMessage(), e);
+        }
     }
 
     private ArticleFeedback parseFeedback(String feedbackText, Article article) {
@@ -168,6 +171,7 @@ public class ArticleFeedbackService {
         try {
             int startIdx = text.indexOf(sectionHeader);
             if (startIdx == -1) {
+                log.warn("섹션 헤더를 찾을 수 없음: {}", sectionHeader);
                 return "";
             }
 
@@ -182,13 +186,13 @@ public class ArticleFeedbackService {
             if (section.contains("- ")) {
                 String[] items = section.split("\n- ");
                 StringBuilder result = new StringBuilder();
-                for (int i = 0; i < items.length; i++) {
-                    String item = items[i].replace("- ", "").trim();
-                    if (!item.isEmpty()) {
+                for (String item : items) {
+                    String cleanItem = item.replace("- ", "").trim();
+                    if (!cleanItem.isEmpty()) {
                         if (result.length() > 0) {
                             result.append("|||");
                         }
-                        result.append(item);
+                        result.append(cleanItem);
                     }
                 }
                 return result.toString();
