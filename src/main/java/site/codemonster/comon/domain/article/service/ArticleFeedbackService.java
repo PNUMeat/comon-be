@@ -33,7 +33,7 @@ public class ArticleFeedbackService {
     public ArticleFeedbackResponse generateFeedback(Long articleId, Member member) {
         Article article = articleService.validateAndGetArticle(articleId, member);
 
-        articleFeedbackRepository.findByArticle_ArticleId(articleId)
+        articleFeedbackRepository.findByArticleArticleId(articleId)
                 .ifPresent(feedback -> {throw new ArticleFeedbackAlreadyExistsException();});
 
         ArticleFeedback feedback = createFeedback(article);
@@ -46,7 +46,7 @@ public class ArticleFeedbackService {
     public ArticleFeedbackResponse regenerateFeedback(Long articleId, Member member) {
         Article article = articleService.validateAndGetArticle(articleId, member);
 
-        ArticleFeedback existingFeedback = articleFeedbackRepository.findByArticle_ArticleId(articleId)
+        ArticleFeedback existingFeedback = articleFeedbackRepository.findByArticleArticleId(articleId)
                 .orElseThrow(ArticleFeedbackNotFoundException::new);
 
         ArticleFeedback newFeedbackContent = createFeedback(article);
@@ -63,7 +63,7 @@ public class ArticleFeedbackService {
 
     public ArticleFeedbackResponse getFeedback(Long articleId) {
         ArticleFeedback feedback = articleFeedbackRepository
-                .findByArticle_ArticleId(articleId)
+                .findByArticleArticleId(articleId)
                 .orElseThrow(ArticleFeedbackNotFoundException::new);
 
         return new ArticleFeedbackResponse(feedback);

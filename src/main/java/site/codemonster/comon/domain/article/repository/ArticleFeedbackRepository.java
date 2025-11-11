@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ArticleFeedbackRepository extends JpaRepository<ArticleFeedback, Long> {
 
-    Optional<ArticleFeedback> findByArticle_ArticleId(Long articleId);
+    Optional<ArticleFeedback> findByArticleArticleId(Long articleId);
 }
