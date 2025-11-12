@@ -82,36 +82,9 @@ public class ArticleFeedbackService {
 
             log.info(aiResponse);
 
-            return parseFeedback(aiResponse, article);
+            return ArticleFeedback.fromAiResponse(aiResponse, article);
         } catch (Exception e) {
             throw new AIFeedbackGenerationException();
         }
-    }
-
-    private ArticleFeedback parseFeedback(String feedbackText, Article article) {
-        return ArticleFeedback.builder()
-                .article(article)
-                .keyPoint(extractResponseSection(feedbackText, "1. 문제 핵심 포인트"))
-                .strengths(extractResponseSection(feedbackText, "2. 잘한 부분"))
-                .improvements(extractResponseSection(feedbackText, "3. 개선 제안"))
-                .learningPoint(extractResponseSection(feedbackText, "4. 학습 포인트"))
-                .build();
-    }
-
-    private String extractResponseSection(String text, String header) {
-        int start = text.indexOf(header);
-        if (start == -1) return "";
-
-        start = text.indexOf("\n", start) + 1;
-        int end = text.indexOf("###", start);
-        if (end == -1) end = text.length();
-
-        String content = text.substring(start, end).trim();
-        return content.contains("- ") ? joinListItems(content) : content;
-    }
-
-    private String joinListItems(String content) {
-        return String.join("|||", content.split("\n- "))
-                    .replace("- ", "");
     }
 }
