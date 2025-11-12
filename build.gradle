@@ -15,6 +15,8 @@ java {
 
 repositories {
 	mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
 }
 
 dependencies {
@@ -44,8 +46,12 @@ dependencies {
 	implementation 'software.amazon.awssdk:sts'
 
 	implementation 'io.prometheus:prometheus-metrics-core:1.0.0'
+
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M4'
+
+    implementation 'org.jsoup:jsoup:1.17.1'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }

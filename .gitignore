@@ -44,4 +44,4 @@ out/
 application-secret.properties
 application-monitor.properties
 application-secret-prod.properties
-
+application-prompt.properties
