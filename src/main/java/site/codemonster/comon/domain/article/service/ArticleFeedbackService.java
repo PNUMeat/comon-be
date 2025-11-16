@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleFeedback;
-import site.codemonster.comon.domain.article.repository.ArticleFeedbackRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.global.error.ArticleFeedback.*;
 
@@ -25,7 +24,7 @@ import site.codemonster.comon.global.globalConfig.FeedbackPromptConfig;
 public class ArticleFeedbackService {
 
     private final ArticleService articleService;
-    private final ArticleFeedbackRepository articleFeedbackRepository;
+    private final ArticleFeedbackLowService articleFeedbackLowService;
     private final ChatModel chatModel;
     private final FeedbackPromptConfig promptProperties;
 
@@ -33,11 +32,11 @@ public class ArticleFeedbackService {
     public ArticleFeedbackResponse generateFeedback(Long articleId, Member member) {
         Article article = articleService.validateAndGetArticle(articleId, member);
 
-        articleFeedbackRepository.findByArticleArticleId(articleId)
-                .ifPresent(feedback -> {throw new ArticleFeedbackAlreadyExistsException();});
+        if(articleFeedbackLowService.existsByArticleId(articleId))
+                throw new ArticleFeedbackAlreadyExistsException();
 
         ArticleFeedback feedback = createFeedback(article);
-        ArticleFeedback savedFeedback = articleFeedbackRepository.save(feedback);
+        ArticleFeedback savedFeedback = articleFeedbackLowService.save(feedback);
 
         return new ArticleFeedbackResponse(savedFeedback);
     }
@@ -46,8 +45,7 @@ public class ArticleFeedbackService {
     public ArticleFeedbackResponse regenerateFeedback(Long articleId, Member member) {
         Article article = articleService.validateAndGetArticle(articleId, member);
 
-        ArticleFeedback existingFeedback = articleFeedbackRepository.findByArticleArticleId(articleId)
-                .orElseThrow(ArticleFeedbackNotFoundException::new);
+        ArticleFeedback existingFeedback = articleFeedbackLowService.findByArticleId(articleId);
 
         ArticleFeedback newFeedbackContent = createFeedback(article);
 
@@ -62,9 +60,7 @@ public class ArticleFeedbackService {
     }
 
     public ArticleFeedbackResponse getFeedback(Long articleId) {
-        ArticleFeedback feedback = articleFeedbackRepository
-                .findByArticleArticleId(articleId)
-                .orElseThrow(ArticleFeedbackNotFoundException::new);
+        ArticleFeedback feedback = articleFeedbackLowService.findByArticleId(articleId);
 
         return new ArticleFeedbackResponse(feedback);
     }
