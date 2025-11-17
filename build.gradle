@@ -19,6 +19,11 @@ repositories {
     maven { url 'https://repo.spring.io/snapshot' }
 }
 
+ext {
+	set('springAiVersion', "1.0.3")
+}
+
+
 dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
@@ -47,9 +52,15 @@ dependencies {
 
 	implementation 'io.prometheus:prometheus-metrics-core:1.0.0'
 
-    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M4'
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
     implementation 'org.jsoup:jsoup:1.17.1'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+	}
 }
 
 tasks.named('test') {
