@@ -7,7 +7,6 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,7 +25,7 @@ public class AiArticleFeedBackService {
 
     private final ArticleFeedbackLowService articleFeedbackLowService;
     private final ArticleService articleService;
-    private final ArticleFeedbackService articleFeedbackService;
+    private final ArticleFeedbackHighService articleFeedbackService;
     private final TransactionTemplate transactionTemplate;
     private final ChatModel chatModel;
     private final FeedbackPromptConfig promptProperties;

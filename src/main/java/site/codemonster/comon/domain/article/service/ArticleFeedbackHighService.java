@@ -11,7 +11,7 @@ import site.codemonster.comon.domain.article.entity.ArticleFeedback;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ArticleFeedbackService {
+public class ArticleFeedbackHighService {
 
     private final ArticleFeedbackLowService articleFeedbackLowService;
 

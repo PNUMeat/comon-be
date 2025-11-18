@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackResponse;
 import site.codemonster.comon.domain.article.service.AiArticleFeedBackService;
-import site.codemonster.comon.domain.article.service.ArticleFeedbackService;
+import site.codemonster.comon.domain.article.service.ArticleFeedbackHighService;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
@@ -21,7 +21,7 @@ import static site.codemonster.comon.domain.article.controller.ArticleFeedbackRe
 @RequiredArgsConstructor
 public class ArticleFeedbackController {
 
-    private final ArticleFeedbackService articleFeedbackService;
+    private final ArticleFeedbackHighService articleFeedbackService;
     private final AiArticleFeedBackService aiArticleFeedBackService;
 
     @GetMapping(value = "/{articleId}/feedback/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
