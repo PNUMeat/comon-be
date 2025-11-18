@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -30,6 +31,7 @@ import site.codemonster.comon.global.util.cookieUtils.CookieUtils;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.SoftAssertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.securityContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static site.codemonster.comon.domain.auth.constant.AuthConstant.*;
@@ -63,7 +65,8 @@ class AuthApiControllerTest {
         Member member = memberRepository.save(TestUtil.createMember());
         TestSecurityContextInjector.inject(member);
 
-        String response = mockMvc.perform(post("/api/v1/logout"))
+        String response = mockMvc.perform(post("/api/v1/logout")
+                        .with(securityContext(SecurityContextHolder.getContext())))
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         ApiResponse<Void> apiResponse = objectMapper.readValue(response, new TypeReference<ApiResponse<Void>>() {

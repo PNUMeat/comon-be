@@ -9,6 +9,7 @@ import site.codemonster.comon.global.error.ErrorCode;
 import site.codemonster.comon.global.globalConfig.DomainProperties;
 import site.codemonster.comon.global.security.filter.JWTAccessFilter;
 import site.codemonster.comon.global.security.filter.JWTRefreshFilter;
+import site.codemonster.comon.global.security.filter.SseAccessFilter;
 import site.codemonster.comon.global.security.jwt.JWTUtils;
 import site.codemonster.comon.global.security.oauth.OAuth2SuccessHandler;
 import site.codemonster.comon.global.security.oauth.OAuth2UserServiceImpl;
@@ -62,6 +63,7 @@ public class SecurityConfiguration {
                 .httpBasic((auth) -> auth.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .addFilterAfter(new JWTAccessFilter(jwtUtil, responseUtils, memberService, cookieUtils), OAuth2LoginAuthenticationFilter.class)
+                .addFilterAfter(new SseAccessFilter(jwtUtil, responseUtils, memberService, cookieUtils), JWTAccessFilter.class)
                 .addFilterAfter(new JWTRefreshFilter(jwtUtil, refreshTokenRepository, responseUtils,cookieUtils), OAuth2LoginAuthenticationFilter.class)
                 .oauth2Login(
                     (oauth2) -> oauth2
@@ -81,7 +83,8 @@ public class SecurityConfiguration {
                             "/api/v1/recruitments/{recruitId}",
                             "/admin/**",
                             "/api/v1/teams/all",
-                            "/actuator/health"
+                            "/actuator/health",
+                            "/api/v1/articles/{articleId}/feedback/stream"
                     ).permitAll()
                     .anyRequest().authenticated())
                 .sessionManagement((session) -> session
