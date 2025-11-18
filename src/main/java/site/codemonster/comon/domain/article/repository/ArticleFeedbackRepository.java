@@ -1,6 +1,7 @@
 package site.codemonster.comon.domain.article.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import site.codemonster.comon.domain.article.entity.ArticleFeedback;
@@ -14,4 +15,8 @@ public interface ArticleFeedbackRepository extends JpaRepository<ArticleFeedback
     Optional<ArticleFeedback> findByArticleId(Long articleId);
 
     boolean existsByArticleArticleId(Long articleId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("delete from ArticleFeedback af where af.article.articleId = :articleId")
+    void deleteByArticleId(Long articleId);
 }

@@ -20,13 +20,12 @@ public class ArticleFeedbackLowService {
     }
 
     @Transactional(readOnly = true)
-    public boolean existsByArticleId(Long articleId) {
-        return articleFeedbackRepository.existsByArticleArticleId(articleId);
-    }
-
-    @Transactional(readOnly = true)
     public ArticleFeedback findByArticleId(Long articleId) {
         return articleFeedbackRepository.findByArticleId(articleId)
                 .orElseThrow(ArticleFeedbackNotFoundException::new);
+    }
+
+    public void deleteByArticleId(Long articleId) {
+        articleFeedbackRepository.deleteByArticleId(articleId);
     }
 }
