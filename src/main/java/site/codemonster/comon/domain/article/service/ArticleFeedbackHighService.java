@@ -22,10 +22,4 @@ public class ArticleFeedbackHighService {
         return new ArticleFeedbackResponse(feedback);
     }
 
-    public ArticleFeedback safeSaveArticleFeedback(ArticleFeedback feedback) {
-        articleFeedbackLowService.deleteByArticleId(feedback.getArticle().getArticleId());
-
-        return articleFeedbackLowService.save(feedback);
-    }
-
 }

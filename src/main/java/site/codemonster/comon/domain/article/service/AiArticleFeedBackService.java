@@ -2,6 +2,9 @@ package site.codemonster.comon.domain.article.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
@@ -10,12 +13,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleFeedback;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.global.error.ArticleFeedback.AIFeedbackGenerationException;
 import site.codemonster.comon.global.globalConfig.FeedbackPromptConfig;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,44 +28,54 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AiArticleFeedBackService {
 
-    private final ArticleFeedbackLowService articleFeedbackLowService;
     private final ArticleService articleService;
-    private final ArticleFeedbackHighService articleFeedbackService;
+    private final ArticleFeedbackLowService articleFeedbackLowService;
     private final TransactionTemplate transactionTemplate;
-    private final ChatModel chatModel;
+    private final ChatClient chatClient;
     private final FeedbackPromptConfig promptProperties;
 
     public Flux<String> generateFeedback(Long articleId, Member member) {
         Article article = articleService.validateAndGetArticle(articleId, member);
-        StringBuffer builder = new StringBuffer();
 
-        return createStreamFeedback(article)
-                .doOnNext(builder::append)
-                .doOnComplete(() -> {
-                    String finalText = builder.toString();
-                    transactionTemplate.execute(status -> {
-                        ArticleFeedback feedback = new ArticleFeedback(article, finalText);
-                        articleFeedbackService.safeSaveArticleFeedback(feedback);
-                        return null;
-                    });
-                })
-                .onErrorResume(e -> {
-                    log.error("AI Feedback generation failed", e);
-
-                    return Mono.error(new AIFeedbackGenerationException());
-                });
+        return createStreamFeedback(article);
     }
 
     public Flux<String> createStreamFeedback(Article article) {
-        String systemPrompt = promptProperties.getSystem();
-        String userPrompt = promptProperties.getUserPrompt(article.getArticleTitle(), articleService.getPlainArticleBody(article.getArticleBody()));
+
+        List<Message> messages = new ArrayList<>();
+
+        SystemMessage systemMessage = new SystemMessage(promptProperties.getSystem());
+        UserMessage userPrompt = new UserMessage(promptProperties.getUserPrompt(article.getArticleTitle(), articleService.getPlainArticleBody(article.getArticleBody())));
+
+        boolean hasPrevFeedBack = articleFeedbackLowService.existByArticle(article);
+        messages.addAll(List.of(userPrompt,systemMessage));
+
+        if (hasPrevFeedBack) {
+            ArticleFeedback prevFeedback = articleFeedbackLowService.findByArticleId(article.getArticleId());
+            messages.add(new AssistantMessage(prevFeedback.getFeedbackBody()));
+        }
+
+        Prompt prompt = new Prompt(messages);
 
 
-        Prompt prompt = new Prompt(List.of(new SystemMessage(systemPrompt), new UserMessage(userPrompt)));
+        StringBuffer messageBuffer = new StringBuffer();
 
-
-        return chatModel.stream(prompt)
-                .mapNotNull(response -> response.getResult().getOutput().getText()); // 묶은 chunk을 하나로 합침
+        return chatClient.prompt(prompt)
+                .stream()
+                .content()
+                .mapNotNull(token -> {
+                    messageBuffer.append(token);
+                    return token;
+                })
+                .onErrorMap(e-> new AIFeedbackGenerationException())
+                .doOnComplete(() -> {
+                    String finalText = messageBuffer.toString();
+                    transactionTemplate.execute(status -> {
+                        ArticleFeedback feedback = new ArticleFeedback(article, finalText);
+                        articleFeedbackLowService.deleteByArticleId(feedback.getArticle().getArticleId());
+                        return articleFeedbackLowService.save(feedback);
+                    });
+                });
     }
 
 
