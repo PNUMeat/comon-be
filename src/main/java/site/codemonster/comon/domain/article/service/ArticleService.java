@@ -200,29 +200,4 @@ public class ArticleService {
 
         return article;
     }
-
-    public String getPlainArticleBody(String articleBody) {
-        Document doc = Jsoup.parse(articleBody);
-        StringBuilder result = new StringBuilder();
-
-        // 1. 일반 텍스트 추출
-        doc.select("p, li").stream()
-                .map(element -> element.text().trim())
-                .filter(text -> !text.isEmpty())
-                .forEach(text -> result.append(text).append("\n"));
-        result.append("\n");
-
-        // 2. 코드 블록 추출
-        doc.select("pre.codeblock").forEach(codeBlock -> {
-            String language = codeBlock.attr("data-highlight-language");
-
-            result.append("```").append(language.isEmpty() ? "" : language).append("\n");
-
-            String code = codeBlock.text().trim();
-
-            result.append(code).append("\n```\n\n");
-        });
-
-        return result.toString().trim();
-    }
 }

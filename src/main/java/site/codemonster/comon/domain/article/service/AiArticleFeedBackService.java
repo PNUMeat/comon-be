@@ -45,7 +45,7 @@ public class AiArticleFeedBackService {
         List<Message> messages = new ArrayList<>();
 
         SystemMessage systemMessage = new SystemMessage(promptProperties.getSystem());
-        UserMessage userPrompt = new UserMessage(promptProperties.getUserPrompt(article.getArticleTitle(), articleService.getPlainArticleBody(article.getArticleBody())));
+        UserMessage userPrompt = new UserMessage(promptProperties.getUserPrompt(article.getArticleTitle(), article.getArticleBody()));
 
         boolean hasPrevFeedBack = articleFeedbackLowService.existByArticle(article);
         messages.addAll(List.of(userPrompt,systemMessage));
