@@ -5,8 +5,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackResponse;
-import site.codemonster.comon.domain.article.service.ArticleFeedbackService;
+import site.codemonster.comon.domain.article.service.AiArticleFeedBackService;
+import site.codemonster.comon.domain.article.service.ArticleFeedbackHighService;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
@@ -19,32 +21,18 @@ import static site.codemonster.comon.domain.article.controller.ArticleFeedbackRe
 @RequiredArgsConstructor
 public class ArticleFeedbackController {
 
-    private final ArticleFeedbackService articleFeedbackService;
+    private final ArticleFeedbackHighService articleFeedbackService;
+    private final AiArticleFeedBackService aiArticleFeedBackService;
 
-    @PostMapping("/{articleId}/feedback")
-    public ResponseEntity<ApiResponse<ArticleFeedbackResponse>> generateFeedback(
+    @GetMapping(value = "/{articleId}/feedback/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public ResponseEntity<Flux<String>> generateFeedback(
             @PathVariable Long articleId,
             @AuthenticationPrincipal Member member
     ) {
-        ArticleFeedbackResponse response =
-                articleFeedbackService.generateFeedback(articleId, member);
 
-        return ResponseEntity.status(ARTICLE_FEEDBACK_CREATE_SUCCESS.getStatusCode())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(response, ARTICLE_FEEDBACK_CREATE_SUCCESS.getMessage()));
-    }
+        Flux<String> response = aiArticleFeedBackService.generateFeedback(articleId, member);
 
-    @PutMapping("/{articleId}/feedback/regenerate")
-    public ResponseEntity<ApiResponse<ArticleFeedbackResponse>> regenerateFeedback(
-            @PathVariable Long articleId,
-            @AuthenticationPrincipal Member member
-    ) {
-        ArticleFeedbackResponse response =
-                articleFeedbackService.regenerateFeedback(articleId, member);
-
-        return ResponseEntity.status(ARTICLE_FEEDBACK_REGENERATE_SUCCESS.getStatusCode())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(response, ARTICLE_FEEDBACK_REGENERATE_SUCCESS.getMessage()));
+        return ResponseEntity.status(ARTICLE_FEEDBACK_GENERATE_SUCCESS.getStatusCode()).body(response);
     }
 
     @GetMapping("/{articleId}/feedback")

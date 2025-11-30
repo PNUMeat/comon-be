@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileCreateRequest;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.securityContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
@@ -72,6 +74,7 @@ class MemberControllerTest {
         String requestBody = objectMapper.writeValueAsString(memberProfileCreateRequest);
 
         String response = mockMvc.perform(post("/api/v1/members")
+                        .with(securityContext(SecurityContextHolder.getContext()))
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -104,6 +107,7 @@ class MemberControllerTest {
         String response = mockMvc.perform(put("/api/v1/members")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(securityContext(SecurityContextHolder.getContext()))
                 )
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
@@ -131,6 +135,7 @@ class MemberControllerTest {
 
         String response = mockMvc.perform(get("/api/v1/members/own-profile")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(securityContext(SecurityContextHolder.getContext()))
                 )
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
@@ -177,6 +182,7 @@ class MemberControllerTest {
 
         String response = mockMvc.perform(get("/api/v1/members/profile/" + member.getUuid())
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(securityContext(SecurityContextHolder.getContext()))
                 )
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
@@ -206,6 +212,7 @@ class MemberControllerTest {
 
         String response = mockMvc.perform(get("/api/v1/members/info")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .with(securityContext(SecurityContextHolder.getContext()))
                 )
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
@@ -233,6 +240,7 @@ class MemberControllerTest {
         TestSecurityContextInjector.inject(member);
 
         String response = mockMvc.perform(delete("/api/v1/members")
+                        .with(securityContext(SecurityContextHolder.getContext()))
                 )
                 .andReturn()
                 .getResponse()
