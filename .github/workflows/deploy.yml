@@ -30,9 +30,15 @@ jobs:
 
       - name: .properties 생성
         run: |
-          echo "${{ secrets.APPLICATION_MONITOR_PROPERTIES }}" > ./src/main/resources/application-monitor.properties
-          echo "${{ secrets.APPLICATION_SECRET_PROPERTIES }}" > ./src/main/resources/application-secret.properties
-          echo "${{ secrets.APPLICATION_PROMPT_PROPERTIES }}" > ./src/main/resources/application-prompt.properties
+          cat << 'EOF' > ./src/main/resources/application-monitor.properties 
+          ${{ secrets.APPLICATION_MONITOR_PROPERTIES }}
+          EOF
+          cat << 'EOF' > ./src/main/resources/application-secret.properties 
+          ${{ secrets.APPLICATION_SECRET_PROPERTIES }} 
+          EOF
+          cat << 'EOF' > ./src/main/resources/application-prompt.properties 
+          ${{ secrets.APPLICATION_PROMPT_PROPERTIES }}
+          EOF
 
       - name: 빌드하기
         run: ./gradlew clean build -x test
