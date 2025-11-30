@@ -85,7 +85,7 @@ jobs:
           exit 1
 
       - name: 디스코드 성공 알림
-        if: env.HEALTH_STATUS == 'success'
+        if: ${{ env.HEALTH_STATUS == 'success' }}
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
@@ -97,7 +97,7 @@ jobs:
             **헬스체크:** ✅ 통과
 
       - name: 디스코드 실패 알림
-        if: failure()
+        if: ${{ failure() }}
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
