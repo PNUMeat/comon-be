@@ -30,15 +30,8 @@ jobs:
 
       - name: .properties 생성
         run: |
-          cat << 'EOF' > ./src/main/resources/application-monitor.properties 
-          ${{ secrets.APPLICATION_MONITOR_PROPERTIES }}
-          EOF
-          cat << 'EOF' > ./src/main/resources/application-secret.properties 
-          ${{ secrets.APPLICATION_SECRET_PROPERTIES }} 
-          EOF
-          cat << 'EOF' > ./src/main/resources/application-prompt.properties 
-          ${{ secrets.APPLICATION_PROMPT_PROPERTIES }}
-          EOF
+          echo "${{ secrets.APPLICATION_MONITOR_PROPERTIES }}" > ./src/main/resources/application-monitor.properties
+          echo "${{ secrets.APPLICATION_SECRET_PROPERTIES }}" > ./src/main/resources/application-secret.properties
 
       - name: 빌드하기
         run: ./gradlew clean build -x test
@@ -91,7 +84,7 @@ jobs:
           exit 1
 
       - name: 디스코드 성공 알림
-        if: ${{ env.HEALTH_STATUS == 'success' }}
+        if: env.HEALTH_STATUS == 'success'
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
@@ -103,7 +96,7 @@ jobs:
             **헬스체크:** ✅ 통과
 
       - name: 디스코드 실패 알림
-        if: ${{ failure() }}
+        if: failure()
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
