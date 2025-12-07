@@ -14,6 +14,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackResponse;
+import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackStreamResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleFeedback;
 import site.codemonster.comon.domain.auth.entity.Member;
@@ -34,13 +35,13 @@ public class AiArticleFeedBackService {
     private final ChatClient chatClient;
     private final FeedbackPromptConfig promptProperties;
 
-    public Flux<String> generateFeedback(Long articleId, Member member) {
+    public Flux<ArticleFeedbackStreamResponse> generateFeedback(Long articleId, Member member) {
         Article article = articleService.validateAndGetArticle(articleId, member);
 
         return createStreamFeedback(article);
     }
 
-    public Flux<String> createStreamFeedback(Article article) {
+    public Flux<ArticleFeedbackStreamResponse> createStreamFeedback(Article article) {
 
         List<Message> messages = new ArrayList<>();
 
@@ -63,9 +64,9 @@ public class AiArticleFeedBackService {
         return chatClient.prompt(prompt)
                 .stream()
                 .content()
-                .mapNotNull(token -> {
+                .mapNotNull(token-> {
                     messageBuffer.append(token);
-                    return token;
+                    return new ArticleFeedbackStreamResponse(token);
                 })
                 .onErrorMap(e-> new AIFeedbackGenerationException())
                 .doOnComplete(() -> {

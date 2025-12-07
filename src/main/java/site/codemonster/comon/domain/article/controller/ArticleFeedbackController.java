@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackResponse;
+import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackStreamResponse;
 import site.codemonster.comon.domain.article.service.AiArticleFeedBackService;
 import site.codemonster.comon.domain.article.service.ArticleFeedbackHighService;
 import site.codemonster.comon.domain.auth.entity.Member;
@@ -25,12 +26,12 @@ public class ArticleFeedbackController {
     private final AiArticleFeedBackService aiArticleFeedBackService;
 
     @GetMapping(value = "/{articleId}/feedback/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public ResponseEntity<Flux<String>> generateFeedback(
+    public ResponseEntity<Flux<ArticleFeedbackStreamResponse>> generateFeedback(
             @PathVariable Long articleId,
             @AuthenticationPrincipal Member member
     ) {
 
-        Flux<String> response = aiArticleFeedBackService.generateFeedback(articleId, member);
+        Flux<ArticleFeedbackStreamResponse> response = aiArticleFeedBackService.generateFeedback(articleId, member);
 
         return ResponseEntity.status(ARTICLE_FEEDBACK_GENERATE_SUCCESS.getStatusCode()).body(response);
     }
