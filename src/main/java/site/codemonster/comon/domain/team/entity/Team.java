@@ -49,7 +49,6 @@ public class Team extends TimeStamp {
     protected Team(){
     }
 
-    @Builder
     public Team(String teamName, Topic teamTopic, String teamExplain, int maxParticipant, String teamPassword) {
         this.teamName = teamName;
         this.teamTopic = teamTopic;

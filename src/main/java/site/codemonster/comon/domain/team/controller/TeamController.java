@@ -45,8 +45,8 @@ public class TeamController {
     private final TeamRecruitService teamRecruitService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<?>> createTeam(
-            @RequestBody @Valid TeamRequest teamRequest,
+    public ResponseEntity<ApiResponse<TeamCreateResponse>> createTeam(
+            @RequestBody @Valid TeamCreateRequest teamRequest,
             @AuthenticationPrincipal Member manager
     ){
         List<String> memberUuids = teamRequest.teamMemberUuids();

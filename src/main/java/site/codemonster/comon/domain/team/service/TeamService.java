@@ -4,7 +4,7 @@ import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.team.dto.request.TeamInfoEditRequest;
-import site.codemonster.comon.domain.team.dto.request.TeamRequest;
+import site.codemonster.comon.domain.team.dto.request.TeamCreateRequest;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.enums.Topic;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
@@ -37,14 +37,9 @@ public class TeamService {
     private final TeamApplyService teamApplyService;
 
     @Transactional
-    public Team createTeam(TeamRequest teamRequest, Member manager, List<Member> applyMembers, Long teamRecruitId) {
-        Team team = Team.builder()
-                .teamName(teamRequest.teamName())
-                .teamExplain(teamRequest.teamExplain())
-                .teamTopic(Topic.fromName(teamRequest.topic()))
-                .maxParticipant(teamRequest.memberLimit())
-                .teamPassword(teamRequest.password())
-                .build();
+    public Team createTeam(TeamCreateRequest teamRequest, Member manager, List<Member> applyMembers, Long teamRecruitId) {
+
+        Team team = new Team(teamRequest.teamName(), Topic.fromName(teamRequest.topic()), teamRequest.teamExplain(), teamRequest.memberLimit(), teamRequest.password());
 
         Team savedTeam = teamRepository.save(team);
 
