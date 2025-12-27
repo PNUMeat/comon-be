@@ -127,17 +127,6 @@ public class TeamService {
         return team;
     }
 
-    public void deleteTeam(Long teamId) {
-
-        teamLowService.getTeamByTeamId(teamId);
-
-        articleImageLowService.deleteByTeamTeamId(teamId);
-
-        articleLowService.deleteByTeamTeamId(teamId);
-
-        teamMemberLowService.deleteTeamMemberByTeamId(teamId);
-    }
-
     public void deleteTeamByOwner(Member member, Long teamId) {
 
         Team team = teamLowService.findById(teamId);

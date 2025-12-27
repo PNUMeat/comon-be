@@ -86,6 +86,9 @@ public class TeamRecommendationHighService {
     public void deleteTeamRecommendation(Long teamId) {
 
         Team team = teamLowService.findById(teamId);
+
+        if (!teamRecommendationLowService.isExistByTeam(team)) return;
+
         TeamRecommendation teamRecommendation = teamRecommendationLowService.findByTeam(team);
 
         platformRecommendationLowService.deleteByTeamRecommendationId(teamRecommendation.getId());
