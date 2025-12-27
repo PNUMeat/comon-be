@@ -1,15 +1,21 @@
 package site.codemonster.comon.domain.teamRecruit.service;
 
+import org.springframework.data.domain.PageRequest;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamLowService;
+import site.codemonster.comon.domain.teamApply.dto.response.TeamApplyMemberResponse;
+import site.codemonster.comon.domain.teamApply.entity.TeamApply;
 import site.codemonster.comon.domain.teamApply.repository.TeamApplyRepository;
+import site.codemonster.comon.domain.teamApply.service.TeamApplyLowService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.domain.teamRecruit.dto.request.TeamRecruitCreateRequest;
 import site.codemonster.comon.domain.teamRecruit.dto.request.TeamRecruitInviteRequest;
 import site.codemonster.comon.domain.teamRecruit.dto.request.TeamRecruitUpdateRequest;
+import site.codemonster.comon.domain.teamRecruit.dto.response.TeamRecruitGetResponse;
+import site.codemonster.comon.domain.teamRecruit.dto.response.TeamRecruitParticularResponse;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
 import site.codemonster.comon.domain.teamRecruit.repository.TeamRecruitImageRepository;
 import site.codemonster.comon.domain.teamRecruit.repository.TeamRecruitRepository;
@@ -30,8 +36,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class TeamRecruitService {
 
-    private final TeamRecruitImageRepository teamRecruitImageRepository;
-    private final TeamApplyRepository teamApplyRepository;
+    private final TeamApplyLowService teamApplyLowService;
     private final TeamLowService teamLowService;
     private final TeamMemberService teamMemberService;
     private final MemberService memberService;
@@ -57,7 +62,7 @@ public class TeamRecruitService {
     @Transactional
     public void invite(TeamRecruitInviteRequest teamRecruitInviteRequest, Member member) {
         TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(teamRecruitInviteRequest.recruitId());
-        isAuthorOrThrow(teamRecruit, member);
+        teamRecruitLowService.isAuthorOrThrow(teamRecruit, member);
 
         List<String> memberUuids = teamRecruitInviteRequest.memberUuids();
         List<Member> applyMembers = new ArrayList<>();
@@ -78,11 +83,19 @@ public class TeamRecruitService {
         }
 
         if(teamRecruit.isRecruiting()){
-            teamApplyRepository.deleteTeamAppliesByTeamRecruitId(teamRecruitId);
+            teamApplyLowService.deleteTeamAppliesByTeamRecruitId(teamRecruitId);
         }
 
         teamRecruit.changeRecruitingStatus();
     }
+
+    public Page<TeamRecruitGetResponse> findTeamRecruitmentWithPage(Pageable pageable, String status) {
+
+        Page<TeamRecruit> teamRecruitmentsUsingPaging = teamRecruitLowService.getTeamRecruitmentsUsingPaging(pageable, status);
+
+        return teamRecruitmentsUsingPaging.map(TeamRecruitGetResponse::of);
+    }
+
 
     @Transactional
     public void updateTeamRecruit(Long teamRecruitId, Member member, TeamRecruitUpdateRequest teamRecruitUpdateRequest){
@@ -93,12 +106,30 @@ public class TeamRecruitService {
         }
 
         teamRecruit.updateTeamRecruit(teamRecruitUpdateRequest);
+
+
     }
 
+    public TeamRecruitParticularResponse findTeamRecruitParticular(Long recruitId, Member member){
 
-    public void isAuthorOrThrow(TeamRecruit teamRecruit, Member member){
-        if(!teamRecruit.isAuthor(member)){
-            throw new TeamRecruitNotAuthorException();
+        TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdWithMemberOrThrow(recruitId);
+        List<TeamApply> teamApplies = teamApplyLowService.getTeamApplies(teamRecruit, member);
+
+        List<String> teamMemberUuids = List.of();
+        if(teamRecruit.isAuthor(member)){
+            teamMemberUuids = TeamApplyMemberResponse.of(teamApplies);
         }
+
+        return TeamRecruitParticularResponse.from(
+                teamRecruit,
+                teamApplies,
+                member,
+                teamMemberUuids
+        );
+    }
+
+    public void deleteByRecruitId(Long recruitId,Member member){
+        TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(recruitId);
+        teamRecruitLowService.deleteTeamRecruit(teamRecruit, member);
     }
 }

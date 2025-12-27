@@ -7,6 +7,7 @@ import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
+import site.codemonster.comon.domain.teamApply.service.TeamApplyLowService;
 import site.codemonster.comon.domain.teamApply.service.TeamApplyService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.repository.TeamMemberRepository;
@@ -33,7 +34,7 @@ public class TeamMemberService {
     private final ArticleImageRepository articleImageRepository;
     private final MemberService memberService;
     private final TeamRepository teamRepository;
-    private final TeamApplyService teamApplyService;
+    private final TeamApplyLowService teamApplyLowService;
     private final TeamRecruitLowService teamRecruitLowService;
 
     public List<TeamMember> getTeamMembersByMember(Member member){
@@ -210,7 +211,7 @@ public class TeamMemberService {
             saveTeamMember(team, member, false);
         }
 
-        teamApplyService.deleteTeamApplyAfterTeamMake(teamRecruit);
+        teamApplyLowService.deleteTeamApplyAfterTeamMake(teamRecruit);
     }
 
     @Transactional

@@ -11,6 +11,7 @@ import site.codemonster.comon.domain.team.dto.request.TeamCreateRequest;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.enums.Topic;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
+import site.codemonster.comon.domain.teamApply.service.TeamApplyLowService;
 import site.codemonster.comon.domain.teamApply.service.TeamApplyService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
@@ -39,9 +40,9 @@ public class TeamService {
     private final ArticleRepository articleRepository;
     private final ArticleImageRepository articleImageRepository;
     private final TeamRecruitLowService teamRecruitLowService;
-    private final TeamApplyService teamApplyService;
     private final TeamRecommendationHighService teamRecommendationHighService;
     private final RecommendationHistoryLowService recommendationHistoryLowService;
+    private final TeamApplyLowService teamApplyLowService;
 
     @Transactional
     public Team createTeam(TeamCreateRequest teamRequest, Member manager, List<Member> applyMembers, Long teamRecruitId) {
@@ -62,7 +63,7 @@ public class TeamService {
         if(teamRecruitId != null){
             TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(teamRecruitId);
             teamRecruit.addTeam(savedTeam);
-            teamApplyService.deleteTeamApplyAfterTeamMake(teamRecruit);
+            teamApplyLowService.deleteTeamApplyAfterTeamMake(teamRecruit);
         }
 
         return savedTeam;

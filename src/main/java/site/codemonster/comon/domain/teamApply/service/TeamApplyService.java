@@ -61,13 +61,4 @@ public class TeamApplyService {
 
         teamApply.updateTeamApplyBody(teamApplyBody);
     }
-
-    public List<TeamApply> getTeamApplies(TeamRecruit teamRecruit, Member member){
-        return teamApplyRepository.findTeamAppliesWithAuthorFirst(teamRecruit.getTeamRecruitId(), member.getId());
-    }
-
-    @Transactional
-    public void deleteTeamApplyAfterTeamMake(TeamRecruit teamRecruit){
-        teamApplyRepository.deleteTeamAppliesByTeamRecruitId(teamRecruit.getTeamRecruitId());
-    }
 }

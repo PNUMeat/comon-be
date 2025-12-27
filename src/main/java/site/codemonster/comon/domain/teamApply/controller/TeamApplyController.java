@@ -25,7 +25,6 @@ import static site.codemonster.comon.domain.teamApply.controller.TeamApplyRespon
 @RequestMapping("/api/v1/apply")
 @RequiredArgsConstructor
 public class TeamApplyController {
-    private final TeamRecruitService teamRecruitService;
     private final TeamMemberService teamMemberService;
     private final TeamApplyService teamApplyService;
     private final TeamRecruitLowService teamRecruitLowService;
