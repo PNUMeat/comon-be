@@ -23,7 +23,7 @@ import site.codemonster.comon.domain.recommendation.entity.TeamRecommendationDay
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamLowService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
-import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
+import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.domain.util.TestUtil;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationDuplicateException;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationProblemShortageException;
@@ -65,7 +65,7 @@ class TeamRecommendationServiceTest {
     private ArticleService articleService;
 
     @Mock
-    private TeamMemberService teamMemberService;
+    private TeamMemberLowService teamMemberLowService;
 
 
     @Test
@@ -195,7 +195,7 @@ class TeamRecommendationServiceTest {
         given(problemQueryService.findRecommendationProblem(any(),any()))
                 .willReturn(List.of(problem, problem, problem, problem)); // 추천 가능한 문제 4개
 
-        given(teamMemberService.getTeamManagerByTeamId(any()))
+        given(teamMemberLowService.getTeamManagerByTeamId(any()))
                 .willReturn(teamMember);
 
         given(articleService.createRecommendationArticle(any(),any(),any(), any()))
@@ -217,12 +217,12 @@ class TeamRecommendationServiceTest {
         verify(teamRecommendationLowService).findByTeam(any());
         verify(recommendationHistoryLowService, times(2)).findByTeamId(any());
         verify(problemQueryService).findRecommendationProblem(any(),any());
-        verify(teamMemberService).getTeamManagerByTeamId(any());
+        verify(teamMemberLowService).getTeamManagerByTeamId(any());
         verify(articleService).createRecommendationArticle(any(),any(),any(), any());
         verify(recommendationHistoryLowService).saveAll(any());
         verifyNoMoreInteractions(
                 teamLowService,recommendationHistoryLowService,
-                problemQueryService,teamMemberService,
+                problemQueryService,teamMemberLowService,
                 articleService);
     }
 
@@ -252,7 +252,7 @@ class TeamRecommendationServiceTest {
         given(problemQueryService.findRecommendationProblem(any(),any()))
                 .willReturn(List.of(problem, problem, problem, problem)); // 추천 가능한 문제 4개
 
-        given(teamMemberService.getTeamManagerByTeamId(any()))
+        given(teamMemberLowService.getTeamManagerByTeamId(any()))
                 .willReturn(teamMember);
 
         given(articleService.createRecommendationArticle(any(),any(),any(), any()))
@@ -273,12 +273,12 @@ class TeamRecommendationServiceTest {
         verify(teamRecommendationLowService).findByTeam(any());
         verify(recommendationHistoryLowService, times(2)).findByTeamId(any());
         verify(problemQueryService).findRecommendationProblem(any(),any());
-        verify(teamMemberService).getTeamManagerByTeamId(any());
+        verify(teamMemberLowService).getTeamManagerByTeamId(any());
         verify(articleService).createRecommendationArticle(any(),any(),any(), any());
         verify(recommendationHistoryLowService).saveAll(any());
         verifyNoMoreInteractions(
                 teamLowService,recommendationHistoryLowService,
-                problemQueryService,teamMemberService,
+                problemQueryService,teamMemberLowService,
                 articleService);
     }
 
@@ -303,7 +303,7 @@ class TeamRecommendationServiceTest {
         given(problemQueryService.findRecommendationProblem(any(),any()))
                 .willReturn(List.of(problem, problem,problem)); // 추천 가능한 문제 3개
 
-        given(teamMemberService.getTeamManagerByTeamId(any()))
+        given(teamMemberLowService.getTeamManagerByTeamId(any()))
                 .willReturn(teamMember);
 
         given(articleService.createRecommendationArticle(any(),any(),any(), any()))
@@ -315,12 +315,12 @@ class TeamRecommendationServiceTest {
         assertThat(title).isEqualTo("제목");
         verify(recommendationHistoryLowService).findByTeamId(any());
         verify(problemQueryService).findRecommendationProblem(any(),any());
-        verify(teamMemberService).getTeamManagerByTeamId(any());
+        verify(teamMemberLowService).getTeamManagerByTeamId(any());
         verify(articleService).createRecommendationArticle(any(),any(),any(), any());
         verify(recommendationHistoryLowService).saveAll(any());
         verifyNoMoreInteractions(
                 teamLowService,recommendationHistoryLowService,
-                problemQueryService,teamMemberService,
+                problemQueryService,teamMemberLowService,
                 articleService);
     }
 
@@ -352,7 +352,7 @@ class TeamRecommendationServiceTest {
         verify(problemQueryService).findRecommendationProblem(any(),any());
         verifyNoMoreInteractions(
                 teamLowService,recommendationHistoryLowService,
-                problemQueryService,teamMemberService,
+                problemQueryService,teamMemberLowService,
                 articleService);
     }
 

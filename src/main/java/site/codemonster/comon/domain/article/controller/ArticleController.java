@@ -39,14 +39,12 @@ import static site.codemonster.comon.domain.article.controller.ArticleResponseEn
 public class ArticleController {
 
     private final ArticleService articleService;
-    private final TeamMemberService teamMemberService;
 
     @PostMapping
     public ResponseEntity<?> createArticle(
             @AuthenticationPrincipal Member member,
             @RequestBody @Valid ArticleCreateRequest articleCreateRequest
     ) {
-        teamMemberService.getTeamMemberByTeamIdAndMemberId(articleCreateRequest.teamId(), member);
 
         Article savedArticle = articleService.articleCreate(member, articleCreateRequest);
 
@@ -58,7 +56,7 @@ public class ArticleController {
     }
 
     @GetMapping("/{teamId}/my-page")
-    public ResponseEntity<?> getMyArticlesAtTeam(
+    public ResponseEntity<ApiResponse<Page<ArticleResponse>>> getMyArticlesAtTeam(
             @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -66,9 +64,7 @@ public class ArticleController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        Page<Article> myArticles = articleService.getMyArticlesUsingPaging(member.getId(), teamId, pageable);
-
-        Page<ArticleResponse> responses = myArticles.map(ArticleResponse::new);
+        Page<ArticleResponse> responses = articleService.getMyArticleResponseUsingPaging(teamId, member, pageable);
 
         return ResponseEntity.status(GET_MY_PAGE_ARTICLE_PARTICULAR_TEAM.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -76,11 +72,8 @@ public class ArticleController {
     }
 
     @GetMapping("/team/{teamId}")
-    public ResponseEntity<?> getArticlesByTeam(@PathVariable Long teamId) {
-        List<Article> articles = articleService.getAllArticlesByTeam(teamId);
-        List<ArticleResponse> responses = articles.stream()
-                .map(ArticleResponse::new)
-                .toList();
+    public ResponseEntity<ApiResponse<List<ArticleResponse>>> getArticlesByTeam(@PathVariable Long teamId) {
+        List<ArticleResponse> responses = articleService.getAllArticleResponseByTeam(teamId);
 
         return ResponseEntity.status(GET_ARTICLE_PARTICULAR_TEAM.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -113,17 +106,14 @@ public class ArticleController {
     }
 
     @GetMapping("/{teamId}/by-date")
-    public ResponseEntity<?> getArticlesByTeamAndDate(
+    public ResponseEntity<ApiResponse<Page<ArticleParticularDateResponse>>> getArticlesByTeamAndDate(
         @PathVariable("teamId") Long teamId,
         @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
         @AuthenticationPrincipal Member member,
         @PageableDefault(size = 6, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        boolean isMyTeam = teamMemberService.existsByTeamIdAndMemberId(teamId, member);
-        Page<Article> articlePage = articleService.getArticlesByTeamAndDate(teamId, date, pageable);
 
-        Page<ArticleParticularDateResponse> responsePage = articlePage.map(article ->
-                ArticleParticularDateResponse.of(article, member, isMyTeam));
+        Page<ArticleParticularDateResponse> responsePage = articleService.getArticlesByTeamAndDate(teamId,date, member, pageable);
 
         return ResponseEntity.status(GET_ARTICLE_PARTICULAR_TEAM_AND_DATE.getStatusCode())
             .contentType(MediaType.APPLICATION_JSON)

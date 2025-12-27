@@ -18,12 +18,14 @@ public class TeamLowService {
 
     private final TeamRepository teamRepository;
 
+    @Transactional(readOnly = true)
     public Team findById(Long id) {
         return teamRepository.findById(id)
                 .orElseThrow(TeamNotFoundException::new);
     }
 
-    public Team getTeamByTeamId(Long teamId){
+    @Transactional(readOnly = true)
+    public Team getTeamByTeamId(Long teamId) {
         return teamRepository.findTeamByTeamIdWithTeamRecruit(teamId)
                 .orElseThrow(TeamNotFoundException::new);
     }
@@ -32,15 +34,18 @@ public class TeamLowService {
         return teamRepository.save(team);
     }
 
+    @Transactional(readOnly = true)
     public Page<Team> findAllWithPagination(Pageable pageable) {
         return teamRepository.findAllWithPagination(pageable);
     }
 
+    @Transactional(readOnly = true)
     public Page<Team> findByTeamNameContaining(String keyword, Pageable pageable) {
         return teamRepository.findByTeamNameContaining(keyword, pageable);
     }
 
-    public Team findTeamsByTeamIdWithTeamMembers(Long teamId){
+    @Transactional(readOnly = true)
+    public Team findTeamsByTeamIdWithTeamMembers(Long teamId) {
         return teamRepository.findTeamsByTeamIdWithTeamMembers(teamId)
                 .orElseThrow(TeamNotFoundException::new);
     }
@@ -49,12 +54,19 @@ public class TeamLowService {
         teamRepository.deleteById(teamId);
     }
 
+    @Transactional(readOnly = true)
     public List<Team> findByTeamManagerId(Long memberId) {
         return teamRepository.findByTeamManagerId(memberId);
     }
 
+    @Transactional(readOnly = true)
     public List<Team> findAll() {
         return teamRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Team findTeamByTeamIdWithTeamRecruit(Long teamId) {
+        return teamRepository.findTeamByTeamIdWithTeamRecruit(teamId).orElseThrow(TeamNotFoundException::new);
     }
 
 }

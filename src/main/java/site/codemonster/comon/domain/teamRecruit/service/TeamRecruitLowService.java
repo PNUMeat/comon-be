@@ -13,6 +13,8 @@ import site.codemonster.comon.domain.teamRecruit.repository.TeamRecruitRepositor
 import site.codemonster.comon.global.error.TeamRecruit.TeamRecruitNotAuthorException;
 import site.codemonster.comon.global.error.TeamRecruit.TeamRecruitNotFoundException;
 
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class TeamRecruitLowService {
         teamRecruitRepository.delete(teamRecruit);
     }
 
+    @Transactional(readOnly = true)
     public Page<TeamRecruit> getTeamRecruitmentsUsingPaging(Pageable pageable, String status){
         return switch (status) {
             case "open" -> teamRecruitRepository.findByIsRecruitingTrueWithPaging(pageable);
@@ -37,17 +40,18 @@ public class TeamRecruitLowService {
         };
     }
 
+    @Transactional(readOnly = true)
     public TeamRecruit findByTeamRecruitIdOrThrow(Long teamRecruitId){
         return teamRecruitRepository.findById(teamRecruitId)
                 .orElseThrow(TeamRecruitNotFoundException::new);
     }
 
+    @Transactional(readOnly = true)
     public TeamRecruit findByTeamRecruitIdWithMemberOrThrow(Long teamRecruitId){
         return teamRecruitRepository.findTeamRecruitByTeamRecruitIdWithRelation(teamRecruitId)
                 .orElseThrow(TeamRecruitNotFoundException::new);
     }
 
-    @Transactional
     public void deleteTeamRecruit(TeamRecruit teamRecruit, Member member){
         if(!teamRecruit.isAuthor(member)){
             throw new TeamRecruitNotAuthorException();
@@ -62,9 +66,19 @@ public class TeamRecruitLowService {
         return teamRecruitRepository.save(teamRecruit);
     }
 
+    @Transactional(readOnly = true)
     public void isAuthorOrThrow(TeamRecruit teamRecruit, Member member){
         if(!teamRecruit.isAuthor(member)){
             throw new TeamRecruitNotAuthorException();
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> findIdsByMemberId(Long memberId){
+        return teamRecruitRepository.findIdsByMemberId(memberId);
+    }
+
+    public void deleteByMemberId(Long memberId){
+        teamRecruitRepository.deleteByMemberId(memberId);
     }
 }

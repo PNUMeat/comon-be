@@ -32,7 +32,6 @@ import static site.codemonster.comon.global.response.ResponseMessageEnum.MEMBER_
 public class MemberController {
 
     private final MemberService memberService;
-    private final TeamMemberService teamMemberService;
     private final CookieUtils cookieUtils;
 
     @PostMapping
@@ -70,25 +69,18 @@ public class MemberController {
     @GetMapping("/profile/{uuid}") // uuid로 회원 프로필 조회
     public ResponseEntity<ApiResponse<MemberProfileResponse>> getMemberProfile(@PathVariable("uuid") String uuid){
 
-        Member findMember = memberService.getMemberByUUID(uuid);
+        MemberProfileResponse response = memberService.findProfileMemberInfoByUUID(uuid);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(new MemberProfileResponse(findMember)));
+                .body(ApiResponse.successResponseWithData(response));
     }
 
 
     @GetMapping("/info") // 내 정보 눌렀을 때 팀까지 조회도록하는 API
     public ResponseEntity<ApiResponse<MemberInfoResponse>> getMemberInfo(@AuthenticationPrincipal Member member) {
 
-        List<TeamMember> teamMemberAndTeamByMember = teamMemberService.getTeamMemberAndTeamByMember(member);
-
-        List<TeamAbstractResponse> teamAbstractResponses = teamMemberAndTeamByMember.stream()
-                .map(TeamMember::getTeam)
-                .map(TeamAbstractResponse::of)
-                .toList();
-
-        MemberInfoResponse memberInfoResponse = new MemberInfoResponse(member, teamAbstractResponses);
+        MemberInfoResponse memberInfoResponse = memberService.findMyMemberInfo(member);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)

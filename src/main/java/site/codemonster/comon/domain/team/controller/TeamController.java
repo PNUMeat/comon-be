@@ -40,31 +40,17 @@ import static site.codemonster.comon.global.response.ResponseMessageEnum.*;
 public class TeamController {
 
     private final TeamService teamService;
-    private final ArticleService articleService;
     private final TeamMemberService teamMemberService;
-    private final MemberService memberService;
-    private final TeamRecruitLowService teamRecruitLowService;
+    private final ArticleService articleService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<TeamCreateResponse>> createTeam(
             @RequestBody @Valid TeamCreateRequest teamRequest,
             @AuthenticationPrincipal Member manager
     ){
-        List<String> memberUuids = teamRequest.teamMemberUuids();
 
-        List<Member> applyMembers = new ArrayList<>();
-        if(memberUuids != null){
-            for (String memberUuid : memberUuids) {
-                applyMembers.add(memberService.getMemberByUUID(memberUuid));
-            }
-        }
 
-        if(teamRequest.teamRecruitId() != null){
-            TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(teamRequest.teamRecruitId());
-            teamRecruitLowService.isAuthorOrThrow(teamRecruit, manager);
-        }
-
-        Team createdTeam = teamService.createTeam(teamRequest, manager, applyMembers, teamRequest.teamRecruitId());
+        Team createdTeam = teamService.createTeam(teamRequest, manager);
 
         TeamCreateResponse teamCreateResponse = TeamCreateResponse.of(createdTeam);
 
@@ -132,12 +118,9 @@ public class TeamController {
     }
 
     @GetMapping("/my-page")
-    public ResponseEntity<ApiResponse<?>> getMyTeamAtMyPage(@AuthenticationPrincipal Member member){
-        List<TeamMember> teamMembers =  teamMemberService.getTeamMemberAndTeamByMember(member);
+    public ResponseEntity<ApiResponse<List<MyTeamMyPageResponse>>> getMyTeamAtMyPage(@AuthenticationPrincipal Member member){
 
-        List<MyTeamMyPageResponse> myTeamMyPageResponse = teamMembers.stream()
-                .map(MyTeamMyPageResponse::of)
-                .collect(Collectors.toList());
+        List<MyTeamMyPageResponse> myTeamMyPageResponse = teamService.findMyTeamAtMyPage(member);
 
         return ResponseEntity.status(MY_TEAM_DETAILS_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -316,14 +299,12 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}/members")
-    public ResponseEntity<ApiResponse<?>> getTeamMembers(
+    public ResponseEntity<ApiResponse<List<TeamMemberResponse>>> getTeamMembers(
             @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId
     ){
-        List<TeamMemberResponse> teamMemberResponses = teamMemberService.getTeamMembersByTeamId(teamId, member)
-                .stream()
-                .map(TeamMemberResponse::new)
-                .toList();
+
+        List<TeamMemberResponse> teamMemberResponses = teamService.findTeamMemberResponseByTeamId(teamId, member);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)

@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
+import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationDuplicateException;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationProblemShortageException;
@@ -44,7 +45,7 @@ public class TeamRecommendationHighService {
     private final RecommendationHistoryLowService recommendationHistoryLowService;
     private final ProblemLowService problemQueryService;
     private final ArticleService articleService;
-    private final TeamMemberService teamMemberService;
+    private final TeamMemberLowService teamMemberLowService;
 
     public TeamRecommendation saveRecommendationSettings(TeamRecommendationRequest teamRecommendationRequest) {
         Long teamId = teamRecommendationRequest.teamId();
@@ -206,7 +207,7 @@ public class TeamRecommendationHighService {
             throw new TeamRecommendationProblemShortageException();
 
         // 문제 추천할 TeamManager 아무나 한 명 조회
-        TeamMember findTeamManager = teamMemberService.getTeamManagerByTeamId(teamRecommendation.getTeam().getTeamId());
+        TeamMember findTeamManager = teamMemberLowService.getTeamManagerByTeamId(teamRecommendation.getTeam().getTeamId());
 
         // 추천 글 생성
         String articleTitle = articleService.createRecommendationArticle(

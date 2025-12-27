@@ -1,27 +1,23 @@
 package site.codemonster.comon.domain.teamRecruit.service;
 
-import org.springframework.data.domain.PageRequest;
 import site.codemonster.comon.domain.auth.entity.Member;
-import site.codemonster.comon.domain.auth.service.MemberService;
+import site.codemonster.comon.domain.auth.service.MemberLowService;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamLowService;
 import site.codemonster.comon.domain.teamApply.dto.response.TeamApplyMemberResponse;
 import site.codemonster.comon.domain.teamApply.entity.TeamApply;
-import site.codemonster.comon.domain.teamApply.repository.TeamApplyRepository;
 import site.codemonster.comon.domain.teamApply.service.TeamApplyLowService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
-import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
+import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.domain.teamRecruit.dto.request.TeamRecruitCreateRequest;
 import site.codemonster.comon.domain.teamRecruit.dto.request.TeamRecruitInviteRequest;
 import site.codemonster.comon.domain.teamRecruit.dto.request.TeamRecruitUpdateRequest;
 import site.codemonster.comon.domain.teamRecruit.dto.response.TeamRecruitGetResponse;
 import site.codemonster.comon.domain.teamRecruit.dto.response.TeamRecruitParticularResponse;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
-import site.codemonster.comon.domain.teamRecruit.repository.TeamRecruitImageRepository;
-import site.codemonster.comon.domain.teamRecruit.repository.TeamRecruitRepository;
+import site.codemonster.comon.global.error.Team.TeamAlreadyJoinException;
 import site.codemonster.comon.global.error.TeamRecruit.TeamRecruitDuplicateException;
 import site.codemonster.comon.global.error.TeamRecruit.TeamRecruitNotAuthorException;
-import site.codemonster.comon.global.error.TeamRecruit.TeamRecruitNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,23 +29,22 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class TeamRecruitService {
 
     private final TeamApplyLowService teamApplyLowService;
     private final TeamLowService teamLowService;
-    private final TeamMemberService teamMemberService;
-    private final MemberService memberService;
+    private final TeamMemberLowService teamMemberLowService;
+    private final MemberLowService memberLowService;
     private final TeamRecruitLowService teamRecruitLowService;
 
-    @Transactional
     public TeamRecruit createTeamRecruit(TeamRecruitCreateRequest teamRecruitCreateRequest, Member member){
 
         Team team = null;
         if (teamRecruitCreateRequest.teamId() != null){
             team = teamLowService.getTeamByTeamId(teamRecruitCreateRequest.teamId());
-            TeamMember teamMember = teamMemberService.getTeamMemberByTeamIdAndMemberId(team.getTeamId(), member);
-            teamMemberService.checkMemberIsTeamManagerOrThrow(teamMember);
+            TeamMember teamMember = teamMemberLowService.getTeamMemberByTeamIdAndMemberId(team.getTeamId(), member);
+            teamMemberLowService.checkMemberIsTeamManagerOrThrow(teamMember);
         }
 
         if (team != null && team.getTeamRecruit() != null) throw new TeamRecruitDuplicateException();
@@ -59,7 +54,6 @@ public class TeamRecruitService {
         return teamRecruitLowService.save(teamRecruit);
     }
 
-    @Transactional
     public void invite(TeamRecruitInviteRequest teamRecruitInviteRequest, Member member) {
         TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(teamRecruitInviteRequest.recruitId());
         teamRecruitLowService.isAuthorOrThrow(teamRecruit, member);
@@ -67,14 +61,22 @@ public class TeamRecruitService {
         List<String> memberUuids = teamRecruitInviteRequest.memberUuids();
         List<Member> applyMembers = new ArrayList<>();
         for (String memberUuid : memberUuids) {
-            applyMembers.add(memberService.getMemberByUUID(memberUuid));
+            applyMembers.add(memberLowService.getMemberByUUID(memberUuid));
         }
 
         Team team = teamLowService.getTeamByTeamId(teamRecruitInviteRequest.teamId());
-        teamMemberService.inviteTeamMember(team, applyMembers, teamRecruit);
+
+        for (Member applyMember : applyMembers) {
+            if(teamMemberLowService.existsByTeamIdAndMemberId(team.getTeamId(), applyMember)){
+                throw new TeamAlreadyJoinException();
+            }
+
+            teamMemberLowService.saveTeamMember(team, applyMember, false);
+        }
+
+        teamApplyLowService.deleteTeamApplyAfterTeamMake(teamRecruit);
     }
 
-    @Transactional
     public void changeTeamRecruitStatus(Long teamRecruitId, Member member){
         TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdWithMemberOrThrow(teamRecruitId);
 
@@ -97,7 +99,6 @@ public class TeamRecruitService {
     }
 
 
-    @Transactional
     public void updateTeamRecruit(Long teamRecruitId, Member member, TeamRecruitUpdateRequest teamRecruitUpdateRequest){
         TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdWithMemberOrThrow(teamRecruitId);
 
@@ -110,6 +111,7 @@ public class TeamRecruitService {
 
     }
 
+    @Transactional(readOnly = true)
     public TeamRecruitParticularResponse findTeamRecruitParticular(Long recruitId, Member member){
 
         TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdWithMemberOrThrow(recruitId);
