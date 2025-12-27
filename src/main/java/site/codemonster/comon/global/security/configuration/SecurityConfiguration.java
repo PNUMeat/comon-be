@@ -4,6 +4,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import site.codemonster.comon.domain.auth.repository.RefreshTokenRepository;
+import site.codemonster.comon.domain.auth.service.MemberLowService;
 import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.global.error.ErrorCode;
 import site.codemonster.comon.global.globalConfig.DomainProperties;
@@ -43,7 +44,7 @@ public class SecurityConfiguration {
 
     private final ResponseUtils responseUtils;
 
-    private final MemberService memberService;
+    private final MemberLowService memberLowService;
 
     private final DomainProperties domainProperties;
 
@@ -62,8 +63,8 @@ public class SecurityConfiguration {
                 .formLogin((auth) -> auth.disable())
                 .httpBasic((auth) -> auth.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .addFilterAfter(new JWTAccessFilter(jwtUtil, responseUtils, memberService, cookieUtils), OAuth2LoginAuthenticationFilter.class)
-                .addFilterAfter(new SseAccessFilter(jwtUtil, responseUtils, memberService, cookieUtils), JWTAccessFilter.class)
+                .addFilterAfter(new JWTAccessFilter(jwtUtil, responseUtils, memberLowService, cookieUtils), OAuth2LoginAuthenticationFilter.class)
+                .addFilterAfter(new SseAccessFilter(jwtUtil, responseUtils, memberLowService, cookieUtils), JWTAccessFilter.class)
                 .addFilterAfter(new JWTRefreshFilter(jwtUtil, refreshTokenRepository, responseUtils,cookieUtils), OAuth2LoginAuthenticationFilter.class)
                 .oauth2Login(
                     (oauth2) -> oauth2

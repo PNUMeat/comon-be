@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
+import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationDuplicateException;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationProblemShortageException;
@@ -44,7 +45,7 @@ public class TeamRecommendationHighService {
     private final RecommendationHistoryLowService recommendationHistoryLowService;
     private final ProblemLowService problemQueryService;
     private final ArticleService articleService;
-    private final TeamMemberService teamMemberService;
+    private final TeamMemberLowService teamMemberLowService;
 
     public TeamRecommendation saveRecommendationSettings(TeamRecommendationRequest teamRecommendationRequest) {
         Long teamId = teamRecommendationRequest.teamId();
@@ -66,10 +67,8 @@ public class TeamRecommendationHighService {
     // 기존 팀 추천 조회
     public TeamRecommendationResponse getRecommendationSettings(Long teamId) {
 
-        // 추천할 팀을 TeamRecommendation과 함께 fetch join해서 조회
-        Team team = teamLowService.findByTeamIdWithTeamRecommendation(teamId);
-
-        TeamRecommendation teamRecommendation = team.getTeamRecommendation();
+        Team team = teamLowService.findById(teamId);
+        TeamRecommendation teamRecommendation = teamRecommendationLowService.findByTeam(team);
 
         Set<DayOfWeek> recommendDays = teamRecommendation.getTeamRecommendationDays().stream().
                 map(TeamRecommendationDay::getDayOfWeek)
@@ -86,10 +85,14 @@ public class TeamRecommendationHighService {
     // 팀 추천 삭제
     public void deleteTeamRecommendation(Long teamId) {
 
-        Team team = teamLowService.findByTeamIdWithTeamRecommendation(teamId);
+        Team team = teamLowService.findById(teamId);
 
-        platformRecommendationLowService.deleteByTeamRecommendationId(team.getTeamRecommendation().getId());
-        teamRecommendationDayLowService.deleteByTeamRecommendationId(team.getTeamRecommendation().getId());
+        if (!teamRecommendationLowService.isExistByTeam(team)) return;
+
+        TeamRecommendation teamRecommendation = teamRecommendationLowService.findByTeam(team);
+
+        platformRecommendationLowService.deleteByTeamRecommendationId(teamRecommendation.getId());
+        teamRecommendationDayLowService.deleteByTeamRecommendationId(teamRecommendation.getId());
         teamRecommendationLowService.deleteByTeamId(team.getTeamId());
     }
 
@@ -97,7 +100,8 @@ public class TeamRecommendationHighService {
     public ManualRecommendationResponse executeManualRecommendation(ManualRecommendationRequest request) {
 
         // 추천할 팀을 TeamRecommendation과 함께 fetch join해서 조회
-        Team team = teamLowService.findByTeamIdWithTeamRecommendation(request.teamId());
+        Team team = teamLowService.findById(request.teamId());
+        TeamRecommendation teamRecommendation = teamRecommendationLowService.findByTeam(team);
 
         // 이미 추천되었던 날짜 조회
         List<LocalDate> historyDates = recommendationHistoryLowService.findByTeamId(team.getTeamId())
@@ -119,7 +123,7 @@ public class TeamRecommendationHighService {
         // 추천 실행
         for (LocalDate selectedDate : selectedDates) {
             try {
-                createdArticleTitles.add(executeRecommendation(team.getTeamRecommendation(), selectedDate));
+                createdArticleTitles.add(executeRecommendation(teamRecommendation, selectedDate));
                 successCount++;
             } catch (Exception e) {
                 log.warn("추천 실패 - 사유: {}", e.getMessage());
@@ -206,7 +210,7 @@ public class TeamRecommendationHighService {
             throw new TeamRecommendationProblemShortageException();
 
         // 문제 추천할 TeamManager 아무나 한 명 조회
-        TeamMember findTeamManager = teamMemberService.getTeamManagerByTeamId(teamRecommendation.getTeam().getTeamId());
+        TeamMember findTeamManager = teamMemberLowService.getTeamManagerByTeamId(teamRecommendation.getTeam().getTeamId());
 
         // 추천 글 생성
         String articleTitle = articleService.createRecommendationArticle(
@@ -216,7 +220,6 @@ public class TeamRecommendationHighService {
         List<RecommendationHistory> recommendationHistories = recommendationProblems.stream()
                 .map(problem -> new RecommendationHistory(teamRecommendation.getTeam(), problem, selectedDate))
                 .toList();
-
 
         recommendationHistoryLowService.saveAll(recommendationHistories);
 

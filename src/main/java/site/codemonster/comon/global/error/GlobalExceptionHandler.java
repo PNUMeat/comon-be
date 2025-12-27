@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.format.DateTimeParseException;
+import java.util.Map;
 
 import static site.codemonster.comon.global.error.ErrorCode.DATETIME_PARSE_ERROR;
 
@@ -21,7 +22,7 @@ public class GlobalExceptionHandler {
 
   @ResponseBody
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<?>> invalidRequestHandler(MethodArgumentNotValidException e) {
+  public ResponseEntity<ApiResponse<Map<String,String>>> invalidRequestHandler(MethodArgumentNotValidException e) {
     ErrorValidationResult errorValidationResult = new ErrorValidationResult();
 
     for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
@@ -44,7 +45,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(ComonException.class)
-  public ResponseEntity<ApiResponse<?>> comonExceptionHandler(ComonException e) {
+  public ResponseEntity<ApiResponse<Void>> comonExceptionHandler(ComonException e) {
     ErrorResult errorResult = new ErrorResult(e.getStatusCode(), e.getMessage());
 
     return ResponseEntity.status(HttpStatus.valueOf(e.getStatusCode()))

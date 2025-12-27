@@ -21,7 +21,7 @@ public class TeamRecruit extends TimeStamp {
     private Long teamRecruitId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id")
+    @JoinColumn(name = "team_id", unique = true)
     private Team team;
 
     @ManyToOne(fetch = FetchType.LAZY)

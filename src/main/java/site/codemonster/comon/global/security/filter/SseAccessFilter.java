@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import site.codemonster.comon.domain.auth.constant.AuthConstant;
 import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.auth.service.MemberLowService;
 import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.global.error.ErrorCode;
 import site.codemonster.comon.global.error.Member.MemberNotFoundException;
@@ -31,7 +32,7 @@ public class SseAccessFilter extends OncePerRequestFilter {
 
     private final JWTUtils jwtUtils;
     private final ResponseUtils responseUtils;
-    private final MemberService memberService;
+    private final MemberLowService memberLowService;
     private final CookieUtils cookieUtils;
 
     @Override
@@ -72,7 +73,7 @@ public class SseAccessFilter extends OncePerRequestFilter {
         Member member = null;
 
         try {
-            member = memberService.getMemberByUUID(jwtInformation.uuid());
+            member = memberLowService.getMemberByUUID(jwtInformation.uuid());
         } catch (MemberNotFoundException e) {
             responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.NOT_COMPLETE_SIGN_UP_ERROR, response);
             return;

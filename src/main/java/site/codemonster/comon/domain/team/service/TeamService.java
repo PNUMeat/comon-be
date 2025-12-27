@@ -2,17 +2,23 @@ package site.codemonster.comon.domain.team.service;
 
 import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
+import site.codemonster.comon.domain.article.service.ArticleImageLowService;
+import site.codemonster.comon.domain.article.service.ArticleLowService;
 import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.auth.service.MemberLowService;
+import site.codemonster.comon.domain.recommendation.service.RecommendationHistoryLowService;
+import site.codemonster.comon.domain.recommendation.service.TeamRecommendationHighService;
 import site.codemonster.comon.domain.team.dto.request.TeamInfoEditRequest;
-import site.codemonster.comon.domain.team.dto.request.TeamRequest;
+import site.codemonster.comon.domain.team.dto.request.TeamCreateRequest;
+import site.codemonster.comon.domain.team.dto.response.MyTeamMyPageResponse;
+import site.codemonster.comon.domain.team.dto.response.TeamMemberResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.enums.Topic;
-import site.codemonster.comon.domain.team.repository.TeamRepository;
-import site.codemonster.comon.domain.teamApply.service.TeamApplyService;
+import site.codemonster.comon.domain.teamApply.service.TeamApplyLowService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
-import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
+import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
-import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
+import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitLowService;
 import site.codemonster.comon.global.error.Team.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,71 +26,84 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class TeamService {
 
-    private final TeamRepository teamRepository;
-    private final TeamMemberService teamMemberService;
-    private final ArticleRepository articleRepository;
-    private final ArticleImageRepository articleImageRepository;
-    private final TeamRecruitService teamRecruitService;
-    private final TeamApplyService teamApplyService;
+    private final TeamLowService teamLowService;
+    private final MemberLowService memberLowService;
+    private final TeamMemberLowService teamMemberLowService;
+    private final ArticleLowService articleLowService;
+    private final ArticleImageLowService articleImageLowService;
+    private final TeamRecruitLowService teamRecruitLowService;
+    private final TeamRecommendationHighService teamRecommendationHighService;
+    private final RecommendationHistoryLowService recommendationHistoryLowService;
+    private final TeamApplyLowService teamApplyLowService;
 
-    @Transactional
-    public Team createTeam(TeamRequest teamRequest, Member manager, List<Member> applyMembers, Long teamRecruitId) {
-        Team team = Team.builder()
-                .teamName(teamRequest.teamName())
-                .teamExplain(teamRequest.teamExplain())
-                .teamTopic(Topic.fromName(teamRequest.topic()))
-                .maxParticipant(teamRequest.memberLimit())
-                .teamPassword(teamRequest.password())
-                .build();
+    public Team createTeam(TeamCreateRequest teamRequest, Member manager) {
 
-        Team savedTeam = teamRepository.save(team);
+        List<String> memberUuids = teamRequest.teamMemberUuids();
+
+        List<Member> applyMembers = new ArrayList<>();
+        if(memberUuids != null){
+            for (String memberUuid : memberUuids) {
+                applyMembers.add(memberLowService.getMemberByUUID(memberUuid));
+            }
+        }
+
+        if(teamRequest.teamRecruitId() != null){
+            TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(teamRequest.teamRecruitId());
+            teamRecruitLowService.isAuthorOrThrow(teamRecruit, manager);
+        }
+
+        Team team = new Team(teamRequest.teamName(), Topic.fromName(teamRequest.topic()), teamRequest.teamExplain(), teamRequest.memberLimit(), teamRequest.password());
+
+        Team savedTeam = teamLowService.save(team);
 
 		if (teamRequest.teamIconUrl() != null){ // null이라면 기본 이미지!
 			team.updateTeamIconUrl(S3ImageUtil.convertImageUrlToObjectKey(teamRequest.teamIconUrl()));
 		}
 
-        teamMemberService.saveTeamMember(savedTeam, manager, true);
+        teamMemberLowService.saveTeamMember(savedTeam, manager, true);
         for (Member applyMember : applyMembers) {
-            teamMemberService.saveTeamMember(savedTeam, applyMember, false);
+            teamMemberLowService.saveTeamMember(savedTeam, applyMember, false);
         }
 
-        if(teamRecruitId != null){
-            TeamRecruit teamRecruit = teamRecruitService.findByTeamRecruitIdOrThrow(teamRecruitId);
+        if(teamRequest.teamRecruitId() != null){
+            TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(teamRequest.teamRecruitId());
             teamRecruit.addTeam(savedTeam);
-            teamApplyService.deleteTeamApplyAfterTeamMake(teamRecruit);
+            teamApplyLowService.deleteTeamApplyAfterTeamMake(teamRecruit);
         }
 
         return savedTeam;
     }
 
+    @Transactional(readOnly = true)
     public Page<Team> getAllTeamsUsingPaging(Pageable pageable){
-        return teamRepository.findAllWithPagination(pageable);
+        return teamLowService.findAllWithPagination(pageable);
     }
 
+    @Transactional(readOnly = true)
     public Page<Team> getAllTeamsByKeywordUsingPaging(Pageable pageable, String keyword){
-        return teamRepository.findByTeamNameContaining(keyword, pageable);
+        return teamLowService.findByTeamNameContaining(keyword, pageable);
     }
 
+    @Transactional(readOnly = true)
     public List<Team> getMyTeams(Member member){
-        List<TeamMember> teamMembers = teamMemberService.getTeamMembersByMember(member);
+        List<TeamMember> teamMembers = teamMemberLowService.getTeamMembersByMember(member);
         return teamMembers.stream()
                 .map(TeamMember::getTeam)
                 .collect(Collectors.toList());
     }
 
-    @Transactional
     public TeamMember joinTeam(Member member, String password, Long teamId){
-        Team team = teamRepository.findTeamsByTeamIdWithTeamMembers(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+        Team team = teamLowService.findTeamsByTeamIdWithTeamMembers(teamId);
 
         validatePassword(password, team);
         validateTeamMembership(team, member);
@@ -93,14 +112,13 @@ public class TeamService {
             throw new ExceedMaxMembersException();
         }
 
-        return teamMemberService.saveTeamMember(team, member, false);
+        return teamMemberLowService.saveTeamMember(team, member, false);
     }
 
-    @Transactional
     public Team updateTeamAnnouncement(Member member, String teamAnnouncement, Long teamId){
-        Team team = getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
 
-        if(!teamMemberService.checkMemberIsTeamManager(teamId, member)) {
+        if(!teamMemberLowService.checkMemberIsTeamManager(teamId, member)) {
             throw new TeamManagerInvalidException();
         }
 
@@ -109,51 +127,43 @@ public class TeamService {
         return team;
     }
 
-    @Transactional
-    public void deleteTeam(Long teamId) {
-        getTeamByTeamId(teamId);
+    public void deleteTeamByOwner(Member member, Long teamId) {
 
-        articleImageRepository.deleteByTeamTeamId(teamId);
+        Team team = teamLowService.findById(teamId);
 
-        articleRepository.deleteByTeamTeamId(teamId);
-
-        teamMemberService.deleteTeamMemberByTeamId(teamId);
-
-        teamRepository.deleteById(teamId);
-    }
-
-    @Transactional
-    public void deleteTeamByOwner(Member member, Team team) {
-        if(!teamMemberService.checkMemberIsTeamManager(team.getTeamId(), member)){
+        if(!teamMemberLowService.checkMemberIsTeamManager(team.getTeamId(), member)){
             throw new TeamMemberInvalidException();
         }
 
         TeamRecruit teamRecruit = team.getTeamRecruit();
         if(teamRecruit != null){
-            teamRecruitService.forceDeleteTeamRecruit(teamRecruit);
+            teamRecruitLowService.forceDeleteTeamRecruit(teamRecruit);
         }
 
-        articleImageRepository.deleteByTeamTeamId(team.getTeamId());
+        recommendationHistoryLowService.deleteByTeamId(team.getTeamId());
 
-        articleRepository.deleteByTeamTeamId(team.getTeamId());
+        teamRecommendationHighService.deleteTeamRecommendation(team.getTeamId());
 
-        teamMemberService.deleteTeamMemberByTeamId(team.getTeamId());
+        articleImageLowService.deleteByTeamTeamId(team.getTeamId());
 
-        teamRepository.deleteById(team.getTeamId());
+        articleLowService.deleteByTeamTeamId(team.getTeamId());
+
+        teamMemberLowService.deleteTeamMemberByTeamId(team.getTeamId());
+
+        teamLowService.deleteById(team.getTeamId());
+
     }
 
     @Transactional(readOnly = true)
     public List<Team> getTeamsManagedByMember(Long memberId) {
 
-        return teamRepository.findByTeamManagerId(memberId);
+        return teamLowService.findByTeamManagerId(memberId);
     }
 
-    @Transactional
     public Team updateTeamInfo(TeamInfoEditRequest teamInfoEditRequest, Member member, Long teamId){
-        Team team = teamRepository.findTeamsByTeamIdWithTeamMembers(teamId)
-                .orElseThrow(TeamNotFoundException::new);
+        Team team = teamLowService.findTeamsByTeamIdWithTeamMembers(teamId);
 
-        if(!teamMemberService.checkMemberIsTeamManager(teamId, member)){
+        if(!teamMemberLowService.checkMemberIsTeamManager(teamId, member)){
             throw new TeamManagerInvalidException();
         }
 
@@ -170,20 +180,17 @@ public class TeamService {
         return team;
     }
 
+    @Transactional(readOnly = true)
     public Team getTeamInfo(Long teamId, Member member){
-        Team team = getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
 
-        if(!teamMemberService.checkMemberIsTeamManager(teamId, member)){
+        if(!teamMemberLowService.checkMemberIsTeamManager(teamId, member)){
             throw new TeamManagerInvalidException();
         }
 
         return team;
     }
 
-    public Team getTeamByTeamId(Long teamId){
-        return teamRepository.findTeamByTeamIdWithTeamRecruit(teamId)
-                .orElseThrow(TeamNotFoundException::new);
-    }
 
     private void validatePassword(String password, Team team) {
         if (!password.equals(team.getTeamPassword())) {
@@ -192,12 +199,31 @@ public class TeamService {
     }
 
     private void validateTeamMembership(Team team, Member member) {
-        if (teamMemberService.existsByTeamIdAndMemberId(team.getTeamId(), member)) {
+        if (teamMemberLowService.existsByTeamIdAndMemberId(team.getTeamId(), member)) {
             throw new TeamAlreadyJoinException();
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Team> getAllTeams() {
-        return teamRepository.findAll();
+        return teamLowService.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyTeamMyPageResponse> findMyTeamAtMyPage(Member member) {
+        List<TeamMember> teamMembers =  teamMemberLowService.getTeamMemberAndTeamByMember(member);
+
+        return teamMembers.stream()
+                .map(MyTeamMyPageResponse::of)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TeamMemberResponse> findTeamMemberResponseByTeamId(Long teamId, Member member) {
+
+        return teamMemberLowService.getTeamMembersByTeamId(teamId, member)
+                .stream()
+                .map(TeamMemberResponse::new)
+                .toList();
     }
 }

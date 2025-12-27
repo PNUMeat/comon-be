@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.teamRecruit.repository;
 
+import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -60,4 +61,6 @@ public interface TeamRecruitRepository extends JpaRepository<TeamRecruit, Long> 
     @Query("DELETE FROM TeamRecruit tr " +
             "WHERE tr.member.id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
+
+    Optional<TeamRecruit> findByTeam(Team team);
 }

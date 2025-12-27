@@ -9,8 +9,6 @@ import site.codemonster.comon.domain.article.entity.ArticleFeedback;
 import site.codemonster.comon.domain.article.repository.ArticleFeedbackRepository;
 import site.codemonster.comon.global.error.ArticleFeedback.ArticleFeedbackNotFoundException;
 
-import java.util.Optional;
-
 @Transactional
 @Service
 @RequiredArgsConstructor
