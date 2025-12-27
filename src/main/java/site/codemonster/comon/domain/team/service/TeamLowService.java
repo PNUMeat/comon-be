@@ -19,14 +19,4 @@ public class TeamLowService {
         return teamRepository.findById(id)
                 .orElseThrow(TeamNotFoundException::new);
     }
-
-    public Team findByTeamIdWithTeamRecommendation(Long teamId) {
-        Team team = teamRepository.findByTeamIdWithTeamRecommendation(teamId)
-                .orElseThrow(TeamNotFoundException::new);
-
-        if (team.getTeamRecommendation() == null)
-            throw new TeamRecommendationNotFoundException();
-
-        return team;
-    }
 }

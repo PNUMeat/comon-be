@@ -66,10 +66,8 @@ public class TeamRecommendationHighService {
     // 기존 팀 추천 조회
     public TeamRecommendationResponse getRecommendationSettings(Long teamId) {
 
-        // 추천할 팀을 TeamRecommendation과 함께 fetch join해서 조회
-        Team team = teamLowService.findByTeamIdWithTeamRecommendation(teamId);
-
-        TeamRecommendation teamRecommendation = team.getTeamRecommendation();
+        Team team = teamLowService.findById(teamId);
+        TeamRecommendation teamRecommendation = teamRecommendationLowService.findByTeam(team);
 
         Set<DayOfWeek> recommendDays = teamRecommendation.getTeamRecommendationDays().stream().
                 map(TeamRecommendationDay::getDayOfWeek)
@@ -86,10 +84,11 @@ public class TeamRecommendationHighService {
     // 팀 추천 삭제
     public void deleteTeamRecommendation(Long teamId) {
 
-        Team team = teamLowService.findByTeamIdWithTeamRecommendation(teamId);
+        Team team = teamLowService.findById(teamId);
+        TeamRecommendation teamRecommendation = teamRecommendationLowService.findByTeam(team);
 
-        platformRecommendationLowService.deleteByTeamRecommendationId(team.getTeamRecommendation().getId());
-        teamRecommendationDayLowService.deleteByTeamRecommendationId(team.getTeamRecommendation().getId());
+        platformRecommendationLowService.deleteByTeamRecommendationId(teamRecommendation.getId());
+        teamRecommendationDayLowService.deleteByTeamRecommendationId(teamRecommendation.getId());
         teamRecommendationLowService.deleteByTeamId(team.getTeamId());
     }
 
@@ -97,7 +96,8 @@ public class TeamRecommendationHighService {
     public ManualRecommendationResponse executeManualRecommendation(ManualRecommendationRequest request) {
 
         // 추천할 팀을 TeamRecommendation과 함께 fetch join해서 조회
-        Team team = teamLowService.findByTeamIdWithTeamRecommendation(request.teamId());
+        Team team = teamLowService.findById(request.teamId());
+        TeamRecommendation teamRecommendation = teamRecommendationLowService.findByTeam(team);
 
         // 이미 추천되었던 날짜 조회
         List<LocalDate> historyDates = recommendationHistoryLowService.findByTeamId(team.getTeamId())
@@ -119,7 +119,7 @@ public class TeamRecommendationHighService {
         // 추천 실행
         for (LocalDate selectedDate : selectedDates) {
             try {
-                createdArticleTitles.add(executeRecommendation(team.getTeamRecommendation(), selectedDate));
+                createdArticleTitles.add(executeRecommendation(teamRecommendation, selectedDate));
                 successCount++;
             } catch (Exception e) {
                 log.warn("추천 실패 - 사유: {}", e.getMessage());
