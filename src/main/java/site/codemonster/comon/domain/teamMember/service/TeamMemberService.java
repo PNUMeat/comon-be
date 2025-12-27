@@ -11,6 +11,7 @@ import site.codemonster.comon.domain.teamApply.service.TeamApplyService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.repository.TeamMemberRepository;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
+import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitLowService;
 import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.Team.*;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +30,11 @@ public class TeamMemberService {
 
     private final TeamMemberRepository teamMemberRepository;
     private final ArticleRepository articleRepository;
-    private final TeamRecruitService teamRecruitService;
     private final ArticleImageRepository articleImageRepository;
     private final MemberService memberService;
     private final TeamRepository teamRepository;
     private final TeamApplyService teamApplyService;
+    private final TeamRecruitLowService teamRecruitLowService;
 
     public List<TeamMember> getTeamMembersByMember(Member member){
         return teamMemberRepository.findByMemberIdOrderByTeamInfoIdDesc(member.getId());
@@ -195,7 +196,7 @@ public class TeamMemberService {
 
         TeamRecruit teamRecruit = team.getTeamRecruit();
         if(teamRecruit != null && team.getTeamRecruit().isTeamRecruitOwner(member)){
-            teamRecruitService.forceDeleteTeamRecruit(teamRecruit);
+            teamRecruitLowService.forceDeleteTeamRecruit(teamRecruit);
         }
     }
 

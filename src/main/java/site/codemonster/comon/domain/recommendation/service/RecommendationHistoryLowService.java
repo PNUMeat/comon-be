@@ -30,4 +30,8 @@ public class RecommendationHistoryLowService {
     public void saveAll(List<RecommendationHistory> recommendationHistorys) {
         recommendationHistoryRepository.saveAll(recommendationHistorys);
     }
+
+    public void deleteByTeamId(Long teamId) {
+        recommendationHistoryRepository.deleteByTeamTeamId(teamId);
+    }
 }

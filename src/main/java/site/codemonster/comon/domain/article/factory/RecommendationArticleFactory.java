@@ -34,18 +34,25 @@ public class RecommendationArticleFactory {
                 continue;
             }
 
-            // 플랫폼 제목
-            body.append("<span style=\"font-size: 18px;\">✅ ")
+            body.append("<span style=\"font-size: 18px; font-weight: bold;\">")
                     .append(platform.getName())
-                    .append("</span>");
+                    .append("</span><br>");
 
-            // 각 문제 링크
             for (Problem problem : platformProblems) {
-                body.append("<a href=\"").append(problem.getUrl())
+                body.append("<span style=\"margin-left: 12px;\">")
+                        .append("[")
+                        .append(problem.getProblemStep())
+                        .append("] ")
+                        .append("</span>");
+
+                body.append("<a href=\"")
+                        .append(problem.getUrl())
                         .append("\" target=\"_blank\" rel=\"noreferrer\" class=\"editor-link\">")
-                        .append("<span style=\"\">").append(problem.getTitle())
-                        .append("</span></a><span style=\"\"></span>");
+                        .append(problem.getTitle())
+                        .append("</a><br>");
             }
+
+            body.append("<br>");
         }
 
         body.append("</p>");

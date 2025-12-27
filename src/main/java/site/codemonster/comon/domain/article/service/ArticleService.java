@@ -14,6 +14,7 @@ import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.team.dto.response.MyTeamResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamPageResponse;
 import site.codemonster.comon.domain.team.entity.Team;
+import site.codemonster.comon.domain.team.service.TeamLowService;
 import site.codemonster.comon.domain.team.service.TeamService;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.Team.TeamManagerInvalidException;
@@ -35,14 +36,14 @@ import static site.codemonster.comon.domain.article.enums.ArticleCategory.getSub
 @Transactional(readOnly = true)
 public class ArticleService {
 
-    private final TeamService teamService;
     private final TeamMemberService teamMemberService;
     private final ArticleRepository articleRepository;
     private final ArticleImageRepository articleImageRepository;
+    private final TeamLowService teamLowService;
 
     @Transactional
     public Article articleCreate(Member member, ArticleCreateRequest articleCreateRequest) {
-        Team team = teamService.getTeamByTeamId(articleCreateRequest.teamId());
+        Team team = teamLowService.getTeamByTeamId(articleCreateRequest.teamId());
 
         Article article = new Article(
                 team,
@@ -102,7 +103,7 @@ public class ArticleService {
             Long teamId,
             TeamSubjectRequest teamSubjectRequest
     ){
-        Team team = teamService.getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
         validateTeamManager(member, team);
 
         LocalDate selectedDate = LocalDate.parse(teamSubjectRequest.selectedDate());
@@ -114,14 +115,14 @@ public class ArticleService {
     }
 
     public Article getTeamSubjectByDate(Long teamId, LocalDate date){
-        teamService.getTeamByTeamId(teamId);
+        teamLowService.getTeamByTeamId(teamId);
         return articleRepository.findTeamSubjectByTeamAndSelectedDate(teamId, date, getSubjectCategories())
                 .orElse(null);
     }
 
     @Transactional
     public void deleteTeamSubjectByArticleId(Member member, Long teamId, Long articleId){
-        Team team = teamService.getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
         validateTeamManager(member, team);
 
         if(!articleRepository.existsById(articleId)){
@@ -133,7 +134,7 @@ public class ArticleService {
 
     @Transactional
     public Article updateTeamSubjectByArticleId(Member member, Long teamId, Long articleId, TeamSubjectUpdateRequest teamSubjectUpdateRequest){
-        Team team = teamService.getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
         validateTeamManager(member, team);
 
         Article article = articleRepository.findById(articleId)
@@ -145,7 +146,7 @@ public class ArticleService {
     }
 
     public TeamPageResponse getSubjectArticlesUsingCalender(Member member, Long teamId, CalenderSubjectRequest calenderSubjectRequest){
-        Team team = teamService.getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
 
         List<Article> subjectArticles = articleRepository.findSubjectArticlesByTeamIdAndYearAndMonth(teamId, calenderSubjectRequest.year(), calenderSubjectRequest.month(), getSubjectCategories());
         boolean isTeamManager = teamMemberService.checkMemberIsTeamManager(teamId, member);

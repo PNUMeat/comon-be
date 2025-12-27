@@ -19,6 +19,7 @@ import site.codemonster.comon.domain.teamRecruit.dto.response.TeamRecruitGetResp
 import site.codemonster.comon.domain.teamRecruit.dto.response.TeamRecruitParticularResponse;
 import site.codemonster.comon.domain.teamRecruit.dto.response.TeamRecruitUpdateResponse;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
+import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitLowService;
 import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -44,24 +45,16 @@ import static site.codemonster.comon.domain.teamRecruit.controller.TeamRecruitRe
 public class TeamRecruitController {
 
     private final TeamRecruitService teamRecruitService;
-    private final TeamService teamService;
-    private final TeamMemberService teamMemberService;
     private final TeamApplyService teamApplyService;
-    private final MemberService memberService;
+    private final TeamRecruitLowService teamRecruitLowService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<TeamRecruitCreateResponse>> createTeamRecruitment(
             @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamRecruitCreateRequest teamRecruitCreateRequest
     ) {
-        Team team = null;
-        if (teamRecruitCreateRequest.teamId() != null){
-            team = teamService.getTeamByTeamId(teamRecruitCreateRequest.teamId());
-            TeamMember teamMember = teamMemberService.getTeamMemberByTeamIdAndMemberId(team.getTeamId(), member);
-            teamMemberService.checkMemberIsTeamManagerOrThrow(teamMember);
-        }
 
-        TeamRecruit teamRecruit = teamRecruitService.createTeamRecruit(teamRecruitCreateRequest, Optional.ofNullable(team), member);
+        TeamRecruit teamRecruit = teamRecruitService.createTeamRecruit(teamRecruitCreateRequest, member);
 
         TeamRecruitCreateResponse teamRecruitCreateResponse = TeamRecruitCreateResponse.of(teamRecruit);
 
@@ -78,7 +71,7 @@ public class TeamRecruitController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        Page<TeamRecruit> teamRecruitmentsUsingPaging = teamRecruitService.getTeamRecruitmentsUsingPaging(pageable, status);
+        Page<TeamRecruit> teamRecruitmentsUsingPaging = teamRecruitLowService.getTeamRecruitmentsUsingPaging(pageable, status);
 
         Page<TeamRecruitGetResponse> responsePage = teamRecruitmentsUsingPaging.map(TeamRecruitGetResponse::of);
 
@@ -92,7 +85,7 @@ public class TeamRecruitController {
             @PathVariable("recruitId") Long recruitId,
             @AuthenticationPrincipal Member member
     ){
-        TeamRecruit teamRecruit = teamRecruitService.findByTeamRecruitIdWithMemberOrThrow(recruitId);
+        TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdWithMemberOrThrow(recruitId);
         List<TeamApply> teamApplies = teamApplyService.getTeamApplies(teamRecruit, member);
 
         List<String> teamMemberUuids = List.of();
@@ -144,8 +137,8 @@ public class TeamRecruitController {
             @PathVariable("recruitId") Long recruitId,
             @AuthenticationPrincipal Member member
     ){
-        TeamRecruit teamRecruit = teamRecruitService.findByTeamRecruitIdOrThrow(recruitId);
-        teamRecruitService.deleteTeamRecruit(teamRecruit, member);
+        TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(recruitId);
+        teamRecruitLowService.deleteTeamRecruit(teamRecruit, member);
 
         return ResponseEntity.status(TEAM_RECRUIT_DELETE.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -157,17 +150,8 @@ public class TeamRecruitController {
             @RequestBody @Valid TeamRecruitInviteRequest teamRecruitInviteRequest,
             @AuthenticationPrincipal Member member
     ){
-        TeamRecruit teamRecruit = teamRecruitService.findByTeamRecruitIdOrThrow(teamRecruitInviteRequest.recruitId());
-        teamRecruitService.isAuthorOrThrow(teamRecruit, member);
 
-        List<String> memberUuids = teamRecruitInviteRequest.memberUuids();
-        List<Member> applyMembers = new ArrayList<>();
-        for (String memberUuid : memberUuids) {
-            applyMembers.add(memberService.getMemberByUUID(memberUuid));
-        }
-
-        Team team = teamService.getTeamByTeamId(teamRecruitInviteRequest.teamId());
-        teamMemberService.inviteTeamMember(team, applyMembers, teamRecruit);
+        teamRecruitService.invite(teamRecruitInviteRequest, member);
 
         return ResponseEntity.status(TEAM_RECRUIT_INVITE.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)

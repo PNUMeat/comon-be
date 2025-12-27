@@ -217,7 +217,6 @@ public class TeamRecommendationHighService {
                 .map(problem -> new RecommendationHistory(teamRecommendation.getTeam(), problem, selectedDate))
                 .toList();
 
-
         recommendationHistoryLowService.saveAll(recommendationHistories);
 
         return articleTitle;

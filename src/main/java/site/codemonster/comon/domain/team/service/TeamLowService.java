@@ -1,12 +1,15 @@
 package site.codemonster.comon.domain.team.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
 import site.codemonster.comon.global.error.Team.TeamNotFoundException;
-import site.codemonster.comon.global.error.recommendation.TeamRecommendationNotFoundException;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional
@@ -19,4 +22,39 @@ public class TeamLowService {
         return teamRepository.findById(id)
                 .orElseThrow(TeamNotFoundException::new);
     }
+
+    public Team getTeamByTeamId(Long teamId){
+        return teamRepository.findTeamByTeamIdWithTeamRecruit(teamId)
+                .orElseThrow(TeamNotFoundException::new);
+    }
+
+    public Team save(Team team) {
+        return teamRepository.save(team);
+    }
+
+    public Page<Team> findAllWithPagination(Pageable pageable) {
+        return teamRepository.findAllWithPagination(pageable);
+    }
+
+    public Page<Team> findByTeamNameContaining(String keyword, Pageable pageable) {
+        return teamRepository.findByTeamNameContaining(keyword, pageable);
+    }
+
+    public Team findTeamsByTeamIdWithTeamMembers(Long teamId){
+        return teamRepository.findTeamsByTeamIdWithTeamMembers(teamId)
+                .orElseThrow(TeamNotFoundException::new);
+    }
+
+    public void deleteById(Long teamId) {
+        teamRepository.deleteById(teamId);
+    }
+
+    public List<Team> findByTeamManagerId(Long memberId) {
+        return teamRepository.findByTeamManagerId(memberId);
+    }
+
+    public List<Team> findAll() {
+        return teamRepository.findAll();
+    }
+
 }

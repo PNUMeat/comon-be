@@ -9,6 +9,7 @@ import site.codemonster.comon.domain.teamApply.entity.TeamApply;
 import site.codemonster.comon.domain.teamApply.service.TeamApplyService;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
+import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitLowService;
 import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -27,13 +28,14 @@ public class TeamApplyController {
     private final TeamRecruitService teamRecruitService;
     private final TeamMemberService teamMemberService;
     private final TeamApplyService teamApplyService;
+    private final TeamRecruitLowService teamRecruitLowService;
 
     @PostMapping
     public ResponseEntity<?> createTeamApply(
             @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamApplyCreateRequest teamApplyCreateRequest
     ){
-        TeamRecruit foundTeamRecruit = teamRecruitService.findByTeamRecruitIdOrThrow(teamApplyCreateRequest.recruitmentId());
+        TeamRecruit foundTeamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(teamApplyCreateRequest.recruitmentId());
 
         if(foundTeamRecruit.existsTeam()){
             Team team = foundTeamRecruit.getTeam();

@@ -12,6 +12,7 @@ import site.codemonster.comon.domain.team.service.TeamService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
+import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitLowService;
 import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
@@ -42,7 +43,7 @@ public class TeamController {
     private final ArticleService articleService;
     private final TeamMemberService teamMemberService;
     private final MemberService memberService;
-    private final TeamRecruitService teamRecruitService;
+    private final TeamRecruitLowService teamRecruitLowService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<TeamCreateResponse>> createTeam(
@@ -59,8 +60,8 @@ public class TeamController {
         }
 
         if(teamRequest.teamRecruitId() != null){
-            TeamRecruit teamRecruit = teamRecruitService.findByTeamRecruitIdOrThrow(teamRequest.teamRecruitId());
-            teamRecruitService.isAuthorOrThrow(teamRecruit, manager);
+            TeamRecruit teamRecruit = teamRecruitLowService.findByTeamRecruitIdOrThrow(teamRequest.teamRecruitId());
+            teamRecruitLowService.isAuthorOrThrow(teamRecruit, manager);
         }
 
         Team createdTeam = teamService.createTeam(teamRequest, manager, applyMembers, teamRequest.teamRecruitId());
@@ -242,8 +243,8 @@ public class TeamController {
             @PathVariable("teamId") Long teamId,
             @AuthenticationPrincipal Member member
     ) {
-        Team team = teamService.getTeamByTeamId(teamId);
-        teamService.deleteTeamByOwner(member, team);
+
+        teamService.deleteTeamByOwner(member, teamId);
 
         return ResponseEntity.status(TEAM_DELETE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
