@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(ComonException.class)
-  public ResponseEntity<ApiResponse<?>> comonExceptionHandler(ComonException e) {
+  public ResponseEntity<ApiResponse<Void>> comonExceptionHandler(ComonException e) {
     ErrorResult errorResult = new ErrorResult(e.getStatusCode(), e.getMessage());
 
     return ResponseEntity.status(HttpStatus.valueOf(e.getStatusCode()))

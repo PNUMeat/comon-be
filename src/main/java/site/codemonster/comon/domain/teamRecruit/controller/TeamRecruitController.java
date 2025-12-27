@@ -3,6 +3,7 @@ package site.codemonster.comon.domain.teamRecruit.controller;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberService;
+import site.codemonster.comon.domain.team.dto.response.TeamCreateResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamService;
 import site.codemonster.comon.domain.teamApply.dto.response.TeamApplyMemberResponse;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static site.codemonster.comon.domain.teamRecruit.controller.TeamRecruitResponseEnum.*;
 
@@ -48,7 +50,7 @@ public class TeamRecruitController {
     private final MemberService memberService;
 
     @PostMapping
-    public ResponseEntity<?> createTeamRecruitment(
+    public ResponseEntity<ApiResponse<TeamRecruitCreateResponse>> createTeamRecruitment(
             @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamRecruitCreateRequest teamRecruitCreateRequest
     ) {
@@ -59,7 +61,7 @@ public class TeamRecruitController {
             teamMemberService.checkMemberIsTeamManagerOrThrow(teamMember);
         }
 
-        TeamRecruit teamRecruit = teamRecruitService.createTeamRecruit(teamRecruitCreateRequest, team, member);
+        TeamRecruit teamRecruit = teamRecruitService.createTeamRecruit(teamRecruitCreateRequest, Optional.ofNullable(team), member);
 
         TeamRecruitCreateResponse teamRecruitCreateResponse = TeamRecruitCreateResponse.of(teamRecruit);
 

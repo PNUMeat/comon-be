@@ -8,6 +8,7 @@ import site.codemonster.comon.domain.teamRecruit.dto.request.TeamRecruitUpdateRe
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
 import site.codemonster.comon.domain.teamRecruit.repository.TeamRecruitImageRepository;
 import site.codemonster.comon.domain.teamRecruit.repository.TeamRecruitRepository;
+import site.codemonster.comon.global.error.TeamRecruit.TeamRecruitDuplicateException;
 import site.codemonster.comon.global.error.TeamRecruit.TeamRecruitNotAuthorException;
 import site.codemonster.comon.global.error.TeamRecruit.TeamRecruitNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,21 +29,14 @@ public class TeamRecruitService {
     private final TeamApplyRepository teamApplyRepository;
 
     @Transactional
-    public TeamRecruit createTeamRecruit(TeamRecruitCreateRequest teamRecruitCreateRequest, Team team, Member member){
-        TeamRecruit teamRecruit = TeamRecruit.builder()
-                .team(team)
-                .member(member)
-                .teamRecruitTitle(teamRecruitCreateRequest.teamRecruitTitle())
-                .teamRecruitBody(teamRecruitCreateRequest.teamRecruitBody())
-                .chatUrl(teamRecruitCreateRequest.chatUrl())
-                .build();
-        TeamRecruit savedTeamRecruit = teamRecruitRepository.save(teamRecruit);
+    public TeamRecruit createTeamRecruit(TeamRecruitCreateRequest teamRecruitCreateRequest, Optional<Team> team, Member member){
 
-        if(team != null){
-            team.updateTeamRecruit(teamRecruit);
-        }
 
-        return savedTeamRecruit;
+        if (team.isPresent() && team.get().getTeamRecruit() != null) throw new TeamRecruitDuplicateException();
+
+        TeamRecruit teamRecruit = new TeamRecruit(team.orElse(null), member, teamRecruitCreateRequest.teamRecruitTitle(), teamRecruitCreateRequest.teamRecruitBody(), teamRecruitCreateRequest.chatUrl());
+
+        return teamRecruitRepository.save(teamRecruit);
     }
 
     public Page<TeamRecruit> getTeamRecruitmentsUsingPaging(Pageable pageable, String status){

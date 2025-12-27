@@ -13,6 +13,7 @@ import site.codemonster.comon.domain.recommendation.entity.TeamRecommendationDay
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.enums.Topic;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
+import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -106,8 +107,17 @@ public final class TestUtil {
 
     public static TeamMember createTeamManager(Team team, Member member) {
         TeamMember teamMember = new TeamMember(team, member, true);
-        ReflectionTestUtils.setField(member, "id", 1L);
         return teamMember;
+    }
+
+    public static TeamMember createTeamMember(Team team, Member member) {
+        TeamMember teamMember = new TeamMember(team, member, false);
+        return teamMember;
+    }
+
+    public static TeamRecruit createTeamRecruit(Team team, Member member) {
+
+        return new TeamRecruit(team, member, "제목", "바디", "naver.com");
     }
 
     public static AdminMember createAdminMember() {

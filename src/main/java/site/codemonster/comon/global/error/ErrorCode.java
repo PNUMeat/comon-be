@@ -44,6 +44,7 @@ public enum ErrorCode {
     TEAM_RECRUIT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, 404,"팀 모집글이 존재하지 않습니다."),
     TEAM_RECRUIT_NOT_AUTHOR_ERROR(HttpStatus.BAD_REQUEST, 401,"팀 모집글 작성자가 아닙니다."),
     TEAM_RECRUIT_NOT_RECRUIT_ERROR(HttpStatus.BAD_REQUEST, 400,"현재 모집 중이지 않습니다."),
+    TEAM_RECRUIT_DUPLICATE_ERROR(HttpStatus.BAD_REQUEST, 400, "이미 작성된 모집글이 존재합니다."),
 
     //TEAM APPLY
     TEAM_APPLY_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, 404,"팀 지원글이 존재하지 않습니다."),
