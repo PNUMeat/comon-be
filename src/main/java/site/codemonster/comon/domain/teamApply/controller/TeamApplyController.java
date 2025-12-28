@@ -26,7 +26,7 @@ import static site.codemonster.comon.domain.teamApply.controller.TeamApplyRespon
 @RequiredArgsConstructor
 public class TeamApplyController {
 
-    private final TeamApplyService teamApplyService;;
+    private final TeamApplyService teamApplyService;
 
     @PostMapping
     public ResponseEntity<?> createTeamApply(
