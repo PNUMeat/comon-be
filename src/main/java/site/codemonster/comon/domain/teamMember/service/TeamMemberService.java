@@ -125,7 +125,7 @@ public class TeamMemberService {
 
         TeamRecruit teamRecruit = team.getTeamRecruit();
         if(teamRecruit != null && team.getTeamRecruit().isTeamRecruitOwner(member)){
-            teamRecruitLowService.forceDeleteTeamRecruit(teamRecruit);
+            teamRecruitLowService.forceDeleteTeamRecruit(teamRecruit.getTeamRecruitId());
         }
     }
 }

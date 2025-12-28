@@ -57,10 +57,15 @@ public interface TeamRecruitRepository extends JpaRepository<TeamRecruit, Long> 
             "WHERE tr.member.id = :memberId")
     List<Long> findIdsByMemberId(@Param("memberId") Long memberId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM TeamRecruit tr " +
             "WHERE tr.member.id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM TeamRecruit tr " +
+            "WHERE tr.teamRecruitId = :teamRecruitId")
+    void deleteById(@Param("teamRecruitId") Long teamRecruitId);
 
     Optional<TeamRecruit> findByTeam(Team team);
 }

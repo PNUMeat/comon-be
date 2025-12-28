@@ -25,10 +25,10 @@ public class TeamRecruitLowService {
     private final TeamApplyRepository teamApplyRepository;
 
 
-    public void forceDeleteTeamRecruit(TeamRecruit teamRecruit) {
-        teamRecruitImageRepository.deleteTeamRecruitImagesByTeamRecruitId(teamRecruit.getTeamRecruitId());
-        teamApplyRepository.deleteTeamAppliesByTeamRecruitId(teamRecruit.getTeamRecruitId());
-        teamRecruitRepository.delete(teamRecruit);
+    public void forceDeleteTeamRecruit(Long teamRecruitId) {
+        teamRecruitImageRepository.deleteTeamRecruitImagesByTeamRecruitId(teamRecruitId);
+        teamApplyRepository.deleteTeamAppliesByTeamRecruitId(teamRecruitId);
+        teamRecruitRepository.deleteById(teamRecruitId);
     }
 
     @Transactional(readOnly = true)

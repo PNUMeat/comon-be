@@ -10,20 +10,20 @@ import java.util.List;
 
 public interface ArticleImageRepository extends JpaRepository<ArticleImage,Long> {
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM ArticleImage ai WHERE ai.article.team.teamId = :teamId")
     void deleteByTeamTeamId(@Param("teamId") Long teamId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM ArticleImage ai WHERE ai.article.articleId IN " +
         "(SELECT a.articleId FROM Article a WHERE a.member.id = :memberId)")
     void deleteByMemberId(@Param("memberId") Long memberId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM ArticleImage ai WHERE ai.article.articleId = :articleId")
     void deleteByArticleId(@Param("articleId") Long articleId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("DELETE FROM ArticleImage ai WHERE ai.article.articleId IN (:articleIds)")
     void deleteArticleImagesInArticleIds(@Param("articleIds") List<Long> articleIds);
 }
