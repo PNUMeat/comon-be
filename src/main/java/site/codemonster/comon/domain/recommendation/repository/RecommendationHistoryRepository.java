@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.recommendation.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import site.codemonster.comon.domain.recommendation.entity.RecommendationHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -30,6 +31,8 @@ public interface RecommendationHistoryRepository extends JpaRepository<Recommend
     /**
      * 팀의 추천 기록 삭제
      */
+    @Modifying(clearAutomatically = true)
+    @Query("delete from RecommendationHistory rh where rh.team.teamId = :teamId")
     void deleteByTeamTeamId(Long teamId);
 
     @Query("select rh from RecommendationHistory rh where rh.recommendedAt = :today")

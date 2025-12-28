@@ -37,19 +37,15 @@ public class Team extends TimeStamp {
 
     private String teamAnnouncement="";
 
-    @OneToOne(mappedBy = "team", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "team")
     private TeamRecruit teamRecruit;
 
     @OneToMany(mappedBy = "team")
     private List<TeamMember> teamMembers = new ArrayList<>();
 
-    @OneToOne(mappedBy = "team", fetch = FetchType.LAZY)
-    private TeamRecommendation teamRecommendation;
-
     protected Team(){
     }
 
-    @Builder
     public Team(String teamName, Topic teamTopic, String teamExplain, int maxParticipant, String teamPassword) {
         this.teamName = teamName;
         this.teamTopic = teamTopic;
@@ -76,10 +72,6 @@ public class Team extends TimeStamp {
         if (teamInfoEditRequest.password() != null && !teamInfoEditRequest.password().isEmpty()){
             this.teamPassword = teamInfoEditRequest.password();
         }
-    }
-
-    public void updateTeamRecruit(TeamRecruit teamRecruit){
-        this.teamRecruit = teamRecruit;
     }
 
     public void updateTeamAnnouncement(String teamAnnouncement) { this.teamAnnouncement = teamAnnouncement; }

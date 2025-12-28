@@ -1,21 +1,19 @@
 package site.codemonster.comon.domain.article.service;
 
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+import site.codemonster.comon.domain.article.dto.response.ArticleParticularDateResponse;
+import site.codemonster.comon.domain.article.dto.response.ArticleResponse;
 import site.codemonster.comon.domain.article.factory.RecommendationArticleFactory;
 import site.codemonster.comon.domain.article.dto.request.*;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;
-import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
-import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.team.dto.response.MyTeamResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamPageResponse;
 import site.codemonster.comon.domain.team.entity.Team;
-import site.codemonster.comon.domain.team.service.TeamService;
-import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
+import site.codemonster.comon.domain.team.service.TeamLowService;
+import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.global.error.Team.TeamManagerInvalidException;
 import site.codemonster.comon.global.error.articles.*;
 import lombok.RequiredArgsConstructor;
@@ -32,17 +30,19 @@ import static site.codemonster.comon.domain.article.enums.ArticleCategory.getSub
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class ArticleService {
 
-    private final TeamService teamService;
-    private final TeamMemberService teamMemberService;
-    private final ArticleRepository articleRepository;
-    private final ArticleImageRepository articleImageRepository;
+    private final TeamMemberLowService teamMemberLowService;
+    private final ArticleLowService articleLowService;
+    private final ArticleImageLowService articleImageLowService;
+    private final TeamLowService teamLowService;
 
-    @Transactional
     public Article articleCreate(Member member, ArticleCreateRequest articleCreateRequest) {
-        Team team = teamService.getTeamByTeamId(articleCreateRequest.teamId());
+
+        teamMemberLowService.getTeamMemberByTeamIdAndMemberId(articleCreateRequest.teamId(), member);
+
+        Team team = teamLowService.getTeamByTeamId(articleCreateRequest.teamId());
 
         Article article = new Article(
                 team,
@@ -52,38 +52,24 @@ public class ArticleService {
                 ArticleCategory.NORMAL
         );
 
-        Article savedArticle = articleRepository.save(article);
+        Article savedArticle = articleLowService.save(article);
 
         return savedArticle;
     }
 
-    @Transactional
-    public Page<Article> getMyArticlesUsingPaging(Long memberId, Long teamId, Pageable pageable){
-        return articleRepository.findArticleByMemberIdAndByTeamIdUsingPage(memberId, teamId, pageable);
-    }
-
-    @Transactional
-    public List<Article> getAllArticlesByTeam(Long teamId){
-        return articleRepository.findByTeamTeamIdWithImages(teamId);
-    }
-
-    @Transactional
     public void deleteArticle(Long articleId, Member member) {
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(ArticleNotFoundException::new);
+        Article article = articleLowService.findById(articleId);
 
         if (!article.isAuthor(member)) {
             throw new UnauthorizedActionException();
         }
 
-        articleImageRepository.deleteByArticleId(articleId);
-        articleRepository.delete(article);
+        articleImageLowService.deleteByArticleId(articleId);
+        articleLowService.delete(article);
     }
 
-    @Transactional
     public void updateArticle(Long articleId, ArticleUpdateRequest articleUpdateRequest, Member member) {
-        Article article = articleRepository.findByIdWithImages(articleId)
-                .orElseThrow(ArticleNotFoundException::new);
+        Article article = articleLowService.findByIdWithImages(articleId);
 
         if (!article.isAuthor(member)) {
             throw new UnauthorizedActionException();
@@ -92,74 +78,78 @@ public class ArticleService {
         article.updateArticle(articleUpdateRequest.articleTitle(), articleUpdateRequest.articleBody());
     }
 
-    public Page<Article> getArticlesByTeamAndDate(Long teamId, LocalDate date, Pageable pageable) {
-        return articleRepository.findByTeamIdAndDateWithMember(teamId, date, pageable);
+    @Transactional(readOnly = true)
+    public Page<ArticleParticularDateResponse>  getArticlesByTeamAndDate(Long teamId, LocalDate date, Member member, Pageable pageable) {
+        Page<Article> articlePage = articleLowService.findByTeamIdAndDateWithMember(teamId, date, pageable);
+
+        boolean isMyTeam = teamMemberLowService.existsByTeamIdAndMemberId(teamId, member);
+
+        return articlePage.map(article ->
+                ArticleParticularDateResponse.of(article, member, isMyTeam));
     }
 
-    @Transactional
     public Article saveTeamSubject(
             Member member,
             Long teamId,
             TeamSubjectRequest teamSubjectRequest
     ){
-        Team team = teamService.getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
         validateTeamManager(member, team);
 
         LocalDate selectedDate = LocalDate.parse(teamSubjectRequest.selectedDate());
         checkSubjectExists(team, selectedDate);
 
         Article subject = createArticle(member, team, teamSubjectRequest, selectedDate);
-        Article savedSubject = articleRepository.save(subject);
+        Article savedSubject = articleLowService.save(subject);
         return savedSubject;
     }
 
+    @Transactional(readOnly = true)
     public Article getTeamSubjectByDate(Long teamId, LocalDate date){
-        teamService.getTeamByTeamId(teamId);
-        return articleRepository.findTeamSubjectByTeamAndSelectedDate(teamId, date, getSubjectCategories())
+        teamLowService.getTeamByTeamId(teamId);
+        return articleLowService.findTeamSubjectByTeamAndSelectedDate(teamId, date, getSubjectCategories())
                 .orElse(null);
     }
 
-    @Transactional
     public void deleteTeamSubjectByArticleId(Member member, Long teamId, Long articleId){
-        Team team = teamService.getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
         validateTeamManager(member, team);
 
-        if(!articleRepository.existsById(articleId)){
+        if(!articleLowService.existsById(articleId)){
             throw new ArticleNotFoundException();
         }
 
-        articleRepository.deleteById(articleId);
+        articleLowService.deleteById(articleId);
     }
 
-    @Transactional
     public Article updateTeamSubjectByArticleId(Member member, Long teamId, Long articleId, TeamSubjectUpdateRequest teamSubjectUpdateRequest){
-        Team team = teamService.getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
         validateTeamManager(member, team);
 
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(ArticleNotFoundException::new);
+        Article article = articleLowService.findById(articleId);
 
         article.updateSubject(teamSubjectUpdateRequest.articleTitle(), teamSubjectUpdateRequest.articleBody(), teamSubjectUpdateRequest.articleCategory());
 
         return article;
     }
 
+    @Transactional(readOnly = true)
     public TeamPageResponse getSubjectArticlesUsingCalender(Member member, Long teamId, CalenderSubjectRequest calenderSubjectRequest){
-        Team team = teamService.getTeamByTeamId(teamId);
+        Team team = teamLowService.getTeamByTeamId(teamId);
 
-        List<Article> subjectArticles = articleRepository.findSubjectArticlesByTeamIdAndYearAndMonth(teamId, calenderSubjectRequest.year(), calenderSubjectRequest.month(), getSubjectCategories());
-        boolean isTeamManager = teamMemberService.checkMemberIsTeamManager(teamId, member);
+        List<Article> subjectArticles = articleLowService.findSubjectArticlesByTeamIdAndYearAndMonth(teamId, calenderSubjectRequest);
+        boolean isTeamManager = teamMemberLowService.checkMemberIsTeamManager(teamId, member);
         return TeamPageResponse.from(MyTeamResponse.of(team), isTeamManager, subjectArticles);
     }
 
     private void validateTeamManager(Member member, Team team) {
-        if(!teamMemberService.checkMemberIsTeamManager(team.getTeamId(), member)){
+        if(!teamMemberLowService.checkMemberIsTeamManager(team.getTeamId(), member)){
             throw new TeamManagerInvalidException();
         }
     }
 
     private void checkSubjectExists(Team team, LocalDate selectedDate) {
-        if(articleRepository.existsByTeamAndSelectedDateAndArticleCategoryIn(team, selectedDate, getSubjectCategories())){
+        if(articleLowService.existsByTeamAndSelectedDateAndArticleCategoryIn(team, selectedDate, getSubjectCategories())){
             throw new SubjectDuplicatedException();
         }
     }
@@ -188,16 +178,31 @@ public class ArticleService {
                 .selectedDate(date)
                 .build();
 
-        articleRepository.save(article);
+        articleLowService.save(article);
         return content.title();
     }
 
+    @Transactional(readOnly = true)
     public Article validateAndGetArticle(Long articleId, Member member) {
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(ArticleNotFoundException::new);
+        Article article = articleLowService.findById(articleId);
 
         if (!article.isAuthor(member)) throw new UnauthorizedActionException();
 
         return article;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ArticleResponse> getMyArticleResponseUsingPaging(Long teamId, Member member, Pageable pageable) {
+        Page<Article> myArticles = articleLowService.getMyArticlesUsingPaging(member.getId(), teamId, pageable);
+
+        return myArticles.map(ArticleResponse::new);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ArticleResponse> getAllArticleResponseByTeam(Long teamId) {
+        List<Article> articles = articleLowService.getAllArticlesByTeam(teamId);
+        return articles.stream()
+                .map(ArticleResponse::new)
+                .toList();
     }
 }

@@ -9,6 +9,7 @@ import site.codemonster.comon.domain.teamApply.entity.TeamApply;
 import site.codemonster.comon.domain.teamApply.service.TeamApplyService;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
+import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitLowService;
 import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -24,8 +25,7 @@ import static site.codemonster.comon.domain.teamApply.controller.TeamApplyRespon
 @RequestMapping("/api/v1/apply")
 @RequiredArgsConstructor
 public class TeamApplyController {
-    private final TeamRecruitService teamRecruitService;
-    private final TeamMemberService teamMemberService;
+
     private final TeamApplyService teamApplyService;
 
     @PostMapping
@@ -33,14 +33,8 @@ public class TeamApplyController {
             @AuthenticationPrincipal Member member,
             @RequestBody @Valid TeamApplyCreateRequest teamApplyCreateRequest
     ){
-        TeamRecruit foundTeamRecruit = teamRecruitService.findByTeamRecruitIdOrThrow(teamApplyCreateRequest.recruitmentId());
 
-        if(foundTeamRecruit.existsTeam()){
-            Team team = foundTeamRecruit.getTeam();
-            teamMemberService.throwIfMemberAlreadyInTeam(team.getTeamId(), member);
-        }
-
-        teamApplyService.createTeamApply(teamApplyCreateRequest, foundTeamRecruit, member);
+        teamApplyService.createTeamApply(teamApplyCreateRequest, member);
 
         return ResponseEntity.status(TEAM_APPLY_CREATE.getStatusCode()).contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.createResponseWithMessage(TEAM_APPLY_CREATE.getMessage()));
@@ -51,9 +45,8 @@ public class TeamApplyController {
             @AuthenticationPrincipal Member member,
             @PathVariable("applyId") Long applyId
     ) {
-        TeamApply teamApply = teamApplyService.findTeamApplyByIdOrThrow(applyId);
 
-        teamApplyService.deleteTeamApply(member, teamApply);
+        teamApplyService.deleteByTeamApplyId(applyId, member);
 
         return ResponseEntity.status(TEAM_APPLY_DELETE.getStatusCode()).contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponseWithMessage(TEAM_APPLY_DELETE.getMessage()));
@@ -65,9 +58,8 @@ public class TeamApplyController {
             @PathVariable("applyId") Long applyId,
             @RequestBody @Valid TeamApplyUpdateRequest teamApplyUpdateRequest
     ) {
-        TeamApply teamApply = teamApplyService.findTeamApplyByIdOrThrow(applyId);
 
-        teamApplyService.updateTeamApply(member, teamApply, teamApplyUpdateRequest.teamApplyBody());
+        teamApplyService.updateByTeamApplyId(applyId, member, teamApplyUpdateRequest);
 
         return ResponseEntity.status(TEAM_APPLY_UPDATE.getStatusCode()).contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponseWithMessage(TEAM_APPLY_UPDATE.getMessage()));

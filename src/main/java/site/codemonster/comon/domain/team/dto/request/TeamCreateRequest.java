@@ -1,10 +1,11 @@
 package site.codemonster.comon.domain.team.dto.request;
 
 import jakarta.validation.constraints.*;
+import org.hibernate.validator.constraints.Range;
 
 import java.util.List;
 
-public record TeamRequest(
+public record TeamCreateRequest(
         @NotBlank(message = "팀 이름은 필수 입력 항목입니다.")
         @Size(
                 max = 10,
@@ -21,8 +22,7 @@ public record TeamRequest(
         @NotBlank(message = "팀 주제는 필수 항목입니다.")
         String topic,
 
-        @Min(value = 2, message = "2 ~ 50 사이의 숫자를 입력해주세요.")
-        @Max(value = 50, message = "2 ~ 50 사이의 숫자를 입력해주세요.")
+        @Range(min = 1, max = 50, message = "1 ~ 50 사이의 숫자를 입력해주세요.")
         int memberLimit,
 
         @NotBlank(message = "팀 비밀번호는 필수 항목입니다.")

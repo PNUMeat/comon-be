@@ -23,7 +23,7 @@ import site.codemonster.comon.domain.recommendation.entity.TeamRecommendationDay
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamLowService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
-import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
+import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.domain.util.TestUtil;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationDuplicateException;
 import site.codemonster.comon.global.error.recommendation.TeamRecommendationProblemShortageException;
@@ -65,7 +65,7 @@ class TeamRecommendationServiceTest {
     private ArticleService articleService;
 
     @Mock
-    private TeamMemberService teamMemberService;
+    private TeamMemberLowService teamMemberLowService;
 
 
     @Test
@@ -143,13 +143,15 @@ class TeamRecommendationServiceTest {
         PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
 
 
-        ReflectionTestUtils.setField(team, "teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "teamRecommendationDays", List.of(teamRecommendationDay));
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
 
 
-        given(teamLowService.findByTeamIdWithTeamRecommendation(any()))
+        given(teamLowService.findById(any()))
                 .willReturn(team);
+
+        given(teamRecommendationLowService.findByTeam(any()))
+                .willReturn(teamRecommendation);
 
         // when
         TeamRecommendationResponse response = teamRecommendationService.getRecommendationSettings(team.getTeamId());
@@ -161,7 +163,8 @@ class TeamRecommendationServiceTest {
             softly.assertThat(response.platformRecommendationResponses().size()).isEqualTo(1);
         });
 
-        verify(teamLowService).findByTeamIdWithTeamRecommendation(any());
+        verify(teamLowService).findById(any());
+        verify(teamRecommendationLowService).findByTeam(any());
         verifyNoMoreInteractions(teamLowService);
     }
 
@@ -178,11 +181,13 @@ class TeamRecommendationServiceTest {
         Member member = TestUtil.createMemberWithId();
         TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
 
-        ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
 
-        given(teamLowService.findByTeamIdWithTeamRecommendation(any()))
+        given(teamLowService.findById(any()))
                 .willReturn(team);
+
+        given(teamRecommendationLowService.findByTeam(any()))
+                .willReturn(teamRecommendation);
 
         given(recommendationHistoryLowService.findByTeamId(any()))
                 .willReturn(List.of(recommendationHistory));
@@ -190,7 +195,7 @@ class TeamRecommendationServiceTest {
         given(problemQueryService.findRecommendationProblem(any(),any()))
                 .willReturn(List.of(problem, problem, problem, problem)); // 추천 가능한 문제 4개
 
-        given(teamMemberService.getTeamManagerByTeamId(any()))
+        given(teamMemberLowService.getTeamManagerByTeamId(any()))
                 .willReturn(teamMember);
 
         given(articleService.createRecommendationArticle(any(),any(),any(), any()))
@@ -208,15 +213,16 @@ class TeamRecommendationServiceTest {
             softly.assertThat(response.totalRecommended()).isEqualTo(1);
         });
 
-        verify(teamLowService).findByTeamIdWithTeamRecommendation(any());
+        verify(teamLowService).findById(any());
+        verify(teamRecommendationLowService).findByTeam(any());
         verify(recommendationHistoryLowService, times(2)).findByTeamId(any());
         verify(problemQueryService).findRecommendationProblem(any(),any());
-        verify(teamMemberService).getTeamManagerByTeamId(any());
+        verify(teamMemberLowService).getTeamManagerByTeamId(any());
         verify(articleService).createRecommendationArticle(any(),any(),any(), any());
         verify(recommendationHistoryLowService).saveAll(any());
         verifyNoMoreInteractions(
                 teamLowService,recommendationHistoryLowService,
-                problemQueryService,teamMemberService,
+                problemQueryService,teamMemberLowService,
                 articleService);
     }
 
@@ -233,11 +239,12 @@ class TeamRecommendationServiceTest {
         Member member = TestUtil.createMemberWithId();
         TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
 
-        ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
 
-        given(teamLowService.findByTeamIdWithTeamRecommendation(any()))
+        given(teamLowService.findById(any()))
                 .willReturn(team);
+        given(teamRecommendationLowService.findByTeam(any()))
+            .willReturn(teamRecommendation);
 
         given(recommendationHistoryLowService.findByTeamId(any()))
                 .willReturn(List.of(recommendationHistory));
@@ -245,7 +252,7 @@ class TeamRecommendationServiceTest {
         given(problemQueryService.findRecommendationProblem(any(),any()))
                 .willReturn(List.of(problem, problem, problem, problem)); // 추천 가능한 문제 4개
 
-        given(teamMemberService.getTeamManagerByTeamId(any()))
+        given(teamMemberLowService.getTeamManagerByTeamId(any()))
                 .willReturn(teamMember);
 
         given(articleService.createRecommendationArticle(any(),any(),any(), any()))
@@ -262,15 +269,16 @@ class TeamRecommendationServiceTest {
             softly.assertThat(response.totalRecommended()).isEqualTo(1);
         });
 
-        verify(teamLowService).findByTeamIdWithTeamRecommendation(any());
+        verify(teamLowService).findById(any());
+        verify(teamRecommendationLowService).findByTeam(any());
         verify(recommendationHistoryLowService, times(2)).findByTeamId(any());
         verify(problemQueryService).findRecommendationProblem(any(),any());
-        verify(teamMemberService).getTeamManagerByTeamId(any());
+        verify(teamMemberLowService).getTeamManagerByTeamId(any());
         verify(articleService).createRecommendationArticle(any(),any(),any(), any());
         verify(recommendationHistoryLowService).saveAll(any());
         verifyNoMoreInteractions(
                 teamLowService,recommendationHistoryLowService,
-                problemQueryService,teamMemberService,
+                problemQueryService,teamMemberLowService,
                 articleService);
     }
 
@@ -287,7 +295,6 @@ class TeamRecommendationServiceTest {
         RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistoryWithId(team, problem);
         Member member = TestUtil.createMemberWithId();
         TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
-        ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
 
         given(recommendationHistoryLowService.findByTeamId(any()))
@@ -296,7 +303,7 @@ class TeamRecommendationServiceTest {
         given(problemQueryService.findRecommendationProblem(any(),any()))
                 .willReturn(List.of(problem, problem,problem)); // 추천 가능한 문제 3개
 
-        given(teamMemberService.getTeamManagerByTeamId(any()))
+        given(teamMemberLowService.getTeamManagerByTeamId(any()))
                 .willReturn(teamMember);
 
         given(articleService.createRecommendationArticle(any(),any(),any(), any()))
@@ -308,12 +315,12 @@ class TeamRecommendationServiceTest {
         assertThat(title).isEqualTo("제목");
         verify(recommendationHistoryLowService).findByTeamId(any());
         verify(problemQueryService).findRecommendationProblem(any(),any());
-        verify(teamMemberService).getTeamManagerByTeamId(any());
+        verify(teamMemberLowService).getTeamManagerByTeamId(any());
         verify(articleService).createRecommendationArticle(any(),any(),any(), any());
         verify(recommendationHistoryLowService).saveAll(any());
         verifyNoMoreInteractions(
                 teamLowService,recommendationHistoryLowService,
-                problemQueryService,teamMemberService,
+                problemQueryService,teamMemberLowService,
                 articleService);
     }
 
@@ -327,7 +334,6 @@ class TeamRecommendationServiceTest {
         TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
         PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
         RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistoryWithId(team, problem);
-        ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
 
 
@@ -346,7 +352,7 @@ class TeamRecommendationServiceTest {
         verify(problemQueryService).findRecommendationProblem(any(),any());
         verifyNoMoreInteractions(
                 teamLowService,recommendationHistoryLowService,
-                problemQueryService,teamMemberService,
+                problemQueryService,teamMemberLowService,
                 articleService);
     }
 
@@ -362,7 +368,6 @@ class TeamRecommendationServiceTest {
         RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistoryWithId(team, problem);
         TeamRecommendationDay teamRecommendationDay = TestUtil.createTeamRecommendationDayWithId(teamRecommendation);
 
-        ReflectionTestUtils.setField(team,"teamRecommendation", teamRecommendation);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
         ReflectionTestUtils.setField(teamRecommendation, "teamRecommendationDays", List.of(teamRecommendationDay));
 
