@@ -137,7 +137,7 @@ public class TeamService {
 
         TeamRecruit teamRecruit = team.getTeamRecruit();
         if(teamRecruit != null){
-            teamRecruitLowService.forceDeleteTeamRecruit(teamRecruit);
+            teamRecruitLowService.forceDeleteTeamRecruit(teamRecruit.getTeamRecruitId());
         }
 
         recommendationHistoryLowService.deleteByTeamId(team.getTeamId());
