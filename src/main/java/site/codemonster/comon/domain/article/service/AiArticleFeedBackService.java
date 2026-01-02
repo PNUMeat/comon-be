@@ -68,7 +68,7 @@ public class AiArticleFeedBackService {
                 })
                 .onErrorMap(e-> new AIFeedbackGenerationException())
                 .concatWith(
-                        Mono.fromCallable(ArticleFeedbackStreamResponse::complete))
+                        Mono.just(ArticleFeedbackStreamResponse.complete()))
                 .doOnComplete(()-> {
                     String finalText = messageBuffer.toString();
                     transactionTemplate.execute(status -> {
