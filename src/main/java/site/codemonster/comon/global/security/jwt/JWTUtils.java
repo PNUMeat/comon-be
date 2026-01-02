@@ -20,7 +20,8 @@ import static site.codemonster.comon.domain.auth.constant.AuthConstant.*;
 @Getter
 public class JWTUtils {
     private final SecretKey secretKey;
-    private final Long ACCESS_TOKEN_TIME = 60 * 25 * 1000L;
+//    private final Long ACCESS_TOKEN_TIME = 60 * 25 * 1000L;
+    private final Long ACCESS_TOKEN_TIME = 10 * 1000L; // 트러블 슈팅 위해서 10초로 수정
     private final Long REFRESH_TOKEN_TIME = 60 * 60 * 24 * 1000L;
 
     public JWTUtils(@Value("${spring.jwt.secret}") String secret) {
