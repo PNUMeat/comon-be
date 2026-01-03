@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.hibernate.validator.constraints.Range;
 
 public record TeamInfoEditRequest(
         @Size(
@@ -20,8 +21,7 @@ public record TeamInfoEditRequest(
 
         String topic,
 
-        @Min(value = 2, message = "2 ~ 50 사이의 숫자를 입력해주세요.")
-        @Max(value = 50, message = "2 ~ 50 사이의 숫자를 입력해주세요.")
+        @Range(min = 1, max = 50, message = "1 ~ 50 사이의 숫자를 입력해주세요.")
         Integer memberLimit,
 
         @Pattern(

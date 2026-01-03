@@ -7,13 +7,11 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackResponse;
 import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackStreamResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleFeedback;
@@ -66,10 +64,12 @@ public class AiArticleFeedBackService {
                 .content()
                 .mapNotNull(token-> {
                     messageBuffer.append(token);
-                    return new ArticleFeedbackStreamResponse(token);
+                    return ArticleFeedbackStreamResponse.createStream(token);
                 })
                 .onErrorMap(e-> new AIFeedbackGenerationException())
-                .doOnComplete(() -> {
+                .concatWith(
+                        Mono.just(ArticleFeedbackStreamResponse.complete()))
+                .doOnComplete(()-> {
                     String finalText = messageBuffer.toString();
                     transactionTemplate.execute(status -> {
                         ArticleFeedback feedback = new ArticleFeedback(article, finalText);
