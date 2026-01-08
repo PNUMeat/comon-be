@@ -26,13 +26,13 @@ public interface TeamApplyRepository extends JpaRepository<TeamApply, Long> {
     )
     void deleteTeamAppliesByTeamRecruitId(@Param("teamRecruitId") Long teamRecruitId);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM TeamApply ta " +
             "WHERE ta.teamRecruit.teamRecruitId " +
             "IN :teamRecruitIds")
     void deleteTeamAppliesByTeamRecruitIds(@Param("teamRecruitIds") List<Long> teamRecruitIds);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM TeamApply ta " +
             "WHERE ta.member.id = :memberId")
     void deleteTeamAppliesByMemberId(@Param("memberId") Long memberId);

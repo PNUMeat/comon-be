@@ -14,7 +14,7 @@ public interface PlatformRecommendationRepository extends JpaRepository<Platform
 
     List<PlatformRecommendation> findByTeamRecommendation(TeamRecommendation teamRecommendation);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from PlatformRecommendation pr where pr.teamRecommendation.id = :teamRecommendationId")
     void deleteByTeamRecommendationId(Long teamRecommendationId);
 }

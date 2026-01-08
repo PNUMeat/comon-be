@@ -20,7 +20,7 @@ public interface TeamRecommendationRepository extends JpaRepository<TeamRecommen
     List<TeamRecommendation> findAllWithRecommendationDays();
 
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from TeamRecommendation t where t.team.teamId = :teamId")
     void deleteByTeamId(Long teamId);
 }
