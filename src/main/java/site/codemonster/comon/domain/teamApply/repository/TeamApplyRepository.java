@@ -20,7 +20,7 @@ public interface TeamApplyRepository extends JpaRepository<TeamApply, Long> {
             "ta.createdDate DESC")
     List<TeamApply> findTeamAppliesWithAuthorFirst(@Param("teamRecruitId") Long teamRecruitId, @Param("memberId") Long memberId);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(
             "DELETE FROM TeamApply ta WHERE ta.teamRecruit.teamRecruitId = :teamRecruitId"
     )

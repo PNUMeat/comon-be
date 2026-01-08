@@ -99,6 +99,10 @@ public final class TestUtil {
         return new Member("example@naver.com", "kakao 1234", "USER_ROLE");
     }
 
+    public static Member createOtherMember() {
+        return new Member("other@naver.com", "kakao 1234", "USER_ROLE");
+    }
+
     public static TeamMember createTeamManagerWithId(Team team, Member member) {
         TeamMember teamMember = new TeamMember(team, member, true);
         ReflectionTestUtils.setField(member, "id", 1L);

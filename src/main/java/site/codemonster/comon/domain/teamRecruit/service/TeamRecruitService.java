@@ -84,11 +84,11 @@ public class TeamRecruitService {
             throw new TeamRecruitNotAuthorException();
         }
 
-        if(teamRecruit.isRecruiting()){
+        teamRecruit.changeRecruitingStatus(); // 영속성 컨텍스트 지워지기 전에 변경
+
+        if(!teamRecruit.isRecruiting()){
             teamApplyLowService.deleteTeamAppliesByTeamRecruitId(teamRecruitId);
         }
-
-        teamRecruit.changeRecruitingStatus();
     }
 
     public Page<TeamRecruitGetResponse> findTeamRecruitmentWithPage(Pageable pageable, String status) {
