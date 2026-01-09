@@ -31,7 +31,7 @@ public interface RecommendationHistoryRepository extends JpaRepository<Recommend
     /**
      * 팀의 추천 기록 삭제
      */
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from RecommendationHistory rh where rh.team.teamId = :teamId")
     void deleteByTeamTeamId(Long teamId);
 

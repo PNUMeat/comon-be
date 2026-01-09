@@ -17,6 +17,8 @@ import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
+import site.codemonster.comon.domain.teamApply.entity.TeamApply;
+import site.codemonster.comon.domain.teamApply.repository.TeamApplyRepository;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.repository.TeamMemberRepository;
 import site.codemonster.comon.domain.teamRecruit.dto.request.TeamRecruitCreateRequest;
@@ -31,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.securityContext;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static site.codemonster.comon.domain.teamRecruit.controller.TeamRecruitResponseEnum.TEAM_RECRUIT_CREATE;
 import static site.codemonster.comon.global.error.ErrorCode.TEAM_MANAGER_INVALID_ERROR;
@@ -59,6 +62,9 @@ class TeamRecruitControllerTest {
 
     @Autowired
     private TeamRecruitRepository teamRecruitRepository;
+
+    @Autowired
+    private TeamApplyRepository teamApplyRepository;
 
     @Autowired
     private EntityManager em;
@@ -182,6 +188,33 @@ class TeamRecruitControllerTest {
             softly.assertThat(apiResponse.getCode()).isEqualTo(TEAM_RECRUIT_DUPLICATE_ERROR.getCustomStatusCode());
             softly.assertThat(apiResponse.getMessage()).isEqualTo(TEAM_RECRUIT_DUPLICATE_ERROR.getMessage());
         });
+    }
+
+    @Test
+    @DisplayName("팀 모집글 상태 변경 성공 - 모집 중단")
+    void changeTeamRecruitStatusSuccess() throws Exception {
+        Member member = memberRepository.save(TestUtil.createMember());
+        Member teamApplyMember = memberRepository.save(TestUtil.createOtherMember());
+        Team team = teamRepository.save(TestUtil.createTeam());
+        TeamMember teamMember = teamMemberRepository.save(TestUtil.createTeamManager(team, member));
+        TeamRecruit teamRecruit = teamRecruitRepository.save(TestUtil.createTeamRecruit(team, member));
+        TeamApply teamApply = new TeamApply(teamApplyMember, teamRecruit, "신청!");
+        teamApplyRepository.save(teamApply);
+
+        TestSecurityContextInjector.inject(member);
+
+        mockMvc.perform(patch("/api/v1/recruitments/{teamRecruitId}", teamRecruit.getTeamRecruitId())
+                        .with(securityContext(SecurityContextHolder.getContext())))
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+        TeamRecruit findTeamRecruit = teamRecruitRepository.findById(teamRecruit.getTeamRecruitId()).get();
+        boolean teamApplyExist = teamApplyRepository.existsById(teamApply.getTeamApplyId());
+
+        assertSoftly(softly-> {
+                    softly.assertThat(findTeamRecruit.isRecruiting()).isFalse();
+                    softly.assertThat(teamApplyExist).isFalse();
+                }
+        );
     }
 
     public void flushAndClear() {

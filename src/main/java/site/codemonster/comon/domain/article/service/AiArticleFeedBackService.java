@@ -66,7 +66,10 @@ public class AiArticleFeedBackService {
                     messageBuffer.append(token);
                     return ArticleFeedbackStreamResponse.createStream(token);
                 })
-                .onErrorMap(e-> new AIFeedbackGenerationException())
+                .onErrorMap(e-> {
+                    log.error("ai 피드백 호출 실패 errorMessage = {}", e.getMessage());
+                    throw new AIFeedbackGenerationException();
+                })
                 .concatWith(
                         Mono.just(ArticleFeedbackStreamResponse.complete()))
                 .doOnComplete(()-> {

@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface TeamRecruitImageRepository extends JpaRepository<TeamRecruitImage, Long> {
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM TeamRecruitImage ti WHERE ti.teamRecruit.teamRecruitId = :teamRecruitId")
     void deleteTeamRecruitImagesByTeamRecruitId(@Param("teamRecruitId") Long teamRecruitId);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM TeamRecruitImage ti " +
             "WHERE ti.teamRecruit.teamRecruitId " +
             "IN :teamRecruitIds")

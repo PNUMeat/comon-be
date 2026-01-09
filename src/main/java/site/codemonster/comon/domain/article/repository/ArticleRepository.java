@@ -56,15 +56,15 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "AND a.articleCategory IN :articleSubjectCategories")
     List<Article> findSubjectArticlesByTeamIdAndYearAndMonth(@Param("teamId")Long teamId, @Param("year") int year, @Param("month") int month, @Param("articleSubjectCategories")List<ArticleCategory> articleSubjectCategories);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.team.teamId = :teamId")
     void deleteByTeamTeamId(@Param("teamId") Long teamId);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.member.id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.member.id = :memberId AND a.team.teamId = :teamId")
     void deleteByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
 

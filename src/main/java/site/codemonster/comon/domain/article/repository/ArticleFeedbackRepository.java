@@ -17,7 +17,7 @@ public interface ArticleFeedbackRepository extends JpaRepository<ArticleFeedback
 
     boolean existsByArticle(Article article);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from ArticleFeedback af where af.article.articleId = :articleId")
     void deleteByArticleId(Long articleId);
 }

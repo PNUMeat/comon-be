@@ -32,11 +32,11 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
     void deleteByTeamTeamIdAndMember(Long teamId, Member member);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM TeamMember tm WHERE tm.team.teamId = :teamId")
     void deleteByTeamTeamId(@Param("teamId") Long teamId);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM TeamMember tm WHERE tm.member.id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
 
