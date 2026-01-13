@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.article.entity;
 
+import org.jsoup.Jsoup;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.team.entity.Team;
@@ -47,7 +48,9 @@ public class Article extends TimeStamp {
             this.articleTitle = articleTitle;
         }
 
-        if(articleBody != null){
+        boolean isEmpty = Jsoup.parse(articleBody).text().isEmpty();
+
+        if(!isEmpty){
             this.articleBody = articleBody;
         }
     }
