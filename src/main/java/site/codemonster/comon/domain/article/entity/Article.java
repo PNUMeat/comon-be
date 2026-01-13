@@ -44,15 +44,8 @@ public class Article extends TimeStamp {
     private List<ArticleImage> images = new ArrayList<>();
 
     public void updateArticle(String articleTitle, String articleBody){
-        if(articleTitle != null){
-            this.articleTitle = articleTitle;
-        }
-
-        boolean isEmpty = Jsoup.parse(articleBody).text().isEmpty();
-
-        if(!isEmpty){
-            this.articleBody = articleBody;
-        }
+        this.articleTitle = articleTitle;
+        this.articleBody = articleBody;
     }
 
     public void updateSubject(String articleTitle, String articleBody, String articleCategory){
