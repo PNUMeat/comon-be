@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.article.entity;
 
+import org.jsoup.Jsoup;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.team.entity.Team;
@@ -43,13 +44,8 @@ public class Article extends TimeStamp {
     private List<ArticleImage> images = new ArrayList<>();
 
     public void updateArticle(String articleTitle, String articleBody){
-        if(articleTitle != null){
-            this.articleTitle = articleTitle;
-        }
-
-        if(articleBody != null){
-            this.articleBody = articleBody;
-        }
+        this.articleTitle = articleTitle;
+        this.articleBody = articleBody;
     }
 
     public void updateSubject(String articleTitle, String articleBody, String articleCategory){

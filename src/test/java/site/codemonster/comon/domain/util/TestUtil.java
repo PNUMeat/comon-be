@@ -2,6 +2,8 @@ package site.codemonster.comon.domain.util;
 
 import org.springframework.test.util.ReflectionTestUtils;
 import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
+import site.codemonster.comon.domain.article.entity.Article;
+import site.codemonster.comon.domain.article.enums.ArticleCategory;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.problem.entity.ProblemStep;
@@ -21,6 +23,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public final class TestUtil {
+
+    public static Article createArticle(Team team, Member member) {
+        return new Article(team, member, "제목", "내용", ArticleCategory.NORMAL);
+    }
 
     public static Team createTeamWithId() {
         Team team = new Team("팀이름", Topic.CODINGTEST, "팀설명", 10, "1234");

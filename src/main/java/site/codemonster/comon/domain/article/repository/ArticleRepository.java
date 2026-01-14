@@ -32,7 +32,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findByTeamTeamIdWithImages(@Param("teamId") Long teamId);
 
     @Query("SELECT a FROM Article a LEFT JOIN FETCH a.images WHERE a.articleId = :articleId AND a.articleCategory = 'NORMAL'")
-    Optional<Article> findByIdWithImages(@Param("articleId") Long articleId);
+    Optional<Article>  findByIdWithImages(@Param("articleId") Long articleId);
 
     @Query("SELECT a FROM Article a " +
         "JOIN FETCH a.member " +

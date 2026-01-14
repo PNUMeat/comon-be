@@ -41,7 +41,7 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @PostMapping
-    public ResponseEntity<?> createArticle(
+    public ResponseEntity<ApiResponse<ArticleCreateResponse>> createArticle(
             @AuthenticationPrincipal Member member,
             @RequestBody @Valid ArticleCreateRequest articleCreateRequest
     ) {
@@ -93,9 +93,9 @@ public class ArticleController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateArticle(
+    public ResponseEntity<ApiResponse<Void>> updateArticle(
             @PathVariable(name = "id") Long articleId,
-            @RequestBody ArticleUpdateRequest articleUpdateRequest,
+            @Valid @RequestBody ArticleUpdateRequest articleUpdateRequest,
             @AuthenticationPrincipal Member member
     ) {
         articleService.updateArticle(articleId, articleUpdateRequest, member);
