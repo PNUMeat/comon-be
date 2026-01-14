@@ -9,6 +9,8 @@ public class NotEmptyHtmlValidator implements ConstraintValidator<NotEmptyHtml, 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
 
+        if (value == null) return false;
+
         boolean isEmpty = Jsoup.parse(value).text().trim().isEmpty();
 
         if (isEmpty) return false;
