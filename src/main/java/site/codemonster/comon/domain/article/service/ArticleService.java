@@ -50,12 +50,11 @@ public class ArticleService {
                 member,
                 articleCreateRequest.articleTitle(),
                 articleCreateRequest.articleBody(),
-                ArticleCategory.NORMAL
+                ArticleCategory.NORMAL,
+                articleCreateRequest.isVisible()
         );
 
-        Article savedArticle = articleLowService.save(article);
-
-        return savedArticle;
+        return articleLowService.save(article);
     }
 
     public void deleteArticle(Long articleId, Member member) {
@@ -77,7 +76,7 @@ public class ArticleService {
             throw new UnauthorizedActionException();
         }
 
-        article.updateArticle(articleUpdateRequest.articleTitle(), articleUpdateRequest.articleBody());
+        article.updateArticle(articleUpdateRequest.articleTitle(), articleUpdateRequest.articleBody(), articleUpdateRequest.isVisible());
     }
 
     @Transactional(readOnly = true)
@@ -164,6 +163,7 @@ public class ArticleService {
                 .articleBody(teamSubjectRequest.articleBody())
                 .articleCategory(fromName(teamSubjectRequest.articleCategory()))
                 .selectedDate(selectedDate)
+                .isVisible(true)
                 .build();
     }
 
@@ -178,6 +178,7 @@ public class ArticleService {
                 .articleBody(content.body())
                 .articleCategory(ArticleCategory.CODING_TEST)
                 .selectedDate(date)
+                .isVisible(true)
                 .build();
 
         articleLowService.save(article);

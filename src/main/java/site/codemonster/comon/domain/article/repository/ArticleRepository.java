@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
-    Optional<Article> findByArticleId(Long articleId);
+
     boolean existsByTeamAndSelectedDateAndArticleCategoryIn(Team team, LocalDate selectedDate, List<ArticleCategory> articleCategories);
 
     List<Article> findArticleByTeamTeamIdAndMemberId(Long teamId, Long memberId);
@@ -25,10 +25,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Query("SELECT a FROM Article a "
             + "JOIN FETCH a.member "
             + "JOIN FETCH a.team "
-            + "WHERE a.member.id = :memberId AND a.team.teamId = :teamId AND a.articleCategory = 'NORMAL'")
+            + "WHERE a.member.id = :memberId AND a.team.teamId = :teamId AND a.articleCategory = 'NORMAL' AND a.isVisible = true")
     Page<Article> findArticleByMemberIdAndByTeamIdUsingPage(@Param("memberId") Long memberId, @Param("teamId") Long teamId, Pageable pageable);
 
-    @Query("SELECT a FROM Article a LEFT JOIN FETCH a.images WHERE a.team.teamId = :teamId AND a.articleCategory = 'NORMAL'")
+    @Query("SELECT a FROM Article a LEFT JOIN FETCH a.images WHERE a.team.teamId = :teamId AND a.articleCategory = 'NORMAL' AND a.isVisible = true")
     List<Article> findByTeamTeamIdWithImages(@Param("teamId") Long teamId);
 
     @Query("SELECT a FROM Article a LEFT JOIN FETCH a.images WHERE a.articleId = :articleId AND a.articleCategory = 'NORMAL'")
@@ -39,6 +39,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
         "WHERE a.team.teamId = :teamId " +
         "AND DATE(a.createdDate) = :date " +
         "AND a.articleCategory = 'NORMAL' " +
+        "AND a.isVisible = true " +
         "ORDER BY a.createdDate DESC")
     Page<Article> findByTeamIdAndDateWithMember(@Param("teamId") Long teamId, @Param("date") LocalDate date, Pageable pageable);
 
@@ -67,6 +68,4 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Article a WHERE a.member.id = :memberId AND a.team.teamId = :teamId")
     void deleteByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
-
-    boolean existsByTeamAndSelectedDateAndArticleCategory(Team team, LocalDate selectedDate, ArticleCategory articleCategory);
 }
