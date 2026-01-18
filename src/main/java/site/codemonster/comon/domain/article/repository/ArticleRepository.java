@@ -26,10 +26,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             + "JOIN FETCH a.member "
             + "JOIN FETCH a.team "
             + "WHERE a.member.id = :memberId AND a.team.teamId = :teamId AND a.articleCategory = 'NORMAL' AND a.isVisible = true")
-    Page<Article> findArticleByMemberIdAndByTeamIdUsingPage(@Param("memberId") Long memberId, @Param("teamId") Long teamId, Pageable pageable);
+    Page<Article> findVisibleArticleByMemberIdAndByTeamIdUsingPage(@Param("memberId") Long memberId, @Param("teamId") Long teamId, Pageable pageable);
 
     @Query("SELECT a FROM Article a LEFT JOIN FETCH a.images WHERE a.team.teamId = :teamId AND a.articleCategory = 'NORMAL' AND a.isVisible = true")
-    List<Article> findByTeamTeamIdWithImages(@Param("teamId") Long teamId);
+    List<Article> findVisibleByTeamTeamIdWithImages(@Param("teamId") Long teamId);
 
     @Query("SELECT a FROM Article a LEFT JOIN FETCH a.images WHERE a.articleId = :articleId AND a.articleCategory = 'NORMAL'")
     Optional<Article>  findByIdWithImages(@Param("articleId") Long articleId);
@@ -41,7 +41,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
         "AND a.articleCategory = 'NORMAL' " +
         "AND a.isVisible = true " +
         "ORDER BY a.createdDate DESC")
-    Page<Article> findByTeamIdAndDateWithMember(@Param("teamId") Long teamId, @Param("date") LocalDate date, Pageable pageable);
+    Page<Article> findVisibleByTeamIdAndDateWithMember(@Param("teamId") Long teamId, @Param("date") LocalDate date, Pageable pageable);
 
 
 
