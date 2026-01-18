@@ -47,7 +47,7 @@ public class ApiResponse<T> {
     }
 
     public static ApiResponse<Map<String,String>> validationErrorResponse(ErrorValidationResult e){
-        return new ApiResponse<>(FAIL, ErrorValidationResult.ERROR_STATUS_CODE, ErrorValidationResult.ERROR_MESSAGE, e.getValidation());
+        return new ApiResponse<>(FAIL, ErrorValidationResult.ERROR_STATUS_CODE, e.getErrorMessage(), e.getValidation());
     }
 
     public static ApiResponse<Void> errorResponse(ErrorResult error){

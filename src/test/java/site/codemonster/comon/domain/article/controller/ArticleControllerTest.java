@@ -2,11 +2,8 @@ package site.codemonster.comon.domain.article.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +19,6 @@ import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
-import site.codemonster.comon.domain.team.dto.response.TeamCreateResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
@@ -120,6 +116,7 @@ class ArticleControllerTest {
         assertSoftly(softly -> {
             softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
             softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.FAIL);
+            softly.assertThat(apiResponse.getMessage()).isEqualTo("게시글 내용은 필수요소입니다");
             softly.assertThat(apiResponse.getData().get("articleBody")).isEqualTo("게시글 내용은 필수요소입니다");
         });
     }
@@ -153,6 +150,7 @@ class ArticleControllerTest {
         assertSoftly(softly -> {
             softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
             softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.FAIL);
+            softly.assertThat(apiResponse.getMessage()).isEqualTo("게시글 내용은 필수요소입니다");
             softly.assertThat(apiResponse.getData().get("articleBody")).isEqualTo("게시글 내용은 필수요소입니다");
         });
     }
