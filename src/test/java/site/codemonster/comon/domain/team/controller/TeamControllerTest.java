@@ -78,7 +78,7 @@ class TeamControllerTest {
 
     @ParameterizedTest
     @ValueSource(ints = {0,51})
-    @DisplayName("팀 생성 실패")
+    @DisplayName("팀 생성 실패 - 팀원 수는 1이상 50 이하")
     void teamCreateFail(int memberLimit) throws Exception {
 
         Member member = memberRepository.save(TestUtil.createMember());
@@ -106,7 +106,7 @@ class TeamControllerTest {
             softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.FAIL);
             softly.assertThat(data.get("memberLimit")).isEqualTo("1 ~ 50 사이의 숫자를 입력해주세요.");
             softly.assertThat(apiResponse.getCode()).isEqualTo(ErrorValidationResult.ERROR_STATUS_CODE);
-            softly.assertThat(apiResponse.getMessage()).isEqualTo(ErrorValidationResult.ERROR_MESSAGE);
+            softly.assertThat(apiResponse.getMessage()).isEqualTo("1 ~ 50 사이의 숫자를 입력해주세요.");
         });
     }
 

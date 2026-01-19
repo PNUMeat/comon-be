@@ -29,6 +29,11 @@ public class GlobalExceptionHandler {
       errorValidationResult.addValidation(fieldError.getField(), fieldError.getDefaultMessage());
     }
 
+    // 가장 최근의 message를 대표 errorMessage로 설정
+    if (!e.getBindingResult().getFieldErrors().isEmpty()) {
+      errorValidationResult.setErrorMessage(e.getBindingResult().getFieldErrors().get(0).getDefaultMessage());
+    }
+
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .contentType(MediaType.APPLICATION_JSON)
         .body(ApiResponse.validationErrorResponse(errorValidationResult));

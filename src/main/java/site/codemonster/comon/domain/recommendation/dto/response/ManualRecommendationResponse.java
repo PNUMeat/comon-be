@@ -14,17 +14,9 @@ public record ManualRecommendationResponse(
         String message = String.format("%d개 날짜에 총 %d개 문제가 추천되었습니다.",
                 createdArticleTitles.size(), totalRecommended);
 
-        return new ManualRecommendationResponse(
-                totalRecommended,
-                createdArticleTitles.size(),
-                createdArticleTitles,
-                message
-        );
-    }
+        if (createdArticleTitles.isEmpty())
+            message = "문제 추천 실패 (추천할 문제가 부족합니다.)";
 
-    public static ManualRecommendationResponse of(int totalRecommended,
-                                                  List<String> createdArticleTitles,
-                                                  String message) {
         return new ManualRecommendationResponse(
                 totalRecommended,
                 createdArticleTitles.size(),
