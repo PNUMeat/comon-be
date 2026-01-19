@@ -30,13 +30,13 @@ public class ArticleLowService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Article> getMyArticlesUsingPaging(Long memberId, Long teamId, Pageable pageable){
-        return articleRepository.findArticleByMemberIdAndByTeamIdUsingPage(memberId, teamId, pageable);
+    public Page<Article> getMyVisibleArticlesUsingPaging(Long memberId, Long teamId, Pageable pageable){
+        return articleRepository.findVisibleArticleByMemberIdAndByTeamIdUsingPage(memberId, teamId, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<Article> getAllArticlesByTeam(Long teamId){
-        return articleRepository.findByTeamTeamIdWithImages(teamId);
+    public List<Article> getAllVisibleArticlesByTeam(Long teamId){
+        return articleRepository.findVisibleByTeamTeamIdWithImages(teamId);
     }
 
     @Transactional(readOnly = true)
@@ -64,9 +64,9 @@ public class ArticleLowService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Article> findByTeamIdAndDateWithMember(Long teamId, LocalDate date, Pageable pageable) {
+    public Page<Article> findVisibleByTeamIdAndDateWithMember(Long teamId, LocalDate date, Pageable pageable) {
 
-        return articleRepository.findByTeamIdAndDateWithMember(teamId, date, pageable);
+        return articleRepository.findVisibleByTeamIdAndDateWithMember(teamId, date, pageable);
     }
 
     @Transactional(readOnly = true)

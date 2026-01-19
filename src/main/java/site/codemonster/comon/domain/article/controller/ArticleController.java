@@ -45,14 +45,11 @@ public class ArticleController {
             @AuthenticationPrincipal Member member,
             @RequestBody @Valid ArticleCreateRequest articleCreateRequest
     ) {
-
         Article savedArticle = articleService.articleCreate(member, articleCreateRequest);
-
-        ArticleCreateResponse articleCreateResponse = ArticleCreateResponse.of(savedArticle);
 
         return ResponseEntity.status(ARTICLE_CREATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.createResponse(articleCreateResponse, ARTICLE_CREATE_SUCCESS.getMessage()));
+                .body(ApiResponse.createResponse(new ArticleCreateResponse(savedArticle), ARTICLE_CREATE_SUCCESS.getMessage()));
     }
 
     @GetMapping("/{teamId}/my-page")

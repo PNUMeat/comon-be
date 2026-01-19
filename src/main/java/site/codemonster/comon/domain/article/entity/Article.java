@@ -40,12 +40,21 @@ public class Article extends TimeStamp {
 
     private LocalDate selectedDate;
 
+    @Column(nullable = false)
+    private Boolean isVisible;
+
     @OneToMany(mappedBy = "article")
     private List<ArticleImage> images = new ArrayList<>();
 
     public void updateArticle(String articleTitle, String articleBody){
         this.articleTitle = articleTitle;
         this.articleBody = articleBody;
+    }
+
+    public void updateArticle(String articleTitle, String articleBody, Boolean isVisible){
+        this.articleTitle = articleTitle;
+        this.articleBody = articleBody;
+        this.isVisible = isVisible;
     }
 
     public void updateSubject(String articleTitle, String articleBody, String articleCategory){
@@ -59,24 +68,26 @@ public class Article extends TimeStamp {
     protected Article() {}
 
     public Article(Team team, Member member, String articleTitle, String articleBody,
-                   ArticleCategory articleCategory) {
+                   ArticleCategory articleCategory, Boolean isVisible) {
         this.team = team;
         this.member = member;
         this.articleTitle = articleTitle;
         this.articleBody = articleBody;
         this.articleCategory = articleCategory;
         this.selectedDate = null;
+        this.isVisible = isVisible;
     }
 
     @Builder
     public Article(Team team, Member member, String articleTitle, String articleBody,
-                   ArticleCategory articleCategory, LocalDate selectedDate) {
+                   ArticleCategory articleCategory, LocalDate selectedDate, Boolean isVisible) {
         this.team = team;
         this.member = member;
         this.articleTitle = articleTitle;
         this.articleBody = articleBody;
         this.articleCategory = articleCategory;
         this.selectedDate = selectedDate;
+        this.isVisible = isVisible;
     }
 
     public void addImage(ArticleImage image) {

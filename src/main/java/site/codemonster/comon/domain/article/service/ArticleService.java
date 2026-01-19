@@ -50,12 +50,11 @@ public class ArticleService {
                 member,
                 articleCreateRequest.articleTitle(),
                 articleCreateRequest.articleBody(),
-                ArticleCategory.NORMAL
+                ArticleCategory.NORMAL,
+                articleCreateRequest.isVisible()
         );
 
-        Article savedArticle = articleLowService.save(article);
-
-        return savedArticle;
+        return articleLowService.save(article);
     }
 
     public void deleteArticle(Long articleId, Member member) {
@@ -77,12 +76,12 @@ public class ArticleService {
             throw new UnauthorizedActionException();
         }
 
-        article.updateArticle(articleUpdateRequest.articleTitle(), articleUpdateRequest.articleBody());
+        article.updateArticle(articleUpdateRequest.articleTitle(), articleUpdateRequest.articleBody(), articleUpdateRequest.isVisible());
     }
 
     @Transactional(readOnly = true)
     public Page<ArticleParticularDateResponse>  getArticlesByTeamAndDate(Long teamId, LocalDate date, Member member, Pageable pageable) {
-        Page<Article> articlePage = articleLowService.findByTeamIdAndDateWithMember(teamId, date, pageable);
+        Page<Article> articlePage = articleLowService.findVisibleByTeamIdAndDateWithMember(teamId, date, pageable);
 
         boolean isMyTeam = teamMemberLowService.existsByTeamIdAndMemberId(teamId, member);
 
@@ -164,6 +163,7 @@ public class ArticleService {
                 .articleBody(teamSubjectRequest.articleBody())
                 .articleCategory(fromName(teamSubjectRequest.articleCategory()))
                 .selectedDate(selectedDate)
+                .isVisible(true)
                 .build();
     }
 
@@ -178,6 +178,7 @@ public class ArticleService {
                 .articleBody(content.body())
                 .articleCategory(ArticleCategory.CODING_TEST)
                 .selectedDate(date)
+                .isVisible(true)
                 .build();
 
         articleLowService.save(article);
@@ -195,14 +196,14 @@ public class ArticleService {
 
     @Transactional(readOnly = true)
     public Page<ArticleResponse> getMyArticleResponseUsingPaging(Long teamId, Member member, Pageable pageable) {
-        Page<Article> myArticles = articleLowService.getMyArticlesUsingPaging(member.getId(), teamId, pageable);
+        Page<Article> myArticles = articleLowService.getMyVisibleArticlesUsingPaging(member.getId(), teamId, pageable);
 
         return myArticles.map(ArticleResponse::new);
     }
 
     @Transactional(readOnly = true)
     public List<ArticleResponse> getAllArticleResponseByTeam(Long teamId) {
-        List<Article> articles = articleLowService.getAllArticlesByTeam(teamId);
+        List<Article> articles = articleLowService.getAllVisibleArticlesByTeam(teamId);
         return articles.stream()
                 .map(ArticleResponse::new)
                 .toList();

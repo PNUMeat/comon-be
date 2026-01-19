@@ -5,7 +5,9 @@ import site.codemonster.comon.domain.article.entity.Article;
 public record ArticleCreateResponse(
         Long articleId
 ) {
-    public static ArticleCreateResponse of(Article article){
-        return new ArticleCreateResponse(article.getArticleId());
+    public ArticleCreateResponse(Article article){
+        this (
+                article.getArticleId()
+        );
     }
 }
