@@ -25,7 +25,7 @@ public class ArticleFeedbackController {
     private final ArticleFeedbackHighService articleFeedbackService;
     private final AiArticleFeedBackService aiArticleFeedBackService;
 
-    @GetMapping(value = "/{articleId}/feedback/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/{articleId}/feedback/stream", produces = "text/event-stream;charset=UTF-8")
     public ResponseEntity<Flux<ArticleFeedbackStreamResponse>> generateFeedback(
             @PathVariable Long articleId,
             @AuthenticationPrincipal Member member
