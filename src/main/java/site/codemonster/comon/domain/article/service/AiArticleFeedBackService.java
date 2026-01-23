@@ -18,7 +18,6 @@ import site.codemonster.comon.domain.article.entity.ArticleFeedback;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.global.error.ArticleFeedback.AIFeedbackGenerationException;
 import site.codemonster.comon.global.globalConfig.FeedbackPromptConfig;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,25 +61,32 @@ public class AiArticleFeedBackService {
         return chatClient.prompt(prompt)
                 .stream()
                 .content()
-                .mapNotNull(token-> {
-                    messageBuffer.append(token);
-                    return ArticleFeedbackStreamResponse.createStream(token);
+                .publish(contentFlux -> {
+                    Flux<ArticleFeedbackStreamResponse> clientStream = contentFlux
+                            .map(ArticleFeedbackStreamResponse::createStream);
+
+                    contentFlux
+                            .reduce(new StringBuffer(), StringBuffer::append)
+                            .flatMap(finalBuffer -> Mono.fromRunnable(() -> {
+                                saveToDb(article, finalBuffer.toString());
+                            }))
+                            .subscribe();
+
+                    return clientStream;
                 })
                 .onErrorMap(e-> {
                     log.error("ai 피드백 호출 실패 errorMessage = {}", e.getMessage());
                     throw new AIFeedbackGenerationException();
                 })
                 .concatWith(
-                        Mono.just(ArticleFeedbackStreamResponse.complete()))
-                .doOnComplete(()-> {
-                    String finalText = messageBuffer.toString();
-                    transactionTemplate.execute(status -> {
-                        ArticleFeedback feedback = new ArticleFeedback(article, finalText);
-                        articleFeedbackLowService.deleteByArticleId(feedback.getArticle().getArticleId());
-                        return articleFeedbackLowService.save(feedback);
-                    });
-                });
+                        Mono.just(ArticleFeedbackStreamResponse.complete()));
     }
 
+    private void saveToDb(Article article, String finalText) {
+        transactionTemplate.execute(status -> {
+            articleFeedbackLowService.deleteByArticleId(article.getArticleId());
+            return articleFeedbackLowService.save(new ArticleFeedback(article, finalText));
+        });
+    }
 
 }
