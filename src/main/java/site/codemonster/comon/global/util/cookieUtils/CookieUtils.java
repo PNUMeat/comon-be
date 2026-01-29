@@ -32,7 +32,7 @@ public class CookieUtils {
         return ResponseCookie.from(REFRESH_TOKEN, value)
                 .path("/")
                 .secure(secure)
-                .maxAge(20 * 60 * 60)
+                .maxAge(25 * 60 * 60)
                 .domain(domainProperties.getDomainName())
                 .httpOnly(true)
                 .sameSite(same).build().toString();
@@ -44,7 +44,7 @@ public class CookieUtils {
         return ResponseCookie.from(ACCESS_TOKEN, value)
                 .path("/")
                 .secure(secure)
-                .maxAge(20 * 20 * 60)
+                .maxAge(25 * 60 * 60)
                 .domain(domainProperties.getDomainName())
                 .httpOnly(true)
                 .sameSite(same).build().toString();
