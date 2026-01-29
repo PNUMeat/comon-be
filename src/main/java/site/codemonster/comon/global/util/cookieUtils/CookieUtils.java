@@ -44,7 +44,7 @@ public class CookieUtils {
         return ResponseCookie.from(ACCESS_TOKEN, value)
                 .path("/")
                 .secure(secure)
-                .maxAge(24 * 60)
+                .maxAge(20 * 20 * 60)
                 .domain(domainProperties.getDomainName())
                 .httpOnly(true)
                 .sameSite(same).build().toString();
