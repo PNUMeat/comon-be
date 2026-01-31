@@ -10,13 +10,6 @@ public final class S3ImageUtil {
         bucketUrl = String.format("https://%s.s3.%s.amazonaws.com", bucket, region);
     }
 
-    public static String convertObjectKeyToImageUrl(String objectKey) {
-        if (objectKey == null || objectKey.isEmpty()) {
-            return null;
-        }
-        return bucketUrl + "/" + objectKey;
-    }
-
     public static String convertImageUrlToObjectKey(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) {
             return null;

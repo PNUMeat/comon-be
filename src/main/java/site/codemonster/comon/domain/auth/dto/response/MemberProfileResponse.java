@@ -12,7 +12,7 @@ public record MemberProfileResponse(
     public MemberProfileResponse(Member member) {
         this(
                 member.getMemberName(),
-                S3ImageUtil.convertObjectKeyToImageUrl(member.getImageUrl()),
+                member.getImageUrl(),
                 member.getDescription(),
                 member.getUuid()
         );

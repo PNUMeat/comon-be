@@ -19,7 +19,7 @@ public record TeamMemberResponse(String uuid,
                 teamMember.getMember().getUuid(),
                 teamMember.getMember().getMemberName(),
                 teamMember.getMember().getDescription(),
-                S3ImageUtil.convertObjectKeyToImageUrl(teamMember.getMember().getImageUrl()),
+                teamMember.getMember().getImageUrl(),
                 teamMember.getCreatedDate(),
                 teamMember.getIsTeamManager()
         );

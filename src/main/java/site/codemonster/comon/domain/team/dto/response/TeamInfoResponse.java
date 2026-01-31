@@ -19,7 +19,7 @@ public record TeamInfoResponse(Long teamId,
                 team.getTeamTopic().getName(),
                 team.getMaxParticipant(),
                 team.getTeamPassword(),
-                S3ImageUtil.convertObjectKeyToImageUrl(team.getTeamIconUrl())
+                team.getTeamIconUrl()
         );
     }
 }

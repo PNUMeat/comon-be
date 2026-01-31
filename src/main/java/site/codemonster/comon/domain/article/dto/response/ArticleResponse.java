@@ -22,7 +22,7 @@ public record ArticleResponse(
                 article.getArticleBody(),
                 article.getCreatedDate(),
                 article.getMember().getMemberName(),
-                S3ImageUtil.convertObjectKeyToImageUrl(article.getMember().getImageUrl())
+                article.getMember().getImageUrl()
         );
     }
 }

@@ -14,7 +14,7 @@ public record MemberInfoResponse(
     public MemberInfoResponse(Member member, List<TeamAbstractResponse> teamAbstractResponses) {
         this(
                 member.getMemberName(),
-                S3ImageUtil.convertObjectKeyToImageUrl(member.getImageUrl()),
+                member.getImageUrl(),
                 teamAbstractResponses
         );
     }
