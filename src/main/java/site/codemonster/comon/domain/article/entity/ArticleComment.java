@@ -33,4 +33,12 @@ public class ArticleComment extends TimeStamp {
         this.member = member;
         this.description = description;
     }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public boolean isAuthor(Member member) {
+        return this.member.getId().equals(member.getId());
+    }
 }

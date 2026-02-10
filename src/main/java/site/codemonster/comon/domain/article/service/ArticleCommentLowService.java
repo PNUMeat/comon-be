@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.article.repository.ArticleCommentRepository;
+import site.codemonster.comon.global.error.ArticleComment.CommentNotFoundException;
 
 @Transactional
 @Service
@@ -21,5 +22,11 @@ public class ArticleCommentLowService {
     @Transactional(readOnly = true)
     public List<ArticleComment> findAllByArticleIdWithMember(Long articleId) {
         return articleCommentRepository.findAllByArticleIdWithMember(articleId);
+    }
+
+    @Transactional(readOnly = true)
+    public ArticleComment findById(Long commentId) {
+        return articleCommentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
     }
 }
