@@ -29,4 +29,8 @@ public class ArticleCommentLowService {
         return articleCommentRepository.findById(commentId)
                 .orElseThrow(CommentNotFoundException::new);
     }
+
+    public void delete(ArticleComment comment) {
+        articleCommentRepository.delete(comment);
+    }
 }

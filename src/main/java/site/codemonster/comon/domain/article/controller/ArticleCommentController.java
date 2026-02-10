@@ -63,4 +63,17 @@ public class ArticleCommentController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponse(new ArticleCommentUpdateResponse(updatedComment), COMMENT_UPDATE_SUCCESS.getMessage()));
     }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
+            @AuthenticationPrincipal Member member,
+            @PathVariable("articleId") Long articleId,
+            @PathVariable("commentId") Long commentId
+    ) {
+        articleCommentHighService.deleteComment(articleId, commentId, member);
+
+        return ResponseEntity.status(COMMENT_DELETE_SUCCESS.getStatusCode())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponseWithMessage(COMMENT_DELETE_SUCCESS.getMessage()));
+    }
 }

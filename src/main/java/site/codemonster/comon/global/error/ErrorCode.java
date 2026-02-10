@@ -32,6 +32,7 @@ public enum ErrorCode {
     COMMENT_NOT_TEAM_MEMBER_READ_ERROR(HttpStatus.FORBIDDEN, 403, "팀 멤버만 댓글을 조회할 수 있습니다."),
     COMMENT_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, 404, "존재하지 않는 댓글입니다."),
     COMMENT_NOT_AUTHOR_ERROR(HttpStatus.FORBIDDEN, 403, "본인이 작성한 댓글만 수정할 수 있습니다."),
+    COMMENT_NOT_AUTHOR_DELETE_ERROR(HttpStatus.FORBIDDEN, 403, "본인이 작성한 댓글만 삭제할 수 있습니다."),
 
     //TEAM
     TOPIC_INVALID_ERROR(HttpStatus.BAD_REQUEST,400, "주제가 올바른 형식이 아닙니다."),

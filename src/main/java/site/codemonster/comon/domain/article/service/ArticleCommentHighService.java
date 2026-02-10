@@ -12,6 +12,7 @@ import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
+import site.codemonster.comon.global.error.ArticleComment.CommentDeleteNotAuthorException;
 import site.codemonster.comon.global.error.ArticleComment.CommentNotAuthorException;
 import site.codemonster.comon.global.error.ArticleComment.CommentNotTeamMemberException;
 import site.codemonster.comon.global.error.ArticleComment.CommentReadNotTeamMemberException;
@@ -70,5 +71,17 @@ public class ArticleCommentHighService {
 
         comment.updateDescription(request.description());
         return comment;
+    }
+
+    public void deleteComment(Long articleId, Long commentId, Member member) {
+        articleLowService.findById(articleId);
+
+        ArticleComment comment = articleCommentLowService.findById(commentId);
+
+        if (!comment.isAuthor(member)) {
+            throw new CommentDeleteNotAuthorException();
+        }
+
+        articleCommentLowService.delete(comment);
     }
 }
