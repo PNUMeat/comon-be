@@ -11,6 +11,7 @@ import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.global.error.ArticleComment.CommentNotAuthorException;
+import site.codemonster.comon.global.error.ArticleComment.CommentNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ public class ArticleCommentHighService {
         ArticleComment comment = articleCommentLowService.findById(commentId);
 
         teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
-        validateCommentAuthor(comment, member);
+        validateCommentOwnership(comment, articleId, member);
 
         comment.updateDescription(request.description());
         return comment;
@@ -58,12 +59,15 @@ public class ArticleCommentHighService {
         ArticleComment comment = articleCommentLowService.findById(commentId);
 
         teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
-        validateCommentAuthor(comment, member);
+        validateCommentOwnership(comment, articleId, member);
 
         articleCommentLowService.delete(comment);
     }
 
-    private void validateCommentAuthor(ArticleComment comment, Member member) {
+    private void validateCommentOwnership(ArticleComment comment, Long articleId, Member member) {
+        if (!comment.getArticle().getArticleId().equals(articleId)) {
+            throw new CommentNotFoundException();
+        }
         if (!comment.isAuthor(member)) {
             throw new CommentNotAuthorException();
         }
