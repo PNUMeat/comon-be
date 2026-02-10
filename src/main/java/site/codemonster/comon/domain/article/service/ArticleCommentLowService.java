@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.article.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,5 +16,10 @@ public class ArticleCommentLowService {
 
     public ArticleComment save(ArticleComment comment) {
         return articleCommentRepository.save(comment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ArticleComment> findAllByArticleIdWithMember(Long articleId) {
+        return articleCommentRepository.findAllByArticleIdWithMember(articleId);
     }
 }
