@@ -4,15 +4,13 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.codemonster.comon.domain.article.dto.request.ArticleCommentCreateRequest;
-import site.codemonster.comon.domain.article.dto.request.ArticleCommentUpdateRequest;
+import site.codemonster.comon.domain.article.dto.request.ArticleCommentRequest;
 import site.codemonster.comon.domain.article.dto.response.ArticleCommentListResponse;
 import site.codemonster.comon.domain.article.dto.response.ArticleCommentResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
-import site.codemonster.comon.global.error.ArticleComment.CommentDeleteNotAuthorException;
 import site.codemonster.comon.global.error.ArticleComment.CommentNotAuthorException;
 
 @Service
@@ -24,7 +22,7 @@ public class ArticleCommentHighService {
     private final ArticleLowService articleLowService;
     private final TeamMemberLowService teamMemberLowService;
 
-    public ArticleComment createComment(Long articleId, Member member, ArticleCommentCreateRequest request) {
+    public ArticleComment createComment(Long articleId, Member member, ArticleCommentRequest request) {
         Article article = articleLowService.findById(articleId);
 
         teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
@@ -45,7 +43,7 @@ public class ArticleCommentHighService {
         return new ArticleCommentListResponse(responses);
     }
 
-    public ArticleComment updateComment(Long articleId, Long commentId, Member member, ArticleCommentUpdateRequest request) {
+    public ArticleComment updateComment(Long articleId, Long commentId, Member member, ArticleCommentRequest request) {
         Article article = articleLowService.findById(articleId);
         ArticleComment comment = articleCommentLowService.findById(commentId);
 
