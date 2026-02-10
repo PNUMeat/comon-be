@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.dto.request.ArticleCommentRequest;
-import site.codemonster.comon.domain.article.dto.response.ArticleCommentListResponse;
 import site.codemonster.comon.domain.article.dto.response.ArticleCommentResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
@@ -31,16 +30,16 @@ public class ArticleCommentHighService {
     }
 
     @Transactional(readOnly = true)
-    public ArticleCommentListResponse getComments(Long articleId, Member member) {
+    public List<ArticleCommentResponse> getComments(Long articleId, Member member) {
         Article article = articleLowService.findById(articleId);
 
         teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
 
         List<ArticleComment> comments = articleCommentLowService.findAllByArticleIdWithMember(articleId);
-        List<ArticleCommentResponse> responses = comments.stream()
+
+        return comments.stream()
                 .map(ArticleCommentResponse::new)
                 .toList();
-        return new ArticleCommentListResponse(responses);
     }
 
     public ArticleComment updateComment(Long articleId, Long commentId, Member member, ArticleCommentRequest request) {

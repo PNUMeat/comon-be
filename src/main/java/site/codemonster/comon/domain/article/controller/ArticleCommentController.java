@@ -1,6 +1,7 @@
 package site.codemonster.comon.domain.article.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import site.codemonster.comon.domain.article.dto.request.ArticleCommentRequest;
 import site.codemonster.comon.domain.article.dto.response.ArticleCommentIdResponse;
-import site.codemonster.comon.domain.article.dto.response.ArticleCommentListResponse;
+import site.codemonster.comon.domain.article.dto.response.ArticleCommentResponse;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.article.service.ArticleCommentHighService;
 import site.codemonster.comon.domain.auth.entity.Member;
@@ -37,15 +38,15 @@ public class ArticleCommentController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<ArticleCommentListResponse>> getComments(
+    public ResponseEntity<ApiResponse<List<ArticleCommentResponse>>> getComments(
             @AuthenticationPrincipal Member member,
             @PathVariable("articleId") Long articleId
     ) {
-        ArticleCommentListResponse response = articleCommentHighService.getComments(articleId, member);
+        List<ArticleCommentResponse> responses = articleCommentHighService.getComments(articleId, member);
 
         return ResponseEntity.status(COMMENT_LIST_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponse(response, COMMENT_LIST_SUCCESS.getMessage()));
+                .body(ApiResponse.successResponse(responses, COMMENT_LIST_SUCCESS.getMessage()));
     }
 
     @PatchMapping("/{commentId}")
