@@ -15,11 +15,9 @@ public final class S3ImageUtil {
             return null;
         }
         String urlPrefix = bucketUrl + "/";
-        if (imageUrl.startsWith(urlPrefix)) {
-            return imageUrl.substring(urlPrefix.length());
-        } else {
-            throw new ComonException(INVALID_IMAGE_URL_FORMAT);
-        }
+        if (!imageUrl.startsWith(urlPrefix)) {
+            return urlPrefix + imageUrl;
+        } else return imageUrl;
     }
 
     public static String getBucketUrl() {
