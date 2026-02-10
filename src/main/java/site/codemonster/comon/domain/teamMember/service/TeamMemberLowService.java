@@ -107,4 +107,11 @@ public class TeamMemberLowService {
     public void deleteByMemberId(Long memberId){
         teamMemberRepository.deleteByMemberId(memberId);
     }
+
+    @Transactional(readOnly = true)
+    public void validateTeamMember(Long teamId, Member member) {
+        if (!teamMemberRepository.existsByTeamTeamIdAndMemberId(teamId, member.getId())) {
+            throw new TeamMemberInvalidException();
+        }
+    }
 }

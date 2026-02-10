@@ -14,8 +14,6 @@ import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.global.error.ArticleComment.CommentDeleteNotAuthorException;
 import site.codemonster.comon.global.error.ArticleComment.CommentNotAuthorException;
-import site.codemonster.comon.global.error.ArticleComment.CommentNotTeamMemberException;
-import site.codemonster.comon.global.error.ArticleComment.CommentReadNotTeamMemberException;
 
 @Service
 @RequiredArgsConstructor
@@ -29,26 +27,18 @@ public class ArticleCommentHighService {
     public ArticleComment createComment(Long articleId, Member member, ArticleCommentCreateRequest request) {
         Article article = articleLowService.findById(articleId);
 
-        Long teamId = article.getTeam().getTeamId();
-        if (!teamMemberLowService.existsByTeamIdAndMemberId(teamId, member)) {
-            throw new CommentNotTeamMemberException();
-        }
+        teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
 
-        ArticleComment comment = new ArticleComment(article, member, request.description());
-        return articleCommentLowService.save(comment);
+        return articleCommentLowService.save(new ArticleComment(article, member, request.description()));
     }
 
     @Transactional(readOnly = true)
     public ArticleCommentListResponse getComments(Long articleId, Member member) {
         Article article = articleLowService.findById(articleId);
 
-        Long teamId = article.getTeam().getTeamId();
-        if (!teamMemberLowService.existsByTeamIdAndMemberId(teamId, member)) {
-            throw new CommentReadNotTeamMemberException();
-        }
+        teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
 
         List<ArticleComment> comments = articleCommentLowService.findAllByArticleIdWithMember(articleId);
-
         List<ArticleCommentResponse> responses = comments.stream()
                 .map(ArticleCommentResponse::new)
                 .toList();
@@ -57,31 +47,28 @@ public class ArticleCommentHighService {
 
     public ArticleComment updateComment(Long articleId, Long commentId, Member member, ArticleCommentUpdateRequest request) {
         Article article = articleLowService.findById(articleId);
-
-        Long teamId = article.getTeam().getTeamId();
-        if (!teamMemberLowService.existsByTeamIdAndMemberId(teamId, member)) {
-            throw new CommentNotTeamMemberException();
-        }
-
         ArticleComment comment = articleCommentLowService.findById(commentId);
 
-        if (!comment.isAuthor(member)) {
-            throw new CommentNotAuthorException();
-        }
+        teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
+        validateCommentAuthor(comment, member);
 
         comment.updateDescription(request.description());
         return comment;
     }
 
     public void deleteComment(Long articleId, Long commentId, Member member) {
-        articleLowService.findById(articleId);
-
+        Article article = articleLowService.findById(articleId);
         ArticleComment comment = articleCommentLowService.findById(commentId);
 
-        if (!comment.isAuthor(member)) {
-            throw new CommentDeleteNotAuthorException();
-        }
+        teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
+        validateCommentAuthor(comment, member);
 
         articleCommentLowService.delete(comment);
+    }
+
+    private void validateCommentAuthor(ArticleComment comment, Member member) {
+        if (!comment.isAuthor(member)) {
+            throw new CommentNotAuthorException();
+        }
     }
 }
