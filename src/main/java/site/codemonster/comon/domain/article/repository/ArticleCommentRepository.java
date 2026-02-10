@@ -9,6 +9,9 @@ import java.util.List;
 
 public interface ArticleCommentRepository extends JpaRepository<ArticleComment, Long> {
 
-    @Query("SELECT c FROM ArticleComment c JOIN FETCH c.member WHERE c.article.articleId = :articleId ORDER BY c.createdDate ASC")
+    @Query("SELECT comment FROM ArticleComment comment " +
+            "JOIN FETCH comment.member " +
+            "WHERE comment.article.articleId = :articleId " +
+            "ORDER BY comment.createdDate ASC")
     List<ArticleComment> findAllByArticleIdWithMember(@Param("articleId") Long articleId);
 }
