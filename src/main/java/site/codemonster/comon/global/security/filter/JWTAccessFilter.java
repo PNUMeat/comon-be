@@ -82,8 +82,8 @@ public class JWTAccessFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 회원가입 요청이면 pass
-        if(!isJoinRequest(request) && member.getMemberName() == null) {
+        // 회원가입 요청이거나 사진 요청이면 pass
+        if(!isJoinOrImageRequest(request) && member.getMemberName() == null) {
             responseUtils.generateErrorResponseInHttpServletResponse(ErrorCode.NOT_COMPLETE_SIGN_UP_ERROR, response);
             return;
         }
@@ -106,10 +106,15 @@ public class JWTAccessFilter extends OncePerRequestFilter {
         return request.getRequestURI().contains("/api/v1/reissue");
     }
 
-    private boolean isJoinRequest(HttpServletRequest request) {
+
+    private boolean isJoinOrImageRequest(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         String method = request.getMethod();
         if (requestURI.equals("/api/v1/members") && method.equals(HttpMethod.POST.name())) {
+            return true;
+        }
+
+        if (requestURI.startsWith("/api/v1/image/presigned-url") && method.equals(HttpMethod.POST.name())) {
             return true;
         }
 
