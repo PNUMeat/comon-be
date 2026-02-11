@@ -9,15 +9,19 @@ public record ArticleCommentResponse(
         String description,
         Long memberId,
         String memberName,
-        LocalDateTime createdAt
+        String memberImageUrl,
+        LocalDateTime createdAt,
+        Boolean isDeleted
 ) {
     public ArticleCommentResponse(ArticleComment comment) {
         this(
                 comment.getCommentId(),
-                comment.getDescription(),
-                comment.getMember().getId(),
-                comment.getMember().getMemberName(),
-                comment.getCreatedDate()
+                comment.getIsDeleted() ? "삭제된 댓글입니다" : comment.getDescription(),
+                comment.getIsDeleted() ? null : comment.getMember().getId(),
+                comment.getIsDeleted() ? null : comment.getMember().getMemberName(),
+                comment.getIsDeleted() ? null : comment.getMember().getImageUrl(),
+                comment.getCreatedDate(),
+                comment.getIsDeleted()
         );
     }
 }
