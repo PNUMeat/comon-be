@@ -1,6 +1,7 @@
 package site.codemonster.comon.domain.article.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +21,6 @@ public class ArticleCommentLowService {
     }
 
     @Transactional(readOnly = true)
-    public List<ArticleComment> findAllByArticleIdWithMember(Long articleId) {
-        return articleCommentRepository.findAllByArticleIdWithMember(articleId);
-    }
-
-    @Transactional(readOnly = true)
     public ArticleComment findById(Long commentId) {
         return articleCommentRepository.findById(commentId)
                 .orElseThrow(CommentNotFoundException::new);
@@ -32,5 +28,10 @@ public class ArticleCommentLowService {
 
     public void delete(ArticleComment comment) {
         articleCommentRepository.delete(comment);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ArticleComment> findActiveCommentsByArticleId(Long articleId, Pageable pageable) {
+        return articleCommentRepository.findActiveCommentsByArticleId(articleId, pageable);
     }
 }

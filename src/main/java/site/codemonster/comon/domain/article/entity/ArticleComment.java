@@ -28,6 +28,9 @@ public class ArticleComment extends TimeStamp {
     @Column(nullable = false, length = 300)
     private String description;
 
+    @Column(nullable = false)
+    private Boolean isDeleted = false;
+
     public ArticleComment(Article article, Member member, String description) {
         this.article = article;
         this.member = member;
@@ -40,5 +43,9 @@ public class ArticleComment extends TimeStamp {
 
     public boolean isAuthor(Member member) {
         return this.member.getId().equals(member.getId());
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
     }
 }

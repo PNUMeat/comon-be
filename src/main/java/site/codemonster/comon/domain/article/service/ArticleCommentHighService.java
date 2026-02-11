@@ -1,6 +1,7 @@
 package site.codemonster.comon.domain.article.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,16 +32,14 @@ public class ArticleCommentHighService {
     }
 
     @Transactional(readOnly = true)
-    public List<ArticleCommentResponse> getComments(Long articleId, Member member) {
+    public Page<ArticleCommentResponse> getComments(Long articleId, Member member, Pageable pageable) {
         Article article = articleLowService.findById(articleId);
 
         teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
 
-        List<ArticleComment> comments = articleCommentLowService.findAllByArticleIdWithMember(articleId);
+        Page<ArticleComment> commentPages = articleCommentLowService.findActiveCommentsByArticleId(articleId, pageable);
 
-        return comments.stream()
-                .map(ArticleCommentResponse::new)
-                .toList();
+        return commentPages.map(ArticleCommentResponse::new);
     }
 
     public ArticleComment updateComment(Long articleId, Long commentId, Member member, ArticleCommentRequest request) {
@@ -61,7 +60,7 @@ public class ArticleCommentHighService {
         teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
         validateCommentOwnership(comment, articleId, member);
 
-        articleCommentLowService.delete(comment);
+        comment.softDelete();
     }
 
     private void validateCommentOwnership(ArticleComment comment, Long articleId, Member member) {

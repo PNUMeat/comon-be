@@ -1,8 +1,11 @@
 package site.codemonster.comon.domain.article.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,11 +41,14 @@ public class ArticleCommentController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ArticleCommentResponse>>> getComments(
+    public ResponseEntity<ApiResponse<Page<ArticleCommentResponse>>> getComments(
             @AuthenticationPrincipal Member member,
-            @PathVariable("articleId") Long articleId
+            @PathVariable("articleId") Long articleId,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size
     ) {
-        List<ArticleCommentResponse> responses = articleCommentHighService.getComments(articleId, member);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdDate"));
+        Page<ArticleCommentResponse> responses = articleCommentHighService.getComments(articleId, member, pageable);
 
         return ResponseEntity.status(COMMENT_LIST_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
