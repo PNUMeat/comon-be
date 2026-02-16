@@ -68,7 +68,7 @@ class ArticleControllerTest {
 
         TestSecurityContextInjector.inject(member);
 
-        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest(team.getTeamId(), "게시글 제목", "게시글 내용");
+        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest(team.getTeamId(), "게시글 제목", "게시글 내용", true);
 
         String requestBody = objectMapper.writeValueAsString(articleCreateRequest);
 
@@ -99,7 +99,7 @@ class ArticleControllerTest {
 
         TestSecurityContextInjector.inject(member);
 
-        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest(team.getTeamId(), "게시글 제목", "<p><br></p>");
+        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest(team.getTeamId(), "게시글 제목", "<p><br></p>", true);
 
         String requestBody = objectMapper.writeValueAsString(articleCreateRequest);
 
@@ -133,7 +133,7 @@ class ArticleControllerTest {
         TestSecurityContextInjector.inject(member);
 
 
-        ArticleUpdateRequest articleUpdateRequest = new ArticleUpdateRequest("게시글 제목", "<p><br></p>");
+        ArticleUpdateRequest articleUpdateRequest = new ArticleUpdateRequest("게시글 제목", "<p><br></p>", true);
 
         String requestBody = objectMapper.writeValueAsString(articleUpdateRequest);
 
@@ -167,7 +167,7 @@ class ArticleControllerTest {
 
         TestSecurityContextInjector.inject(member);
 
-        ArticleUpdateRequest articleUpdateRequest = new ArticleUpdateRequest("게시글 제목", "<p><br>게시글 본문</p>");
+        ArticleUpdateRequest articleUpdateRequest = new ArticleUpdateRequest("게시글 제목", "<p><br>게시글 본문</p>", true);
 
         String requestBody = objectMapper.writeValueAsString(articleUpdateRequest);
 

@@ -25,7 +25,7 @@ import java.util.UUID;
 public final class TestUtil {
 
     public static Article createArticle(Team team, Member member) {
-        return new Article(team, member, "제목", "내용", ArticleCategory.NORMAL);
+        return new Article(team, member, "제목", "내용", ArticleCategory.NORMAL, true);
     }
 
     public static Team createTeamWithId() {
