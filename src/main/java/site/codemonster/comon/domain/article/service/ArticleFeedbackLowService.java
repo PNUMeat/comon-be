@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleFeedback;
 import site.codemonster.comon.domain.article.repository.ArticleFeedbackRepository;
-import site.codemonster.comon.global.error.ArticleFeedback.ArticleFeedbackNotFoundException;
+import site.codemonster.comon.global.error.articlefeedback.ArticleFeedbackNotFoundException;
 
 @Transactional
 @Service

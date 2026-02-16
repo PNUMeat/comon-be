@@ -1,4 +1,4 @@
-package site.codemonster.comon.global.error.ArticleFeedback;
+package site.codemonster.comon.global.error.articlefeedback;
 
 import site.codemonster.comon.global.error.ComonException;
 import site.codemonster.comon.global.error.ErrorCode;

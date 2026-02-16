@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.article.repository.ArticleCommentRepository;
-import site.codemonster.comon.global.error.ArticleComment.CommentNotFoundException;
+import site.codemonster.comon.global.error.articlecomment.CommentNotFoundException;
 
 @Transactional
 @Service

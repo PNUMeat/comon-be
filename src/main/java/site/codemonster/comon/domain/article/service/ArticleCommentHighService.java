@@ -11,8 +11,8 @@ import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
-import site.codemonster.comon.global.error.ArticleComment.CommentNotAuthorException;
-import site.codemonster.comon.global.error.ArticleComment.CommentNotFoundException;
+import site.codemonster.comon.global.error.articlecomment.CommentNotAuthorException;
+import site.codemonster.comon.global.error.articlecomment.CommentNotFoundException;
 
 @Service
 @RequiredArgsConstructor

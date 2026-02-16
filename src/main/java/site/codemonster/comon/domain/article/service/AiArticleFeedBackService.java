@@ -16,7 +16,7 @@ import site.codemonster.comon.domain.article.dto.response.ArticleFeedbackStreamR
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleFeedback;
 import site.codemonster.comon.domain.auth.entity.Member;
-import site.codemonster.comon.global.error.ArticleFeedback.AIFeedbackGenerationException;
+import site.codemonster.comon.global.error.articlefeedback.AIFeedbackGenerationException;
 import site.codemonster.comon.global.globalConfig.FeedbackPromptConfig;
 import java.util.ArrayList;
 import java.util.List;
