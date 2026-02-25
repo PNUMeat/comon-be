@@ -1,7 +1,5 @@
 package site.codemonster.comon.domain.auth.service;
 
-import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
-import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.article.service.ArticleImageLowService;
 import site.codemonster.comon.domain.article.service.ArticleLowService;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileCreateRequest;
@@ -83,16 +81,12 @@ public class MemberService {
         for (Team team : teamsManagedByMember) {
             Long teamId = team.getTeamId();
 
-            articleImageLowService.deleteByTeamTeamId(teamId);
-
             articleLowService.deleteByTeamTeamId(teamId);
 
             teamMemberLowService.deleteByTeamTeamId(teamId);
 
             teamLowService.deleteById(teamId);
         }
-
-        articleImageLowService.deleteByMemberId(memberId);
 
         articleLowService.deleteByMemberId(memberId);
 

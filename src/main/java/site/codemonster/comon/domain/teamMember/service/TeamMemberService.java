@@ -42,15 +42,6 @@ public class TeamMemberService {
         // 내가 쓴 팀 모집글 삭제
         deleteTeamRecruit(teamId, member);
 
-        // 내가 쓴 글의 이미지 삭제
-        List<Article> findArticle = articleLowService.findArticleByTeamTeamIdAndMemberId(teamId, member.getId());
-
-        List<Long> articleIds = findArticle.stream()
-                .map(Article::getArticleId)
-                .toList();
-
-        articleImageLowService.deleteArticleImagesInArticleIds(articleIds);
-
         // 내가 쓴 글 삭제
         articleLowService.deleteByMemberIdAndTeamId(member.getId(), teamId);
     }
