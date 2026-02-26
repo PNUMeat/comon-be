@@ -47,7 +47,7 @@ public class ArticleCommentController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "5") int size
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdDate"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<ArticleCommentResponse> responses = articleCommentHighService.getComments(articleId, member, pageable);
 
         return ResponseEntity.status(COMMENT_LIST_SUCCESS.getStatusCode())
