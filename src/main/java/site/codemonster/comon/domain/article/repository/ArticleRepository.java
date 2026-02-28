@@ -58,14 +58,15 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findSubjectArticlesByTeamIdAndYearAndMonth(@Param("teamId")Long teamId, @Param("year") int year, @Param("month") int month, @Param("articleSubjectCategories")List<ArticleCategory> articleSubjectCategories);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM Article a WHERE a.team.teamId = :teamId")
-    void deleteByTeamTeamId(@Param("teamId") Long teamId);
+    @Query("DELETE FROM Article a WHERE a.articleId in :ids")
+    void deleteByIds(@Param("ids") List<Long> ids);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM Article a WHERE a.member.id = :memberId")
-    void deleteByMemberId(@Param("memberId") Long memberId);
+    @Query("SELECT a FROM Article a where a.team.teamId = :teamId")
+    List<Article> findByTeamId(@Param("teamId") Long teamId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM Article a WHERE a.member.id = :memberId AND a.team.teamId = :teamId")
-    void deleteByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
+    @Query("SELECT a FROM Article a where a.member.id = :memberId")
+    List<Article> findByMemberId(@Param("memberId") Long memberId);
+
+    @Query("SELECT a FROM Article a WHERE a.member.id = :memberId AND a.team.teamId = :teamId")
+    List<Article> findByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
 }

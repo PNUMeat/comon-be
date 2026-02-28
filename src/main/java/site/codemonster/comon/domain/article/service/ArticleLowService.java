@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.dto.request.CalenderSubjectRequest;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;
+import site.codemonster.comon.domain.article.repository.ArticleCommentRepository;
+import site.codemonster.comon.domain.article.repository.ArticleFeedbackRepository;
+import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.global.error.articles.ArticleNotFoundException;
@@ -24,6 +27,9 @@ import static site.codemonster.comon.domain.article.enums.ArticleCategory.getSub
 public class ArticleLowService {
 
     private final ArticleRepository articleRepository;
+    private final ArticleImageRepository articleImageRepository;
+    private final ArticleFeedbackRepository articleFeedbackRepository;
+    private final ArticleCommentRepository articleCommentRepository;
 
     public Article save(Article article) {
         return articleRepository.save(article);
@@ -45,11 +51,11 @@ public class ArticleLowService {
     }
 
     public void delete(Article article) {
-        articleRepository.delete(article);
+        deleteByArticleId(article.getArticleId());
     }
 
     public void deleteById(Long articleId) {
-        articleRepository.deleteById(articleId);
+        deleteByArticleId(articleId);
     }
 
     @Transactional(readOnly = true)
@@ -86,20 +92,41 @@ public class ArticleLowService {
     }
 
     public void deleteByTeamTeamId(Long teamId) {
-        articleRepository.deleteByTeamTeamId(teamId);
+
+        List<Long> deletedIds = articleRepository.findByTeamId(teamId)
+                .stream().map(Article::getArticleId).toList();
+
+        deleteByArticleIds(deletedIds);
     }
 
-    @Transactional(readOnly = true)
-    public List<Article> findArticleByTeamTeamIdAndMemberId(Long teamId, Long memberId) {
-        return articleRepository.findArticleByTeamTeamIdAndMemberId(memberId, teamId);
-    }
 
     public void deleteByMemberIdAndTeamId(Long memberId, Long teamId) {
-        articleRepository.deleteByMemberIdAndTeamId(memberId, teamId);
+        List<Long> deletedIds = articleRepository.findByMemberIdAndTeamId(memberId, teamId)
+                .stream().map(Article::getArticleId).toList();
+
+        deleteByArticleIds(deletedIds);
     }
 
 
     public void deleteByMemberId(Long memberId) {
-        articleRepository.deleteByMemberId(memberId);
+
+        List<Long> deletedIds = articleRepository.findByMemberId(memberId)
+                .stream().map(Article::getArticleId).toList();
+
+        deleteByArticleIds(deletedIds);
+    }
+
+    private void deleteByArticleId(Long articleId) {
+        articleCommentRepository.deleteByArticleId(articleId);
+        articleFeedbackRepository.deleteByArticleId(articleId);
+        articleImageRepository.deleteArticleImagesInArticleId(articleId);
+        articleRepository.deleteById(articleId);
+    }
+
+    private void deleteByArticleIds(List<Long> deletedIds) {
+        articleCommentRepository.deleteByArticleIds(deletedIds);
+        articleFeedbackRepository.deleteByArticleIds(deletedIds);
+        articleImageRepository.deleteArticleImagesInArticleIds(deletedIds);
+        articleRepository.deleteByIds(deletedIds);
     }
 }

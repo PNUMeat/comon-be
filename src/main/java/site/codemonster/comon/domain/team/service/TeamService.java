@@ -1,7 +1,5 @@
 package site.codemonster.comon.domain.team.service;
 
-import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
-import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.article.service.ArticleImageLowService;
 import site.codemonster.comon.domain.article.service.ArticleLowService;
 import site.codemonster.comon.domain.auth.entity.Member;
@@ -143,8 +141,6 @@ public class TeamService {
         recommendationHistoryLowService.deleteByTeamId(team.getTeamId());
 
         teamRecommendationHighService.deleteTeamRecommendation(team.getTeamId());
-
-        articleImageLowService.deleteByTeamTeamId(team.getTeamId());
 
         articleLowService.deleteByTeamTeamId(team.getTeamId());
 

@@ -35,9 +35,7 @@ public class ArticleService {
 
     private final TeamMemberLowService teamMemberLowService;
     private final ArticleLowService articleLowService;
-    private final ArticleImageLowService articleImageLowService;
     private final TeamLowService teamLowService;
-    private final ArticleFeedbackLowService articleFeedbackLowService;
 
     public Article articleCreate(Member member, ArticleCreateRequest articleCreateRequest) {
 
@@ -64,8 +62,6 @@ public class ArticleService {
             throw new UnauthorizedActionException();
         }
 
-        articleFeedbackLowService.deleteByArticleId(articleId);
-        articleImageLowService.deleteByArticleId(articleId);
         articleLowService.delete(article);
     }
 
