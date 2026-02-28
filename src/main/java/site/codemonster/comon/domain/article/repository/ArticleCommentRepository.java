@@ -14,8 +14,7 @@ public interface ArticleCommentRepository extends JpaRepository<ArticleComment, 
 
     @Query("SELECT comment FROM ArticleComment comment " +
             "LEFT JOIN FETCH comment.member " +
-            "WHERE comment.article.articleId = :articleId " +
-            "ORDER BY comment.createdDate ASC")
+            "WHERE comment.article.articleId = :articleId")
     Page<ArticleComment> findActiveCommentsByArticleId(@Param("articleId") Long articleId, Pageable pageable);
 
 
