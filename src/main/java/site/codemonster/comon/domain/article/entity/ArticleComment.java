@@ -47,5 +47,6 @@ public class ArticleComment extends TimeStamp {
 
     public void softDelete() {
         this.isDeleted = true;
+        this.member = null;
     }
 }

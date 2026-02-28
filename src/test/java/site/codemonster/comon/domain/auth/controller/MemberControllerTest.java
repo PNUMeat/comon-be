@@ -12,6 +12,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.article.entity.Article;
+import site.codemonster.comon.domain.article.entity.ArticleComment;
+import site.codemonster.comon.domain.article.repository.ArticleCommentRepository;
+import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileCreateRequest;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileUpdateRequest;
 import site.codemonster.comon.domain.auth.dto.response.MemberInfoResponse;
@@ -58,6 +62,12 @@ class MemberControllerTest {
 
     @Autowired
     private TeamMemberRepository teamMemberRepository;
+
+    @Autowired
+    private ArticleRepository articleRepository;
+
+    @Autowired
+    private ArticleCommentRepository articleCommentRepository;
 
     @Test
     @DisplayName("회원 등록 성공")
@@ -237,6 +247,14 @@ class MemberControllerTest {
     @DisplayName("회원 탈퇴 성공")
     void getMemberInfoSuccess() throws Exception {
         Member member = memberRepository.save(TestUtil.createMember());
+        Member otherMember = memberRepository.save(TestUtil.createOtherMember());
+        Long memberId = member.getId();
+        Team team = teamRepository.save(TestUtil.createTeam());
+        TeamMember createCommentMember = teamMemberRepository.save(TestUtil.createTeamMember(team, member));
+        TeamMember createArticleMember = teamMemberRepository.save(TestUtil.createTeamMember(team, otherMember));
+        Article article = articleRepository.save(TestUtil.createArticle(team, otherMember));
+        ArticleComment articleComment = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+
         TestSecurityContextInjector.inject(member);
 
         String response = mockMvc.perform(delete("/api/v1/members")
@@ -251,11 +269,15 @@ class MemberControllerTest {
 
         Optional<Member> findMember = memberRepository.findByUuid(member.getUuid());
 
+        ArticleComment deletedComment = articleCommentRepository.findById(articleComment.getCommentId()).get();
+
         assertSoftly(softly -> {
             softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.SUCCESS);
             softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.OK.value());
             softly.assertThat(apiResponse.getMessage()).isEqualTo(ResponseMessageEnum.MEMBER_DELETE_SUCCESS.getMessage());
             softly.assertThat(findMember.isPresent()).isFalse();
+            softly.assertThat(deletedComment.getIsDeleted()).isTrue();
+            softly.assertThat(deletedComment.getMember()).isNull();
         });
     }
 }

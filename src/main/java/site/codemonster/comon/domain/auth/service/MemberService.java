@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.auth.service;
 
+import site.codemonster.comon.domain.article.service.ArticleCommentLowService;
 import site.codemonster.comon.domain.article.service.ArticleImageLowService;
 import site.codemonster.comon.domain.article.service.ArticleLowService;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileCreateRequest;
@@ -38,7 +39,7 @@ public class MemberService {
     private final ArticleLowService articleLowService;
     private final TeamMemberLowService teamMemberLowService;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final ArticleImageLowService articleImageLowService;
+    private final ArticleCommentLowService articleCommentLowService;
     private final TeamRecruitLowService teamRecruitLowService;
     private final TeamApplyLowService teamApplyLowService;
     private final TeamRecruitImageRepository teamRecruitImageRepository;
@@ -89,6 +90,8 @@ public class MemberService {
         }
 
         articleLowService.deleteByMemberId(memberId);
+
+        articleCommentLowService.softDeleteByMemberId(memberId);
 
         teamMemberLowService.deleteByMemberId(memberId);
 
