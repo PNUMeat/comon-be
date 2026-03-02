@@ -16,6 +16,26 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     Page<Team> findAllWithPagination(Pageable pageable);
 
     Page<Team> findByTeamNameContaining(String keyword, Pageable pageable);
+
+
+    @Query("""
+    SELECT t
+    FROM Team t
+    JOIN TeamMember tm ON t.teamId = tm.team.teamId
+    WHERE tm.member.id = :managerId
+      AND tm.isTeamManager = TRUE
+      AND (
+          SELECT COUNT(tm2)
+          FROM TeamMember tm2
+          WHERE tm2.team = t
+            AND tm2.isTeamManager = TRUE
+      ) = 1
+    """
+    )
+    List<Team> findByTeamMangerIdForDelete(@Param("managerId") Long mangerId);
+
+
+
     @Query("SELECT t FROM Team t "
             + "JOIN TeamMember tm ON t.teamId = tm.team.teamId "
             + "WHERE tm.member.id = :managerId AND tm.isTeamManager = TRUE")

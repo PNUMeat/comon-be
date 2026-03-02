@@ -264,8 +264,8 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("회원 탈퇴 성공")
-    void getMemberInfoSuccess() throws Exception {
+    @DisplayName("회원 탈퇴 성공 - 팀매니저가 한 명이면 팀을 삭제")
+    void getMemberInfoSuccessCase1() throws Exception {
         Member member = memberRepository.save(TestUtil.createMember());
         Member otherMember = memberRepository.save(TestUtil.createOtherMember());
         Long memberId = member.getId();
@@ -303,6 +303,49 @@ class MemberControllerTest {
             softly.assertThat(teamRecommendationDayRepository.findById(teamRecommendationDay.getId()).isPresent()).isFalse();
             softly.assertThat(teamRecommendationRepository.findById(teamRecommendationDay.getId()).isPresent()).isFalse();
             softly.assertThat(recommendationHistoryRepository.findById(recommendationHistory.getHistoryId()).isPresent()).isFalse();
+        });
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 성공 - 팀매니저가 한 명 이상이라면 팀을 삭제하지 않는다.")
+    void getMemberInfoSuccessCase2() throws Exception {
+        Member member = memberRepository.save(TestUtil.createMember());
+        Member otherMember = memberRepository.save(TestUtil.createOtherMember());
+        Long memberId = member.getId();
+        Problem problem = problemRepository.save(TestUtil.createProblem());
+        Team team = teamRepository.save(TestUtil.createTeam());
+        TeamRecommendation teamRecommendation = teamRecommendationRepository.save(TestUtil.createTeamRecommendation(team));
+        TeamRecommendationDay teamRecommendationDay = teamRecommendationDayRepository.save(TestUtil.createTeamRecommendationDay(teamRecommendation));
+        RecommendationHistory recommendationHistory = recommendationHistoryRepository.save(TestUtil.createRecommendationHistory(team, problem));
+        TeamMember createCommentMember = teamMemberRepository.save(TestUtil.createTeamManager(team, member));
+        TeamMember createArticleMember = teamMemberRepository.save(TestUtil.createTeamManager(team, otherMember));
+        Article article = articleRepository.save(TestUtil.createArticle(team, otherMember));
+        ArticleComment articleComment1 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+        ArticleComment articleComment2 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+        ArticleComment articleComment3 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+
+        TestSecurityContextInjector.inject(member);
+
+        String response = mockMvc.perform(delete("/api/v1/members")
+                        .with(securityContext(SecurityContextHolder.getContext()))
+                )
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+
+        ApiResponse<Void> apiResponse = objectMapper.readValue(response, new TypeReference<ApiResponse<Void>>() {
+        });
+
+        Optional<Member> findMember = memberRepository.findByUuid(member.getUuid());
+
+        assertSoftly(softly -> {
+            softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.SUCCESS);
+            softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.OK.value());
+            softly.assertThat(apiResponse.getMessage()).isEqualTo(ResponseMessageEnum.MEMBER_DELETE_SUCCESS.getMessage());
+            softly.assertThat(findMember.isPresent()).isFalse();
+            softly.assertThat(teamRecommendationDayRepository.findById(teamRecommendationDay.getId()).isPresent()).isTrue();
+            softly.assertThat(teamRecommendationRepository.findById(teamRecommendationDay.getId()).isPresent()).isTrue();
+            softly.assertThat(recommendationHistoryRepository.findById(recommendationHistory.getHistoryId()).isPresent()).isTrue();
         });
     }
 }

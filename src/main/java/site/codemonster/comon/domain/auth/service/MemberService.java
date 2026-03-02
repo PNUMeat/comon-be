@@ -78,7 +78,7 @@ public class MemberService {
         teamRecruitLowService.deleteByMemberId(memberId);
         teamApplyLowService.deleteTeamAppliesByMemberId(memberId);
 
-        List<Team> teamsManagedByMember = teamLowService.findByTeamManagerId(memberId);
+        List<Team> teamsManagedByMember = teamLowService.findByTeamMangerIdForDelete(memberId);
         for (Team team : teamsManagedByMember) {
             Long teamId = team.getTeamId();
 

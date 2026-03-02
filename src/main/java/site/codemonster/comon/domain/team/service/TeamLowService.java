@@ -13,6 +13,7 @@ import site.codemonster.comon.domain.recommendation.repository.TeamRecommendatio
 import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationRepository;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
+import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.repository.TeamMemberRepository;
 import site.codemonster.comon.global.error.Team.TeamNotFoundException;
 
@@ -80,6 +81,11 @@ public class TeamLowService {
     @Transactional(readOnly = true)
     public List<Team> findByTeamManagerId(Long memberId) {
         return teamRepository.findByTeamManagerId(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Team> findByTeamMangerIdForDelete(Long memberId) {
+        return teamRepository.findByTeamMangerIdForDelete(memberId);
     }
 
     @Transactional(readOnly = true)
