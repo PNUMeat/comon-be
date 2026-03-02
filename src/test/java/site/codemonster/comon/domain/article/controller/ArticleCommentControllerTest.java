@@ -163,7 +163,7 @@ class ArticleCommentControllerTest {
 
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(deleteComment.get().getCommentId()).isEqualTo(articleComment.getCommentId());
+            softly.assertThat(deleteComment.get().getIsDeleted()).isTrue();
             softly.assertThat(deleteComment.get().getMember()).isNull();
         });
 
