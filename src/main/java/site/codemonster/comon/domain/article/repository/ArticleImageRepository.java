@@ -26,4 +26,8 @@ public interface ArticleImageRepository extends JpaRepository<ArticleImage,Long>
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM ArticleImage ai WHERE ai.article.articleId IN (:articleIds)")
     void deleteArticleImagesInArticleIds(@Param("articleIds") List<Long> articleIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM ArticleImage ai WHERE ai.article.articleId =:articleId")
+    void deleteArticleImagesInArticleId(@Param("articleId") Long articleId);
 }

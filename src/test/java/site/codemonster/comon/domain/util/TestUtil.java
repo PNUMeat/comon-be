@@ -3,6 +3,9 @@ package site.codemonster.comon.domain.util;
 import org.springframework.test.util.ReflectionTestUtils;
 import site.codemonster.comon.domain.adminAuth.entity.AdminMember;
 import site.codemonster.comon.domain.article.entity.Article;
+import site.codemonster.comon.domain.article.entity.ArticleComment;
+import site.codemonster.comon.domain.article.entity.ArticleFeedback;
+import site.codemonster.comon.domain.article.entity.ArticleImage;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
@@ -132,5 +135,17 @@ public final class TestUtil {
 
     public static AdminMember createAdminMember() {
         return new AdminMember("admin","admin", "admin");
+    }
+
+    public static ArticleComment createArticleComment(Article article, Member member) {
+        return new ArticleComment(article, member, "댓글");
+    }
+
+    public static ArticleFeedback createArticleFeedback(Article article) {
+        return new ArticleFeedback(article, "피드백");
+    }
+
+    public static ArticleImage createArticleImage(Article article) {
+        return new ArticleImage("url", article);
     }
 }

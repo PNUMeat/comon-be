@@ -9,6 +9,8 @@ import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.article.repository.ArticleCommentRepository;
 import site.codemonster.comon.global.error.articlecomment.CommentNotFoundException;
 
+import java.util.List;
+
 @Transactional
 @Service
 @RequiredArgsConstructor
@@ -26,12 +28,12 @@ public class ArticleCommentLowService {
                 .orElseThrow(CommentNotFoundException::new);
     }
 
-    public void delete(ArticleComment comment) {
-        articleCommentRepository.delete(comment);
-    }
-
     @Transactional(readOnly = true)
     public Page<ArticleComment> findActiveCommentsByArticleId(Long articleId, Pageable pageable) {
         return articleCommentRepository.findActiveCommentsByArticleId(articleId, pageable);
+    }
+
+    public void softDeleteByMemberId(Long memberId) {
+        articleCommentRepository.sofDeleteByMemberId(memberId);
     }
 }

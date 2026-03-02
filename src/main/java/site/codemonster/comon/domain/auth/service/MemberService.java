@@ -1,7 +1,6 @@
 package site.codemonster.comon.domain.auth.service;
 
-import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
-import site.codemonster.comon.domain.article.repository.ArticleRepository;
+import site.codemonster.comon.domain.article.service.ArticleCommentLowService;
 import site.codemonster.comon.domain.article.service.ArticleImageLowService;
 import site.codemonster.comon.domain.article.service.ArticleLowService;
 import site.codemonster.comon.domain.auth.dto.request.MemberProfileCreateRequest;
@@ -40,7 +39,7 @@ public class MemberService {
     private final ArticleLowService articleLowService;
     private final TeamMemberLowService teamMemberLowService;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final ArticleImageLowService articleImageLowService;
+    private final ArticleCommentLowService articleCommentLowService;
     private final TeamRecruitLowService teamRecruitLowService;
     private final TeamApplyLowService teamApplyLowService;
     private final TeamRecruitImageRepository teamRecruitImageRepository;
@@ -83,8 +82,6 @@ public class MemberService {
         for (Team team : teamsManagedByMember) {
             Long teamId = team.getTeamId();
 
-            articleImageLowService.deleteByTeamTeamId(teamId);
-
             articleLowService.deleteByTeamTeamId(teamId);
 
             teamMemberLowService.deleteByTeamTeamId(teamId);
@@ -92,9 +89,9 @@ public class MemberService {
             teamLowService.deleteById(teamId);
         }
 
-        articleImageLowService.deleteByMemberId(memberId);
-
         articleLowService.deleteByMemberId(memberId);
+
+        articleCommentLowService.softDeleteByMemberId(memberId);
 
         teamMemberLowService.deleteByMemberId(memberId);
 

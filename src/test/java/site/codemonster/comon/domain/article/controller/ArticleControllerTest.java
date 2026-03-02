@@ -16,6 +16,12 @@ import site.codemonster.comon.domain.article.dto.request.ArticleCreateRequest;
 import site.codemonster.comon.domain.article.dto.request.ArticleUpdateRequest;
 import site.codemonster.comon.domain.article.dto.response.ArticleCreateResponse;
 import site.codemonster.comon.domain.article.entity.Article;
+import site.codemonster.comon.domain.article.entity.ArticleComment;
+import site.codemonster.comon.domain.article.entity.ArticleFeedback;
+import site.codemonster.comon.domain.article.entity.ArticleImage;
+import site.codemonster.comon.domain.article.repository.ArticleCommentRepository;
+import site.codemonster.comon.domain.article.repository.ArticleFeedbackRepository;
+import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
@@ -29,11 +35,11 @@ import site.codemonster.comon.global.error.dto.response.ApiResponse;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.securityContext;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -54,6 +60,15 @@ class ArticleControllerTest {
 
     @Autowired
     private TeamMemberRepository teamMemberRepository;
+
+    @Autowired
+    private ArticleCommentRepository articleCommentRepository;
+
+    @Autowired
+    private ArticleImageRepository articleImageRepository;
+
+    @Autowired
+    private ArticleFeedbackRepository articleFeedbackRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -183,6 +198,43 @@ class ArticleControllerTest {
         assertSoftly(softly -> {
             softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.OK.value());
             softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.SUCCESS);
+        });
+    }
+
+    @Test
+    @DisplayName("게시글 삭제 성공")
+    void articleDeleteSuccess() throws Exception {
+
+        Member member = memberRepository.save(TestUtil.createMember());
+        Team team = teamRepository.save(TestUtil.createTeam());
+        TeamMember teamMember = teamMemberRepository.save(new TeamMember(team, member, false));
+
+        Article article = articleRepository.save(TestUtil.createArticle(team, member));
+        ArticleFeedback articleFeedback = articleFeedbackRepository.save(TestUtil.createArticleFeedback(article));
+        ArticleImage articleImage = articleImageRepository.save(TestUtil.createArticleImage(article));
+
+        ArticleComment articleComment = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+
+
+        TestSecurityContextInjector.inject(member);
+
+        String response = mockMvc.perform(delete("/api/v1/articles/{articleId}", article.getArticleId())
+                .with(securityContext(SecurityContextHolder.getContext()))
+        ).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+        ApiResponse<Void> apiResponse = objectMapper.readValue(response, new TypeReference<ApiResponse<Void>>() {
+        });
+
+        Optional<ArticleComment> deleteComment = articleCommentRepository.findById(articleComment.getCommentId());
+        Optional<ArticleFeedback> deleteFeedback = articleFeedbackRepository.findById(articleFeedback.getFeedbackId());
+        Optional<ArticleImage> deleteImage = articleImageRepository.findById(articleImage.getArticleImageId());
+
+        assertSoftly(softly -> {
+            softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.OK.value());
+            softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.SUCCESS);
+            softly.assertThat(deleteComment.isPresent()).isFalse();
+            softly.assertThat(deleteFeedback.isPresent()).isFalse();
+            softly.assertThat(deleteImage.isPresent()).isFalse();
         });
     }
 }
