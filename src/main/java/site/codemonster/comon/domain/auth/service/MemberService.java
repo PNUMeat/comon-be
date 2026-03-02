@@ -82,9 +82,7 @@ public class MemberService {
         for (Team team : teamsManagedByMember) {
             Long teamId = team.getTeamId();
 
-            articleLowService.deleteByTeamTeamId(teamId);
-
-            teamMemberLowService.deleteByTeamTeamId(teamId);
+            articleLowService.deleteByTeamId(teamId);
 
             teamLowService.deleteById(teamId);
         }

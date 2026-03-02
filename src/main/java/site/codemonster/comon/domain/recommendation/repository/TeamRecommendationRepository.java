@@ -13,6 +13,9 @@ public interface TeamRecommendationRepository extends JpaRepository<TeamRecommen
 
     Optional<TeamRecommendation> findByTeam(Team team);
 
+    @Query("select tr from TeamRecommendation tr where tr.team.teamId = :teamId")
+    Optional<TeamRecommendation> findByTeamId(Long teamId);
+
     boolean existsByTeam(Team team);
 
 

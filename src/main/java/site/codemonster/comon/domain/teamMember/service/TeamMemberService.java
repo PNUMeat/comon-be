@@ -25,7 +25,6 @@ import java.util.Optional;
 @Slf4j
 public class TeamMemberService {
     private final ArticleLowService articleLowService;
-    private final ArticleImageLowService articleImageLowService;
     private final MemberLowService memberLowService;
     private final TeamLowService teamLowService;
     private final TeamRecruitLowService teamRecruitLowService;
