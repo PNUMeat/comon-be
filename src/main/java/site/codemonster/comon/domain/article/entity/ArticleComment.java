@@ -42,6 +42,7 @@ public class ArticleComment extends TimeStamp {
     }
 
     public boolean isAuthor(Member member) {
+        if (member == null) return false;
         return this.member.getId().equals(member.getId());
     }
 
