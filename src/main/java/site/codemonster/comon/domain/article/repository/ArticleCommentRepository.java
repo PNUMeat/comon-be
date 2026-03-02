@@ -18,8 +18,6 @@ public interface ArticleCommentRepository extends JpaRepository<ArticleComment, 
     Page<ArticleComment> findActiveCommentsByArticleId(@Param("articleId") Long articleId, Pageable pageable);
 
 
-    List<ArticleComment> findByMemberId(Long memberId);
-
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM ArticleComment comment where comment.article.articleId in :articleIds")
@@ -28,5 +26,9 @@ public interface ArticleCommentRepository extends JpaRepository<ArticleComment, 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM ArticleComment comment where comment.article.articleId = :articleId")
     void deleteByArticleId(Long articleId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE ArticleComment comment set comment.isDeleted = true, comment.member = null where comment.member.id = :memberId")
+    void sofDeleteByMemberId(Long memberId);
 }
 

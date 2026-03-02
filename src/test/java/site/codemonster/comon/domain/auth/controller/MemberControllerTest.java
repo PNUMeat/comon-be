@@ -253,7 +253,9 @@ class MemberControllerTest {
         TeamMember createCommentMember = teamMemberRepository.save(TestUtil.createTeamMember(team, member));
         TeamMember createArticleMember = teamMemberRepository.save(TestUtil.createTeamMember(team, otherMember));
         Article article = articleRepository.save(TestUtil.createArticle(team, otherMember));
-        ArticleComment articleComment = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+        ArticleComment articleComment1 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+        ArticleComment articleComment2 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+        ArticleComment articleComment3 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
 
         TestSecurityContextInjector.inject(member);
 
@@ -269,7 +271,7 @@ class MemberControllerTest {
 
         Optional<Member> findMember = memberRepository.findByUuid(member.getUuid());
 
-        ArticleComment deletedComment = articleCommentRepository.findById(articleComment.getCommentId()).get();
+        ArticleComment deletedComment = articleCommentRepository.findById(articleComment1.getCommentId()).get();
 
         assertSoftly(softly -> {
             softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.SUCCESS);

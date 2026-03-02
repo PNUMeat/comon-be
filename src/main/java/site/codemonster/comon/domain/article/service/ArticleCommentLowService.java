@@ -34,8 +34,6 @@ public class ArticleCommentLowService {
     }
 
     public void softDeleteByMemberId(Long memberId) {
-        List<ArticleComment> deleteComments = articleCommentRepository.findByMemberId(memberId);
-
-        deleteComments.forEach(ArticleComment::softDelete);
+        articleCommentRepository.sofDeleteByMemberId(memberId);
     }
 }
