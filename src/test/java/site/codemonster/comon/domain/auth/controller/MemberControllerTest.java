@@ -301,7 +301,7 @@ class MemberControllerTest {
             softly.assertThat(apiResponse.getMessage()).isEqualTo(ResponseMessageEnum.MEMBER_DELETE_SUCCESS.getMessage());
             softly.assertThat(findMember.isPresent()).isFalse();
             softly.assertThat(teamRecommendationDayRepository.findById(teamRecommendationDay.getId()).isPresent()).isFalse();
-            softly.assertThat(teamRecommendationRepository.findById(teamRecommendationDay.getId()).isPresent()).isFalse();
+            softly.assertThat(teamRecommendationRepository.findById(teamRecommendation.getId()).isPresent()).isFalse();
             softly.assertThat(recommendationHistoryRepository.findById(recommendationHistory.getHistoryId()).isPresent()).isFalse();
         });
     }
@@ -344,7 +344,7 @@ class MemberControllerTest {
             softly.assertThat(apiResponse.getMessage()).isEqualTo(ResponseMessageEnum.MEMBER_DELETE_SUCCESS.getMessage());
             softly.assertThat(findMember.isPresent()).isFalse();
             softly.assertThat(teamRecommendationDayRepository.findById(teamRecommendationDay.getId()).isPresent()).isTrue();
-            softly.assertThat(teamRecommendationRepository.findById(teamRecommendationDay.getId()).isPresent()).isTrue();
+            softly.assertThat(teamRecommendationRepository.findById(teamRecommendation.getId()).isPresent()).isTrue();
             softly.assertThat(recommendationHistoryRepository.findById(recommendationHistory.getHistoryId()).isPresent()).isTrue();
         });
     }
