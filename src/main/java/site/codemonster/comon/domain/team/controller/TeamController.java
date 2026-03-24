@@ -4,16 +4,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.article.dto.request.CalenderSubjectRequest;
 import site.codemonster.comon.domain.article.service.ArticleService;
 import site.codemonster.comon.domain.auth.entity.Member;
-import site.codemonster.comon.domain.auth.service.MemberService;
 import site.codemonster.comon.domain.team.dto.request.*;
 import site.codemonster.comon.domain.team.dto.response.*;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamService;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
-import site.codemonster.comon.domain.teamRecruit.entity.TeamRecruit;
-import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitLowService;
-import site.codemonster.comon.domain.teamRecruit.service.TeamRecruitService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
 import jakarta.validation.Valid;
@@ -29,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static site.codemonster.comon.global.response.ResponseMessageEnum.*;
@@ -68,7 +65,11 @@ public class TeamController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
 
-        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::new);
+        List<Long> teamIds = teams.getContent().stream().map(Team::getTeamId).toList();
+        Map<Long, Long> solveCountMap = articleService.countCodingTestByTeamIds(teamIds);
+
+        Page<TeamAllResponse> teamAllResponses = teams.map(team
+                -> new TeamAllResponse(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)));
 
         return ResponseEntity.status(TEAM_TOTAL_DETAILS_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -97,7 +98,12 @@ public class TeamController {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<Team> teams = teamService.getAllTeamsByKeywordUsingPaging(pageable,keyword);
-        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::new);
+
+        List<Long> teamIds = teams.getContent().stream().map(Team::getTeamId).toList();
+        Map<Long, Long> solveCountMap = articleService.countCodingTestByTeamIds(teamIds);
+
+        Page<TeamAllResponse> teamAllResponses = teams.map(team ->
+                new TeamAllResponse(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)));
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -106,10 +112,13 @@ public class TeamController {
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<?>> getMyTeam(@AuthenticationPrincipal Member member){
-        List<Team> teamMembers =  teamService.getMyTeams(member);
+        List<Team> myTeams =  teamService.getMyTeams(member);
 
-        List<MyTeamResponse> myTeamResponse = teamMembers.stream()
-                .map(MyTeamResponse::of)
+        List<Long> teamIds = myTeams.stream().map(Team::getTeamId).toList();
+        Map<Long, Long> solveCountMap = articleService.countCodingTestByTeamIds(teamIds);
+
+        List<MyTeamResponse> myTeamResponse = myTeams.stream()
+                .map(team -> MyTeamResponse.of(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)))
                 .collect(Collectors.toList());
 
         return ResponseEntity.status(MY_TEAM_DETAILS_SUCCESS.getStatusCode())
@@ -137,11 +146,20 @@ public class TeamController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
         Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
-        Page<TeamAllResponse> teamAllResponses = teams.map(TeamAllResponse::new);
-
         List<Team> myTeams = teamService.getMyTeams(member);
+
+        List<Long> allTeamIds = new ArrayList<>();
+        teams.getContent().stream().map(Team::getTeamId).forEach(allTeamIds::add);
+        myTeams.stream().map(Team::getTeamId).forEach(allTeamIds::add);
+        List<Long> distinctTeamIds = allTeamIds.stream().distinct().toList();
+
+        Map<Long, Long> solveCountMap = articleService.countCodingTestByTeamIds(distinctTeamIds);
+
+        Page<TeamAllResponse> teamAllResponses = teams.map(team ->
+                new TeamAllResponse(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)));
+
         List<MyTeamResponse> myTeamResponses = myTeams.stream()
-                .map(MyTeamResponse::of)
+                .map(team -> MyTeamResponse.of(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)))
                 .collect(Collectors.toList());
 
         TeamCombinedResponse teamCombinedResponse = new TeamCombinedResponse(myTeamResponses, teamAllResponses);

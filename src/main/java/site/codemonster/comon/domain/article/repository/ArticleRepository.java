@@ -69,4 +69,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("SELECT a FROM Article a WHERE a.member.id = :memberId AND a.team.teamId = :teamId")
     List<Article> findByMemberIdAndTeamId(@Param("memberId") Long memberId, @Param("teamId") Long teamId);
+
+    @Query("SELECT a.team.teamId, COUNT(a) FROM Article a " +
+            "WHERE a.team.teamId IN :teamIds AND a.articleCategory = 'CODING_TEST' " +
+            "GROUP BY a.team.teamId")
+    List<Object[]> countCodingTestByTeamIds(@Param("teamIds") List<Long> teamIds);
 }

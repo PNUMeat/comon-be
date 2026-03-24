@@ -13,12 +13,12 @@ public record MyTeamResponse(Long teamId,
                               int memberLimit,
                               int memberCount,
                               int streakDays,
-                              int successMemberCount,
+                              long totalSolveCount,
                               String teamAnnouncement,
                               Long teamRecruitId,
                               LocalDate createdAt) {
 
-    public static MyTeamResponse of(Team team){
+    public static MyTeamResponse of(Team team, long totalSolveCount){
         Long teamRecruitId = null;
         if (team.getTeamRecruit() != null){
             teamRecruitId = team.getTeamRecruit().getTeamRecruitId();
@@ -33,7 +33,7 @@ public record MyTeamResponse(Long teamId,
                 team.getMaxParticipant(),
                 team.getTeamMembers().size(),
                 team.getStreakDays(),
-                0, // 게시물 엔티티 없는 관계로 0으로 설정
+                totalSolveCount,
                 team.getTeamAnnouncement(),
                 teamRecruitId,
                 team.getCreatedDate().toLocalDate()

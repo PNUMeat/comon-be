@@ -17,7 +17,9 @@ import site.codemonster.comon.global.error.articles.ArticleNotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static site.codemonster.comon.domain.article.enums.ArticleCategory.getSubjectCategories;
 
@@ -114,6 +116,18 @@ public class ArticleLowService {
                 .stream().map(Article::getArticleId).toList();
 
         deleteByArticleIds(deletedIds);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Long> countCodingTestByTeamIds(List<Long> teamIds) {
+        if (teamIds.isEmpty()) {
+            return Map.of();
+        }
+        return articleRepository.countCodingTestByTeamIds(teamIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
     }
 
     private void deleteByArticleId(Long articleId) {
