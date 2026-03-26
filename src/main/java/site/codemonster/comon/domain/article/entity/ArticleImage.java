@@ -12,6 +12,7 @@ public class ArticleImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long articleImageId;
 
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)

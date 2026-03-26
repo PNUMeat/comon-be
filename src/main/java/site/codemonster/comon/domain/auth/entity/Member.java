@@ -30,6 +30,7 @@ public class Member extends TimeStamp {
 
     private String memberName;
 
+    @Column(columnDefinition = "TEXT")
     private String imageUrl = ImageConstant.DEFAULT_MEMBER_PROFILE.getObjectKey();
 
     private String description;
