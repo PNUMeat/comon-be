@@ -21,18 +21,11 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     @Query("""
     SELECT t
     FROM Team t
-    JOIN TeamMember tm ON t.teamId = tm.team.teamId
-    WHERE tm.member.id = :managerId
-      AND tm.isTeamManager = TRUE
-      AND (
-          SELECT COUNT(tm2)
-          FROM TeamMember tm2
-          WHERE tm2.team = t
-            AND tm2.isTeamManager = TRUE
-      ) = 1
+    join TeamMember tm on tm.team.teamId = t.teamId
+    WHERE tm.member.id = :managerId AND tm.isTeamManager = TRUE
     """
     )
-    List<Team> findByTeamMangerIdForDelete(@Param("managerId") Long mangerId);
+    List<Team> findByTeamMangerId(@Param("managerId") Long mangerId);
 
 
 

@@ -84,8 +84,8 @@ public class TeamLowService {
     }
 
     @Transactional(readOnly = true)
-    public List<Team> findByTeamMangerIdForDelete(Long memberId) {
-        return teamRepository.findByTeamMangerIdForDelete(memberId);
+    public List<Team> findByTeamMangerId(Long memberId) {
+        return teamRepository.findByTeamMangerId(memberId);
     }
 
     @Transactional(readOnly = true)

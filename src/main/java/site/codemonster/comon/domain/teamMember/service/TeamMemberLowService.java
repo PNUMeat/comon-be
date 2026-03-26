@@ -114,4 +114,9 @@ public class TeamMemberLowService {
             throw new TeamMemberInvalidException();
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<TeamMember> findTeamManagerByTeamIdForUpdate(Long teamId) {
+        return teamMemberRepository.findTeamManagerByTeamIdForUpdate(teamId);
+    }
 }
