@@ -1,6 +1,8 @@
 package site.codemonster.comon.domain.teamMember.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.teamMember.entity.TeamMember;
@@ -49,4 +51,9 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, Long> {
 
     @Query(value = "select * from team_member tm where tm.team_id = :teamId and tm.is_team_manager = true limit 1", nativeQuery = true)
     Optional<TeamMember> findFirstTeamManagerByTeamId(@Param("teamId") Long teamId);
+
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select tm from TeamMember tm where tm.team.teamId = :teamId and tm.isTeamManager = true")
+    List<TeamMember> findTeamManagerByTeamIdForUpdate(Long teamId);
 }

@@ -91,7 +91,7 @@ public class ArticleLowService {
         return articleRepository.existsByTeamAndSelectedDateAndArticleCategoryIn(team, selectedDate, subjectCategories);
     }
 
-    public void deleteByTeamTeamId(Long teamId) {
+    public void deleteByTeamId(Long teamId) {
 
         List<Long> deletedIds = articleRepository.findByTeamId(teamId)
                 .stream().map(Article::getArticleId).toList();

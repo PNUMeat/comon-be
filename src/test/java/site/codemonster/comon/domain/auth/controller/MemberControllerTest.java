@@ -22,6 +22,14 @@ import site.codemonster.comon.domain.auth.dto.response.MemberInfoResponse;
 import site.codemonster.comon.domain.auth.dto.response.MemberProfileResponse;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
+import site.codemonster.comon.domain.problem.entity.Problem;
+import site.codemonster.comon.domain.problem.repository.ProblemRepository;
+import site.codemonster.comon.domain.recommendation.entity.RecommendationHistory;
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendationDay;
+import site.codemonster.comon.domain.recommendation.repository.RecommendationHistoryRepository;
+import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationDayRepository;
+import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationRepository;
 import site.codemonster.comon.domain.team.dto.response.TeamAbstractResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
@@ -68,6 +76,18 @@ class MemberControllerTest {
 
     @Autowired
     private ArticleCommentRepository articleCommentRepository;
+
+    @Autowired
+    private TeamRecommendationRepository teamRecommendationRepository;
+
+    @Autowired
+    private TeamRecommendationDayRepository teamRecommendationDayRepository;
+
+    @Autowired
+    private RecommendationHistoryRepository recommendationHistoryRepository;
+
+    @Autowired
+    private ProblemRepository problemRepository;
 
     @Test
     @DisplayName("회원 등록 성공")
@@ -244,13 +264,17 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("회원 탈퇴 성공")
-    void getMemberInfoSuccess() throws Exception {
+    @DisplayName("회원 탈퇴 성공 - 팀매니저가 한 명이면 팀을 삭제")
+    void getMemberInfoSuccessCase1() throws Exception {
         Member member = memberRepository.save(TestUtil.createMember());
         Member otherMember = memberRepository.save(TestUtil.createOtherMember());
         Long memberId = member.getId();
+        Problem problem = problemRepository.save(TestUtil.createProblem());
         Team team = teamRepository.save(TestUtil.createTeam());
-        TeamMember createCommentMember = teamMemberRepository.save(TestUtil.createTeamMember(team, member));
+        TeamRecommendation teamRecommendation = teamRecommendationRepository.save(TestUtil.createTeamRecommendation(team));
+        TeamRecommendationDay teamRecommendationDay = teamRecommendationDayRepository.save(TestUtil.createTeamRecommendationDay(teamRecommendation));
+        RecommendationHistory recommendationHistory = recommendationHistoryRepository.save(TestUtil.createRecommendationHistory(team, problem));
+        TeamMember createCommentMember = teamMemberRepository.save(TestUtil.createTeamManager(team, member));
         TeamMember createArticleMember = teamMemberRepository.save(TestUtil.createTeamMember(team, otherMember));
         Article article = articleRepository.save(TestUtil.createArticle(team, otherMember));
         ArticleComment articleComment1 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
@@ -271,15 +295,57 @@ class MemberControllerTest {
 
         Optional<Member> findMember = memberRepository.findByUuid(member.getUuid());
 
-        ArticleComment deletedComment = articleCommentRepository.findById(articleComment1.getCommentId()).get();
+        assertSoftly(softly -> {
+            softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.SUCCESS);
+            softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.OK.value());
+            softly.assertThat(apiResponse.getMessage()).isEqualTo(ResponseMessageEnum.MEMBER_DELETE_SUCCESS.getMessage());
+            softly.assertThat(findMember.isPresent()).isFalse();
+            softly.assertThat(teamRecommendationDayRepository.findById(teamRecommendationDay.getId()).isPresent()).isFalse();
+            softly.assertThat(teamRecommendationRepository.findById(teamRecommendation.getId()).isPresent()).isFalse();
+            softly.assertThat(recommendationHistoryRepository.findById(recommendationHistory.getHistoryId()).isPresent()).isFalse();
+        });
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 성공 - 팀매니저가 한 명 이상이라면 팀을 삭제하지 않는다.")
+    void getMemberInfoSuccessCase2() throws Exception {
+        Member member = memberRepository.save(TestUtil.createMember());
+        Member otherMember = memberRepository.save(TestUtil.createOtherMember());
+        Long memberId = member.getId();
+        Problem problem = problemRepository.save(TestUtil.createProblem());
+        Team team = teamRepository.save(TestUtil.createTeam());
+        TeamRecommendation teamRecommendation = teamRecommendationRepository.save(TestUtil.createTeamRecommendation(team));
+        TeamRecommendationDay teamRecommendationDay = teamRecommendationDayRepository.save(TestUtil.createTeamRecommendationDay(teamRecommendation));
+        RecommendationHistory recommendationHistory = recommendationHistoryRepository.save(TestUtil.createRecommendationHistory(team, problem));
+        TeamMember createCommentMember = teamMemberRepository.save(TestUtil.createTeamManager(team, member));
+        TeamMember createArticleMember = teamMemberRepository.save(TestUtil.createTeamManager(team, otherMember));
+        Article article = articleRepository.save(TestUtil.createArticle(team, otherMember));
+        ArticleComment articleComment1 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+        ArticleComment articleComment2 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+        ArticleComment articleComment3 = articleCommentRepository.save(TestUtil.createArticleComment(article, member));
+
+        TestSecurityContextInjector.inject(member);
+
+        String response = mockMvc.perform(delete("/api/v1/members")
+                        .with(securityContext(SecurityContextHolder.getContext()))
+                )
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+
+        ApiResponse<Void> apiResponse = objectMapper.readValue(response, new TypeReference<ApiResponse<Void>>() {
+        });
+
+        Optional<Member> findMember = memberRepository.findByUuid(member.getUuid());
 
         assertSoftly(softly -> {
             softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.SUCCESS);
             softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.OK.value());
             softly.assertThat(apiResponse.getMessage()).isEqualTo(ResponseMessageEnum.MEMBER_DELETE_SUCCESS.getMessage());
             softly.assertThat(findMember.isPresent()).isFalse();
-            softly.assertThat(deletedComment.getIsDeleted()).isTrue();
-            softly.assertThat(deletedComment.getMember()).isNull();
+            softly.assertThat(teamRecommendationDayRepository.findById(teamRecommendationDay.getId()).isPresent()).isTrue();
+            softly.assertThat(teamRecommendationRepository.findById(teamRecommendation.getId()).isPresent()).isTrue();
+            softly.assertThat(recommendationHistoryRepository.findById(recommendationHistory.getHistoryId()).isPresent()).isTrue();
         });
     }
 }

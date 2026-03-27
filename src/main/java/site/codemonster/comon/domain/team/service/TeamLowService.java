@@ -5,11 +5,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.article.repository.ArticleRepository;
+import site.codemonster.comon.domain.recommendation.entity.RecommendationHistory;
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
+import site.codemonster.comon.domain.recommendation.repository.PlatformRecommendationRepository;
+import site.codemonster.comon.domain.recommendation.repository.RecommendationHistoryRepository;
+import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationDayRepository;
+import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationRepository;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
+import site.codemonster.comon.domain.teamMember.entity.TeamMember;
+import site.codemonster.comon.domain.teamMember.repository.TeamMemberRepository;
 import site.codemonster.comon.global.error.Team.TeamNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Transactional
@@ -17,6 +27,11 @@ import java.util.List;
 public class TeamLowService {
 
     private final TeamRepository teamRepository;
+    private final TeamRecommendationRepository teamRecommendationRepository;
+    private final TeamRecommendationDayRepository teamRecommendationDayRepository;
+    private final TeamMemberRepository teamMemberRepository;
+    private final RecommendationHistoryRepository recommendationHistoryRepository;
+    private final PlatformRecommendationRepository platformRecommendationRepository;
 
     @Transactional(readOnly = true)
     public Team findById(Long id) {
@@ -51,6 +66,18 @@ public class TeamLowService {
     }
 
     public void deleteById(Long teamId) {
+
+        Optional<TeamRecommendation> deleteTeamRecommendation = teamRecommendationRepository.findByTeamId(teamId);
+
+        if (deleteTeamRecommendation.isPresent()) {
+            teamRecommendationDayRepository.deleteByTeamRecommendationId(deleteTeamRecommendation.get().getId());
+            platformRecommendationRepository.deleteByTeamRecommendationId(deleteTeamRecommendation.get().getId());
+        }
+
+        teamRecommendationRepository.deleteByTeamId(teamId);
+
+        recommendationHistoryRepository.deleteByTeamTeamId(teamId);
+        teamMemberRepository.deleteByTeamTeamId(teamId);
         teamRepository.deleteById(teamId);
     }
 
@@ -58,6 +85,7 @@ public class TeamLowService {
     public List<Team> findByTeamManagerId(Long memberId) {
         return teamRepository.findByTeamManagerId(memberId);
     }
+
 
     @Transactional(readOnly = true)
     public List<Team> findAll() {

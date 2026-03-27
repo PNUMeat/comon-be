@@ -38,7 +38,6 @@ public class TeamService {
     private final MemberLowService memberLowService;
     private final TeamMemberLowService teamMemberLowService;
     private final ArticleLowService articleLowService;
-    private final ArticleImageLowService articleImageLowService;
     private final TeamRecruitLowService teamRecruitLowService;
     private final TeamRecommendationHighService teamRecommendationHighService;
     private final RecommendationHistoryLowService recommendationHistoryLowService;
@@ -142,7 +141,7 @@ public class TeamService {
 
         teamRecommendationHighService.deleteTeamRecommendation(team.getTeamId());
 
-        articleLowService.deleteByTeamTeamId(team.getTeamId());
+        articleLowService.deleteByTeamId(team.getTeamId());
 
         teamMemberLowService.deleteTeamMemberByTeamId(team.getTeamId());
 
