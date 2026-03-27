@@ -83,10 +83,6 @@ public class TeamLowService {
         return teamRepository.findByTeamManagerId(memberId);
     }
 
-    @Transactional(readOnly = true)
-    public List<Team> findByTeamMangerId(Long memberId) {
-        return teamRepository.findByTeamMangerId(memberId);
-    }
 
     @Transactional(readOnly = true)
     public List<Team> findAll() {

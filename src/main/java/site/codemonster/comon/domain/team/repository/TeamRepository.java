@@ -18,14 +18,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     Page<Team> findByTeamNameContaining(String keyword, Pageable pageable);
 
 
-    @Query("""
-    SELECT t
-    FROM Team t
-    join TeamMember tm on tm.team.teamId = t.teamId
-    WHERE tm.member.id = :managerId AND tm.isTeamManager = TRUE
-    """
-    )
-    List<Team> findByTeamMangerId(@Param("managerId") Long mangerId);
 
 
 
