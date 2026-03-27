@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.recommendation.entity.RecommendationHistory;
 import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
+import site.codemonster.comon.domain.recommendation.repository.PlatformRecommendationRepository;
 import site.codemonster.comon.domain.recommendation.repository.RecommendationHistoryRepository;
 import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationDayRepository;
 import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationRepository;
@@ -30,6 +31,7 @@ public class TeamLowService {
     private final TeamRecommendationDayRepository teamRecommendationDayRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final RecommendationHistoryRepository recommendationHistoryRepository;
+    private final PlatformRecommendationRepository platformRecommendationRepository;
 
     @Transactional(readOnly = true)
     public Team findById(Long id) {
@@ -69,6 +71,7 @@ public class TeamLowService {
 
         if (deleteTeamRecommendation.isPresent()) {
             teamRecommendationDayRepository.deleteByTeamRecommendationId(deleteTeamRecommendation.get().getId());
+            platformRecommendationRepository.deleteByTeamRecommendationId(deleteTeamRecommendation.get().getId());
         }
 
         teamRecommendationRepository.deleteByTeamId(teamId);
