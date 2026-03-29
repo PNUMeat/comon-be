@@ -9,6 +9,7 @@ import site.codemonster.comon.domain.article.dto.request.CalenderSubjectRequest;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;
 import site.codemonster.comon.domain.article.repository.ArticleCommentRepository;
+import site.codemonster.comon.domain.article.repository.CodingTestCountProjection;
 import site.codemonster.comon.domain.article.repository.ArticleFeedbackRepository;
 import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
@@ -17,7 +18,9 @@ import site.codemonster.comon.global.error.articles.ArticleNotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static site.codemonster.comon.domain.article.enums.ArticleCategory.getSubjectCategories;
 
@@ -114,6 +117,18 @@ public class ArticleLowService {
                 .stream().map(Article::getArticleId).toList();
 
         deleteByArticleIds(deletedIds);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Long> countCodingTestByTeamIds(List<Long> teamIds) {
+        if (teamIds.isEmpty()) {
+            return Map.of();
+        }
+        return articleRepository.countCodingTestByTeamIds(teamIds).stream()
+                .collect(Collectors.toMap(
+                        CodingTestCountProjection::getTeamId,
+                        CodingTestCountProjection::getCount
+                ));
     }
 
     private void deleteByArticleId(Long articleId) {

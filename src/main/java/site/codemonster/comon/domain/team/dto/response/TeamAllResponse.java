@@ -16,10 +16,11 @@ public record TeamAllResponse(Long teamId,
                               int memberLimit,
                               int memberCount,
                               int streakDays,
+                              long totalSolveCount,
                               LocalDate createdAt,
                               List<MemberProfileResponse> members)
 {
-    public TeamAllResponse(Team team) {
+    public TeamAllResponse(Team team, long totalSolveCount) {
         this (
                 team.getTeamId(),
                 team.getTeamName(),
@@ -29,6 +30,7 @@ public record TeamAllResponse(Long teamId,
                 team.getMaxParticipant(),
                 team.getTeamMembers().size(),
                 team.getStreakDays(),
+                totalSolveCount,
                 team.getCreatedDate().toLocalDate(),
                 team.getTeamMembers().stream()
                         .map(tm -> new MemberProfileResponse(tm.getMember()))

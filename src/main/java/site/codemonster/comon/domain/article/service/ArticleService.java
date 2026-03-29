@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static site.codemonster.comon.domain.article.enums.ArticleCategory.fromName;
 import static site.codemonster.comon.domain.article.enums.ArticleCategory.getSubjectCategories;
@@ -136,7 +137,9 @@ public class ArticleService {
 
         List<Article> subjectArticles = articleLowService.findSubjectArticlesByTeamIdAndYearAndMonth(teamId, calenderSubjectRequest);
         boolean isTeamManager = teamMemberLowService.checkMemberIsTeamManager(teamId, member);
-        return TeamPageResponse.from(MyTeamResponse.of(team), isTeamManager, subjectArticles);
+        long totalSolveCount = articleLowService.countCodingTestByTeamIds(List.of(teamId))
+                .getOrDefault(teamId, 0L);
+        return TeamPageResponse.from(MyTeamResponse.of(team, totalSolveCount), isTeamManager, subjectArticles);
     }
 
     private void validateTeamManager(Member member, Team team) {
@@ -195,6 +198,11 @@ public class ArticleService {
         Page<Article> myArticles = articleLowService.getMyVisibleArticlesUsingPaging(member.getId(), teamId, pageable);
 
         return myArticles.map(ArticleResponse::new);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Long> countCodingTestByTeamIds(List<Long> teamIds) {
+        return articleLowService.countCodingTestByTeamIds(teamIds);
     }
 
     @Transactional(readOnly = true)
