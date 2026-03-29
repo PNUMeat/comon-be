@@ -1,6 +1,5 @@
 package site.codemonster.comon.domain.team.service;
 
-import site.codemonster.comon.domain.article.service.ArticleImageLowService;
 import site.codemonster.comon.domain.article.service.ArticleLowService;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.service.MemberLowService;
@@ -8,8 +7,7 @@ import site.codemonster.comon.domain.recommendation.service.RecommendationHistor
 import site.codemonster.comon.domain.recommendation.service.TeamRecommendationHighService;
 import site.codemonster.comon.domain.team.dto.request.TeamInfoEditRequest;
 import site.codemonster.comon.domain.team.dto.request.TeamCreateRequest;
-import site.codemonster.comon.domain.team.dto.response.MyTeamMyPageResponse;
-import site.codemonster.comon.domain.team.dto.response.TeamMemberResponse;
+import site.codemonster.comon.domain.team.dto.response.*;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.enums.Topic;
 import site.codemonster.comon.domain.teamApply.service.TeamApplyLowService;
@@ -26,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import site.codemonster.comon.global.util.s3.S3ImageUtil;
 
 @Service
@@ -38,13 +38,12 @@ public class TeamService {
     private final MemberLowService memberLowService;
     private final TeamMemberLowService teamMemberLowService;
     private final ArticleLowService articleLowService;
-    private final ArticleImageLowService articleImageLowService;
     private final TeamRecruitLowService teamRecruitLowService;
     private final TeamRecommendationHighService teamRecommendationHighService;
     private final RecommendationHistoryLowService recommendationHistoryLowService;
     private final TeamApplyLowService teamApplyLowService;
 
-    public Team createTeam(TeamCreateRequest teamRequest, Member manager) {
+    public TeamCreateResponse createTeam(TeamCreateRequest teamRequest, Member manager) {
 
         List<String> memberUuids = teamRequest.teamMemberUuids();
 
@@ -79,28 +78,58 @@ public class TeamService {
             teamApplyLowService.deleteTeamApplyAfterTeamMake(teamRecruit);
         }
 
-        return savedTeam;
+        return TeamCreateResponse.of(savedTeam);
     }
 
     @Transactional(readOnly = true)
-    public Page<Team> getAllTeamsUsingPaging(Pageable pageable){
-        return teamLowService.findAllWithPagination(pageable);
+    public Page<TeamAllResponse> getAllTeamsUsingPaging(Pageable pageable){
+        Page<Team> teams = teamLowService.findAllWithPagination(pageable);
+        Map<Long, Long> solveCountMap = getSolveCountMap(teams.getContent());
+        return teams.map(team -> new TeamAllResponse(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)));
     }
 
     @Transactional(readOnly = true)
-    public Page<Team> getAllTeamsByKeywordUsingPaging(Pageable pageable, String keyword){
-        return teamLowService.findByTeamNameContaining(keyword, pageable);
+    public Page<TeamAllResponse> getAllTeamsByKeywordUsingPaging(Pageable pageable, String keyword){
+        Page<Team> teams = teamLowService.findByTeamNameContaining(keyword, pageable);
+        Map<Long, Long> solveCountMap = getSolveCountMap(teams.getContent());
+        return teams.map(team -> new TeamAllResponse(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)));
     }
 
     @Transactional(readOnly = true)
-    public List<Team> getMyTeams(Member member){
-        List<TeamMember> teamMembers = teamMemberLowService.getTeamMembersByMember(member);
-        return teamMembers.stream()
+    public List<MyTeamResponse> getMyTeams(Member member){
+        List<Team> myTeams = teamMemberLowService.getTeamMembersByMember(member).stream()
                 .map(TeamMember::getTeam)
+                .collect(Collectors.toList());
+        Map<Long, Long> solveCountMap = getSolveCountMap(myTeams);
+        return myTeams.stream()
+                .map(team -> MyTeamResponse.of(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)))
                 .collect(Collectors.toList());
     }
 
-    public TeamMember joinTeam(Member member, String password, Long teamId){
+    @Transactional(readOnly = true)
+    public TeamCombinedResponse getCombinedTeamsInfo(Pageable pageable, Member member){
+        Page<Team> teams = teamLowService.findAllWithPagination(pageable);
+        List<Team> myTeams = teamMemberLowService.getTeamMembersByMember(member).stream()
+                .map(TeamMember::getTeam)
+                .collect(Collectors.toList());
+
+        List<Long> distinctTeamIds = Stream.concat(
+                teams.getContent().stream().map(Team::getTeamId),
+                myTeams.stream().map(Team::getTeamId)
+        ).distinct().toList();
+
+        Map<Long, Long> solveCountMap = articleLowService.countCodingTestByTeamIds(distinctTeamIds);
+
+        Page<TeamAllResponse> teamAllResponses = teams.map(team ->
+                new TeamAllResponse(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)));
+        List<MyTeamResponse> myTeamResponses = myTeams.stream()
+                .map(team -> MyTeamResponse.of(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)))
+                .collect(Collectors.toList());
+
+        return new TeamCombinedResponse(myTeamResponses, teamAllResponses);
+    }
+
+    public TeamJoinResponse joinTeam(Member member, String password, Long teamId){
         Team team = teamLowService.findTeamsByTeamIdWithTeamMembers(teamId);
 
         validatePassword(password, team);
@@ -110,7 +139,8 @@ public class TeamService {
             throw new ExceedMaxMembersException();
         }
 
-        return teamMemberLowService.saveTeamMember(team, member, false);
+        TeamMember teamMember = teamMemberLowService.saveTeamMember(team, member, false);
+        return TeamJoinResponse.of(teamMember);
     }
 
     public Team updateTeamAnnouncement(Member member, String teamAnnouncement, Long teamId){
@@ -156,7 +186,7 @@ public class TeamService {
         return teamLowService.findByTeamManagerId(memberId);
     }
 
-    public Team updateTeamInfo(TeamInfoEditRequest teamInfoEditRequest, Member member, Long teamId){
+    public TeamInfoResponse updateTeamInfo(TeamInfoEditRequest teamInfoEditRequest, Member member, Long teamId){
         Team team = teamLowService.findTeamsByTeamIdWithTeamMembers(teamId);
 
         if(!teamMemberLowService.checkMemberIsTeamManager(teamId, member)){
@@ -173,20 +203,25 @@ public class TeamService {
             team.updateTeamIconUrl(S3ImageUtil.convertImageUrlToObjectKey(teamInfoEditRequest.teamIconUrl()));
         }
 
-        return team;
+        return new TeamInfoResponse(team);
     }
 
     @Transactional(readOnly = true)
-    public Team getTeamInfo(Long teamId, Member member){
+    public TeamInfoResponse getTeamInfo(Long teamId, Member member){
         Team team = teamLowService.getTeamByTeamId(teamId);
 
         if(!teamMemberLowService.checkMemberIsTeamManager(teamId, member)){
             throw new TeamManagerInvalidException();
         }
 
-        return team;
+        return new TeamInfoResponse(team);
     }
 
+
+    private Map<Long, Long> getSolveCountMap(List<Team> teams) {
+        List<Long> teamIds = teams.stream().map(Team::getTeamId).toList();
+        return articleLowService.countCodingTestByTeamIds(teamIds);
+    }
 
     private void validatePassword(String password, Team team) {
         if (!password.equals(team.getTeamPassword())) {

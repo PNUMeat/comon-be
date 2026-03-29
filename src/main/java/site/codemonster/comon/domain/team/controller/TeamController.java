@@ -8,7 +8,6 @@ import site.codemonster.comon.domain.team.dto.request.*;
 import site.codemonster.comon.domain.team.dto.response.*;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamService;
-import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 import site.codemonster.comon.global.log.annotation.Trace;
@@ -23,9 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static site.codemonster.comon.global.response.ResponseMessageEnum.*;
@@ -46,10 +43,7 @@ public class TeamController {
             @AuthenticationPrincipal Member manager
     ){
 
-
-        Team createdTeam = teamService.createTeam(teamRequest, manager);
-
-        TeamCreateResponse teamCreateResponse = TeamCreateResponse.of(createdTeam);
+        TeamCreateResponse teamCreateResponse = teamService.createTeam(teamRequest, manager);
 
         return ResponseEntity.status(TEAM_CREATED_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -63,13 +57,7 @@ public class TeamController {
             @RequestParam(name = "size", defaultValue = "6") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
-
-        List<Long> teamIds = teams.getContent().stream().map(Team::getTeamId).toList();
-        Map<Long, Long> solveCountMap = articleService.countCodingTestByTeamIds(teamIds);
-
-        Page<TeamAllResponse> teamAllResponses = teams.map(team
-                -> new TeamAllResponse(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)));
+        Page<TeamAllResponse> teamAllResponses = teamService.getAllTeamsUsingPaging(pageable);
 
         return ResponseEntity.status(TEAM_TOTAL_DETAILS_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -97,13 +85,7 @@ public class TeamController {
             @RequestParam(name = "size", defaultValue = "6") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
-        Page<Team> teams = teamService.getAllTeamsByKeywordUsingPaging(pageable,keyword);
-
-        List<Long> teamIds = teams.getContent().stream().map(Team::getTeamId).toList();
-        Map<Long, Long> solveCountMap = articleService.countCodingTestByTeamIds(teamIds);
-
-        Page<TeamAllResponse> teamAllResponses = teams.map(team ->
-                new TeamAllResponse(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)));
+        Page<TeamAllResponse> teamAllResponses = teamService.getAllTeamsByKeywordUsingPaging(pageable, keyword);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -112,14 +94,7 @@ public class TeamController {
 
     @GetMapping("/my")
     public ResponseEntity<ApiResponse<?>> getMyTeam(@AuthenticationPrincipal Member member){
-        List<Team> myTeams =  teamService.getMyTeams(member);
-
-        List<Long> teamIds = myTeams.stream().map(Team::getTeamId).toList();
-        Map<Long, Long> solveCountMap = articleService.countCodingTestByTeamIds(teamIds);
-
-        List<MyTeamResponse> myTeamResponse = myTeams.stream()
-                .map(team -> MyTeamResponse.of(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)))
-                .collect(Collectors.toList());
+        List<MyTeamResponse> myTeamResponse = teamService.getMyTeams(member);
 
         return ResponseEntity.status(MY_TEAM_DETAILS_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -144,25 +119,7 @@ public class TeamController {
             @AuthenticationPrincipal Member member
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
-
-        Page<Team> teams = teamService.getAllTeamsUsingPaging(pageable);
-        List<Team> myTeams = teamService.getMyTeams(member);
-
-        List<Long> allTeamIds = new ArrayList<>();
-        teams.getContent().stream().map(Team::getTeamId).forEach(allTeamIds::add);
-        myTeams.stream().map(Team::getTeamId).forEach(allTeamIds::add);
-        List<Long> distinctTeamIds = allTeamIds.stream().distinct().toList();
-
-        Map<Long, Long> solveCountMap = articleService.countCodingTestByTeamIds(distinctTeamIds);
-
-        Page<TeamAllResponse> teamAllResponses = teams.map(team ->
-                new TeamAllResponse(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)));
-
-        List<MyTeamResponse> myTeamResponses = myTeams.stream()
-                .map(team -> MyTeamResponse.of(team, solveCountMap.getOrDefault(team.getTeamId(), 0L)))
-                .collect(Collectors.toList());
-
-        TeamCombinedResponse teamCombinedResponse = new TeamCombinedResponse(myTeamResponses, teamAllResponses);
+        TeamCombinedResponse teamCombinedResponse = teamService.getCombinedTeamsInfo(pageable, member);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -175,9 +132,7 @@ public class TeamController {
             @RequestBody TeamJoinRequest teamJoinRequest,
             @AuthenticationPrincipal Member member
     ){
-        TeamMember teamMember = teamService.joinTeam(member, teamJoinRequest.password(), teamId);
-
-        TeamJoinResponse teamJoinResponse = TeamJoinResponse.of(teamMember);
+        TeamJoinResponse teamJoinResponse = teamService.joinTeam(member, teamJoinRequest.password(), teamId);
 
         return ResponseEntity.status(TEAM_JOIN_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -232,11 +187,11 @@ public class TeamController {
             @AuthenticationPrincipal Member member,
             @PathVariable("teamId") Long teamId
     ){
-         Team updatedTeam = teamService.updateTeamInfo(teamInfoEditRequest, member, teamId);
+        TeamInfoResponse teamInfoResponse = teamService.updateTeamInfo(teamInfoEditRequest, member, teamId);
 
         return ResponseEntity.status(TEAM_EDIT_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(new TeamInfoResponse(updatedTeam)));
+                .body(ApiResponse.successResponseWithData(teamInfoResponse));
     }
 
     @DeleteMapping("/{teamId}")
@@ -258,10 +213,10 @@ public class TeamController {
             @PathVariable("teamId") Long teamId,
             @AuthenticationPrincipal Member member
     ){
-        Team team = teamService.getTeamInfo(teamId, member);
+        TeamInfoResponse teamInfoResponse = teamService.getTeamInfo(teamId, member);
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.successResponseWithData(new TeamInfoResponse(team)));
+                .body(ApiResponse.successResponseWithData(teamInfoResponse));
     }
 
     @PostMapping("/{teamId}/team-manager")
@@ -328,6 +283,7 @@ public class TeamController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponseWithData(teamMemberResponses));
     }
+
 }
 
 

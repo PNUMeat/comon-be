@@ -9,6 +9,7 @@ import site.codemonster.comon.domain.article.dto.request.CalenderSubjectRequest;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;
 import site.codemonster.comon.domain.article.repository.ArticleCommentRepository;
+import site.codemonster.comon.domain.article.repository.CodingTestCountProjection;
 import site.codemonster.comon.domain.article.repository.ArticleFeedbackRepository;
 import site.codemonster.comon.domain.article.repository.ArticleImageRepository;
 import site.codemonster.comon.domain.article.repository.ArticleRepository;
@@ -125,8 +126,8 @@ public class ArticleLowService {
         }
         return articleRepository.countCodingTestByTeamIds(teamIds).stream()
                 .collect(Collectors.toMap(
-                        row -> (Long) row[0],
-                        row -> (Long) row[1]
+                        CodingTestCountProjection::getTeamId,
+                        CodingTestCountProjection::getCount
                 ));
     }
 
