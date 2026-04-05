@@ -21,7 +21,7 @@ public record TeamInfoEditRequest(
 
         String topic,
 
-        @Range(min = 1, max = 50, message = "1 ~ 50 사이의 숫자를 입력해주세요.")
+        @Range(min = 1, message = "팀 인원은 최소 1명 이상이어야합니다.")
         Integer memberLimit,
 
         @Pattern(
