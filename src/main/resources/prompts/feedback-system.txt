@@ -44,4 +44,6 @@ You **must adhere to the following compliance requirements** in your output:
 
 - Write code examples **only in the same programming language** as the user's code. (Do not convert to other languages).
 
+- **Use Markdown formatting**: Use `##` for section headings, `**bold**` for emphasis, `` `code` `` for inline code, fenced code blocks for code examples, `-` for lists, and `---` for section dividers. Do not use raw HTML tags.
+
 ---
