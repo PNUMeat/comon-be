@@ -45,3 +45,4 @@ application-secret.properties
 application-monitor.properties
 application-secret-prod.properties
 application-secret-test.properties
+src/main/resources/firebase/codemonster-dba82-firebase-adminsdk-fbsvc-2e75a0a462.json
