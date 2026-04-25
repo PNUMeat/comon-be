@@ -5,6 +5,11 @@ import site.codemonster.comon.domain.article.entity.ArticleComment;
 public record ArticleCommentIdResponse(
         Long commentId
 ) {
+
+    public ArticleCommentIdResponse(ArticleCreateCommentResponse comment) {
+        this(comment.commentId());
+    }
+
     public ArticleCommentIdResponse(ArticleComment comment) {
         this(comment.getCommentId());
     }

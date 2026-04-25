@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import site.codemonster.comon.domain.article.dto.request.ArticleCommentRequest;
 import site.codemonster.comon.domain.article.dto.response.ArticleCommentIdResponse;
 import site.codemonster.comon.domain.article.dto.response.ArticleCommentResponse;
+import site.codemonster.comon.domain.article.dto.response.ArticleCreateCommentResponse;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.article.service.ArticleCommentHighService;
 import site.codemonster.comon.domain.auth.entity.Member;
@@ -35,13 +36,13 @@ public class ArticleCommentController {
             @PathVariable("articleId") Long articleId,
             @RequestBody @Valid ArticleCommentRequest request
     ) {
-        ArticleComment savedComment = articleCommentHighService.createComment(articleId, member, request);
+        ArticleCreateCommentResponse response = articleCommentHighService.createComment(articleId, member, request);
 
-        fcmService.sendArticleAlarm(savedComment.getArticle().getMember(), savedComment.getArticle().getArticleTitle(), savedComment.getDescription());
+        fcmService.sendArticleAlarm(response.articleOwnerId(), response.articleTitle(), response.commentDescription());
 
         return ResponseEntity.status(COMMENT_CREATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(ApiResponse.createResponse(new ArticleCommentIdResponse(savedComment), COMMENT_CREATE_SUCCESS.getMessage()));
+                .body(ApiResponse.createResponse(new ArticleCommentIdResponse(response), COMMENT_CREATE_SUCCESS.getMessage()));
     }
 
     @GetMapping

@@ -30,9 +30,9 @@ public class FcmService {
 
     }
 
-    public void sendArticleAlarm(Member member, String articleTitle, String articleComment) {
+    public void sendArticleAlarm(Long memberId, String articleTitle, String articleComment) {
 
-        List<DeviceToken> deviceTokens = deviceTokenLowService.findByMemberId(member.getId());
+        List<DeviceToken> deviceTokens = deviceTokenLowService.findByMemberId(memberId);
 
         deviceTokens.forEach(deviceToken -> {
             sendMessageTo(deviceToken.getToken(), articleTitle + "에 댓글이 달렸습니다.", articleComment);

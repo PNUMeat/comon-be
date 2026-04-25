@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.article.dto.request.ArticleCommentRequest;
 import site.codemonster.comon.domain.article.dto.response.ArticleCommentResponse;
+import site.codemonster.comon.domain.article.dto.response.ArticleCreateCommentResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.auth.entity.Member;
@@ -25,12 +26,13 @@ public class ArticleCommentHighService {
     private final ArticleLowService articleLowService;
     private final TeamMemberLowService teamMemberLowService;
 
-    public ArticleComment createComment(Long articleId, Member member, ArticleCommentRequest request) {
+    public ArticleCreateCommentResponse createComment(Long articleId, Member member, ArticleCommentRequest request) {
         Article article = articleLowService.findById(articleId);
 
         teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
 
-        return articleCommentLowService.save(new ArticleComment(article, member, request.description()));
+        ArticleComment articleComment = articleCommentLowService.save(new ArticleComment(article, member, request.description()));
+        return new ArticleCreateCommentResponse(articleComment.getCommentId(), article.getMember().getId(), article.getArticleTitle(), articleComment.getDescription());
     }
 
     @Transactional(readOnly = true)
