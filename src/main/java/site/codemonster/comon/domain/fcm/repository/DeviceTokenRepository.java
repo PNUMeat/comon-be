@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface DeviceTokenRepository extends JpaRepository<DeviceToken, Long> {
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("delete from DeviceToken dt where dt.member.id = :userId")
+    @Query("delete from DeviceToken dt where dt.member.id = :memberId")
     void deleteByMemberId(Long memberId);
 
     List<DeviceToken> findByMemberId(Long memberId);
