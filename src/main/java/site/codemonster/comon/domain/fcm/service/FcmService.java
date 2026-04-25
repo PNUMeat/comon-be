@@ -5,10 +5,14 @@ import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.article.entity.Article;
+import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.fcm.dto.DeviceTokenRequest;
 import site.codemonster.comon.domain.fcm.entity.DeviceToken;
 import site.codemonster.comon.global.error.fcm.DuplicateDeviceTokenException;
+
+import java.util.List;
 
 @Transactional
 @Service
@@ -26,7 +30,17 @@ public class FcmService {
 
     }
 
-    public void sendMessageTo(String targetToken, String title, String body) {
+    public void sendArticleAlarm(Member member, String articleTitle, String articleComment) {
+
+        List<DeviceToken> deviceTokens = deviceTokenLowService.findByMemberId(member.getId());
+
+        deviceTokens.forEach(deviceToken -> {
+            sendMessageTo(deviceToken.getToken(), articleTitle + "에 댓글이 달렸습니다.", articleComment);
+        });
+
+    }
+
+    private void sendMessageTo(String targetToken, String title, String body) {
 
         Message message = Message.builder()
                 .setToken(targetToken)

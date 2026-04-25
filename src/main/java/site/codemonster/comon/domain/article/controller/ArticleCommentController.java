@@ -16,6 +16,7 @@ import site.codemonster.comon.domain.article.dto.response.ArticleCommentResponse
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.article.service.ArticleCommentHighService;
 import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.fcm.service.FcmService;
 import site.codemonster.comon.global.error.dto.response.ApiResponse;
 
 import static site.codemonster.comon.domain.article.controller.ArticleCommentResponseEnum.*;
@@ -26,6 +27,7 @@ import static site.codemonster.comon.domain.article.controller.ArticleCommentRes
 public class ArticleCommentController {
 
     private final ArticleCommentHighService articleCommentHighService;
+    private final FcmService fcmService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<ArticleCommentIdResponse>> createComment(
@@ -34,6 +36,8 @@ public class ArticleCommentController {
             @RequestBody @Valid ArticleCommentRequest request
     ) {
         ArticleComment savedComment = articleCommentHighService.createComment(articleId, member, request);
+
+        fcmService.sendArticleAlarm(member, savedComment.getArticle().getArticleTitle(), savedComment.getDescription());
 
         return ResponseEntity.status(COMMENT_CREATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
