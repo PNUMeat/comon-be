@@ -37,7 +37,7 @@ public class ArticleCommentController {
     ) {
         ArticleComment savedComment = articleCommentHighService.createComment(articleId, member, request);
 
-        fcmService.sendArticleAlarm(member, savedComment.getArticle().getArticleTitle(), savedComment.getDescription());
+        fcmService.sendArticleAlarm(savedComment.getArticle().getMember(), savedComment.getArticle().getArticleTitle(), savedComment.getDescription());
 
         return ResponseEntity.status(COMMENT_CREATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)
