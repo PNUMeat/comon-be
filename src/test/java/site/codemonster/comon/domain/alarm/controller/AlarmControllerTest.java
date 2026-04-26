@@ -1,7 +1,5 @@
 package site.codemonster.comon.domain.alarm.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,22 +10,17 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import site.codemonster.comon.domain.alarm.entity.Alarm;
-import site.codemonster.comon.domain.alarm.dto.AlarmResponse;
 import site.codemonster.comon.domain.alarm.repository.AlarmRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
 import site.codemonster.comon.domain.util.TestSecurityContextInjector;
 import site.codemonster.comon.domain.util.TestUtil;
 import site.codemonster.comon.global.error.ErrorCode;
-import site.codemonster.comon.global.error.dto.response.ApiResponse;
-
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import site.codemonster.comon.domain.alarm.entity.Alarm;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.securityContext;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,9 +29,6 @@ class AlarmControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -58,51 +48,31 @@ class AlarmControllerTest {
 
         TestSecurityContextInjector.inject(member);
 
-        String response = mockMvc.perform(get("/api/alarms")
+        mockMvc.perform(get("/api/alarms")
+                        .param("page", "0")
+                        .param("size", "5")
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(securityContext(SecurityContextHolder.getContext())))
-                .andReturn()
-                .getResponse()
-                .getContentAsString(StandardCharsets.UTF_8);
-
-        ApiResponse<List<AlarmResponse>> apiResponse = objectMapper.readValue(
-                response,
-                new TypeReference<ApiResponse<List<AlarmResponse>>>() {
-                }
-        );
-
-        List<AlarmResponse> data = apiResponse.getData();
-
-        assertSoftly(softly -> {
-            softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.SUCCESS);
-            softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.OK.value());
-            softly.assertThat(data).hasSize(2);
-            softly.assertThat(data.get(0).title()).isEqualTo("두 번째 알람");
-            softly.assertThat(data.get(0).content()).isEqualTo("두 번째 내용");
-            softly.assertThat(data.get(1).title()).isEqualTo("첫 번째 알람");
-            softly.assertThat(data.get(1).content()).isEqualTo("첫 번째 내용");
-        });
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.data.content[0].title").value("두 번째 알람"))
+                .andExpect(jsonPath("$.data.content[0].content").value("두 번째 내용"))
+                .andExpect(jsonPath("$.data.content[1].title").value("첫 번째 알람"))
+                .andExpect(jsonPath("$.data.content[1].content").value("첫 번째 내용"))
+                .andExpect(jsonPath("$.data.page.number").value(0))
+                .andExpect(jsonPath("$.data.page.size").value(5))
+                .andExpect(jsonPath("$.data.page.totalElements").value(2));
     }
 
     @Test
     @DisplayName("알람 목록 조회 실패 - 인증되지 않은 사용자")
     void getAlarmsFailWhenUnauthorized() throws Exception {
-        String response = mockMvc.perform(get("/api/alarms")
+        mockMvc.perform(get("/api/alarms")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andReturn()
-                .getResponse()
-                .getContentAsString(StandardCharsets.UTF_8);
-
-        ApiResponse<Void> apiResponse = objectMapper.readValue(
-                response,
-                new TypeReference<ApiResponse<Void>>() {
-                }
-        );
-
-        assertSoftly(softly -> {
-            softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.ERROR);
-            softly.assertThat(apiResponse.getCode()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
-            softly.assertThat(apiResponse.getMessage()).isEqualTo(ErrorCode.UNAUTHORIZED_MEMBER_ERROR.getMessage());
-        });
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.code").value(HttpStatus.UNAUTHORIZED.value()))
+                .andExpect(jsonPath("$.message").value(ErrorCode.UNAUTHORIZED_MEMBER_ERROR.getMessage()));
     }
 }
