@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.auth.service;
 
+import site.codemonster.comon.domain.alarm.service.AlarmLowService;
 import site.codemonster.comon.domain.article.service.ArticleCommentLowService;
 import site.codemonster.comon.domain.article.service.ArticleImageLowService;
 import site.codemonster.comon.domain.article.service.ArticleLowService;
@@ -45,6 +46,7 @@ public class MemberService {
     private final TeamApplyLowService teamApplyLowService;
     private final TeamRecruitImageRepository teamRecruitImageRepository;
     private final DeviceTokenLowService deviceTokenLowService;
+    private final AlarmLowService alarmLowService;
 
     public void createMemberProfile(
         MemberProfileCreateRequest memberProfileCreateRequest,
@@ -93,6 +95,8 @@ public class MemberService {
 
             teamLowService.deleteById(teamId);
         }
+
+        alarmLowService.deleteByMemberId(memberId);
 
         deviceTokenLowService.deleteByMemberId(memberId);
 

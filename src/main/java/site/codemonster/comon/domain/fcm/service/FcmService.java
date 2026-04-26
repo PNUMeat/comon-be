@@ -39,7 +39,7 @@ public class FcmService {
 
         List<DeviceToken> deviceTokens = deviceTokenLowService.findByMemberId(memberId);
 
-        Member articleOwner = memberLowService.getMemberById(memberId);
+        Member articleOwner = memberLowService.getReferenceById(memberId);
 
         String title = articleTitle + "에 댓글이 달렸습니다.";
 

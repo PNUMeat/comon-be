@@ -24,4 +24,8 @@ public class AlarmLowService {
     public Alarm save(Alarm alarm) {
         return alarmRepository.save(alarm);
     }
+
+    public void deleteByMemberId(Long memberId) {
+        alarmRepository.deleteByMemberId(memberId);
+    }
 }
