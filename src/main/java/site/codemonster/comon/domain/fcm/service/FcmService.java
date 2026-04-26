@@ -3,6 +3,7 @@ package site.codemonster.comon.domain.fcm.service;
 import com.google.api.core.ApiFuture;
 import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.alarm.entity.Alarm;
@@ -35,6 +36,7 @@ public class FcmService {
 
     }
 
+    @Async("sendAlarm")
     public void sendArticleAlarm(Long memberId, String articleTitle, String articleComment) {
 
         List<DeviceToken> deviceTokens = deviceTokenLowService.findByMemberId(memberId);
