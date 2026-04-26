@@ -55,6 +55,9 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
     implementation 'org.jsoup:jsoup:1.17.1'
+
+	// firebase
+	implementation 'com.google.firebase:firebase-admin:9.2.0'
 }
 
 dependencyManagement {
