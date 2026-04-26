@@ -5,9 +5,12 @@ import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.alarm.entity.Alarm;
+import site.codemonster.comon.domain.alarm.service.AlarmLowService;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.auth.service.MemberLowService;
 import site.codemonster.comon.domain.fcm.dto.DeviceTokenRequest;
 import site.codemonster.comon.domain.fcm.entity.DeviceToken;
 import site.codemonster.comon.global.error.fcm.DuplicateDeviceTokenException;
@@ -20,6 +23,8 @@ import java.util.List;
 public class FcmService {
 
     private final DeviceTokenLowService deviceTokenLowService;
+    private final AlarmLowService alarmLowService;
+    private final MemberLowService memberLowService;
 
     public DeviceToken addDeviceToken(Member member, DeviceTokenRequest deviceTokenRequest) {
 
@@ -34,8 +39,14 @@ public class FcmService {
 
         List<DeviceToken> deviceTokens = deviceTokenLowService.findByMemberId(memberId);
 
+        Member articleOwner = memberLowService.getMemberById(memberId);
+
+        String title = articleTitle + "에 댓글이 달렸습니다.";
+
+        alarmLowService.save(new Alarm(title,articleComment, articleOwner));
+
         deviceTokens.forEach(deviceToken -> {
-            sendMessageTo(deviceToken.getToken(), articleTitle + "에 댓글이 달렸습니다.", articleComment);
+            sendMessageTo(deviceToken.getToken(), title, articleComment);
         });
 
     }

@@ -15,6 +15,11 @@ public class MemberLowService {
     private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
+    public Member getReferenceById(Long memberId) {
+        return memberRepository.getReferenceById(memberId);
+    }
+
+    @Transactional(readOnly = true)
     public Member getMemberByUUID(String uuid){
         return memberRepository.findByUuid(uuid)
                 .orElseThrow(MemberNotFoundException::new);
