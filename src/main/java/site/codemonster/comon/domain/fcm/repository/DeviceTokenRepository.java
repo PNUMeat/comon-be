@@ -16,8 +16,7 @@ public interface DeviceTokenRepository extends JpaRepository<DeviceToken, Long> 
 
     List<DeviceToken> findByMemberId(Long memberId);
 
-    @Query("select dt from DeviceToken dt where dt.member.id = :memberId and dt.token = :token")
-    Optional<DeviceToken> findByMemberIdAndToken(Long memberId, String token);
+    Optional<DeviceToken> findByToken(String token);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("delete from DeviceToken dt where dt.token = :token")

@@ -16,8 +16,8 @@ import site.codemonster.comon.global.entityListeners.TimeStamp;
         name = "device_token",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_member_id_token",
-                        columnNames = {"member_id", "token"}
+                        name = "uk_device_token_token",
+                        columnNames = {"token"}
                 )
         }
 )
@@ -42,5 +42,8 @@ public class DeviceToken extends TimeStamp {
         this.token = token;
     }
 
+    public void updateMember(Member member) {
+        this.member = member;
+    }
 
 }

@@ -11,12 +11,11 @@ import site.codemonster.comon.domain.alarm.service.AlarmLowService;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.auth.entity.Member;
-import site.codemonster.comon.domain.auth.service.MemberLowService;
 import site.codemonster.comon.domain.fcm.dto.DeviceTokenRequest;
 import site.codemonster.comon.domain.fcm.entity.DeviceToken;
-import site.codemonster.comon.global.error.fcm.DuplicateDeviceTokenException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Service
@@ -24,16 +23,16 @@ import java.util.List;
 public class FcmService {
 
     private final DeviceTokenLowService deviceTokenLowService;
-    private final AlarmLowService alarmLowService;
-    private final MemberLowService memberLowService;
 
     public DeviceToken addDeviceToken(Member member, DeviceTokenRequest deviceTokenRequest) {
+        Optional<DeviceToken> deviceToken = deviceTokenLowService.findByToken(deviceTokenRequest.token());
 
-        if (deviceTokenLowService.existsByMemberIdAndToken(member.getId(), deviceTokenRequest.token()))
-            throw new DuplicateDeviceTokenException();
+        if (deviceToken.isPresent()) {
+            deviceToken.get().updateMember(member);
+            return deviceToken.get();
+        }
 
         return deviceTokenLowService.save(new DeviceToken(member, deviceTokenRequest.token()));
-
     }
 
     @Async("sendAlarm")

@@ -93,7 +93,6 @@ public enum ErrorCode {
     INVALID_IMAGE_URL_FORMAT(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 이미지 URL 형식입니다."),
 
     // FCM
-    DUPLICATE_DEVICE_TOKEN(HttpStatus.BAD_REQUEST, 400, "중복된 디바이스 토큰입니다."),
     FIREBASE_CONNECT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "firebase 연결 오류"),
     ;
 

@@ -29,11 +29,8 @@ public class DeviceTokenLowService {
         return deviceTokenRepository.findByMemberId(memberId);
     }
 
-    public boolean existsByMemberIdAndToken(Long memberId, String token) {
-        Optional<DeviceToken> findToken = deviceTokenRepository.findByMemberIdAndToken(memberId, token);
-
-        if (findToken.isPresent()) return true;
-        return false;
+    public Optional<DeviceToken> findByToken(String token) {
+        return deviceTokenRepository.findByToken(token);
     }
 
     public void deleteByToken(String token) {
