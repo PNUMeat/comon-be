@@ -5,12 +5,15 @@ import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.alarm.entity.Alarm;
+import site.codemonster.comon.domain.alarm.service.AlarmLowService;
 import site.codemonster.comon.domain.article.dto.request.ArticleCommentRequest;
 import site.codemonster.comon.domain.article.dto.response.ArticleCommentResponse;
 import site.codemonster.comon.domain.article.dto.response.ArticleCreateCommentResponse;
 import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.entity.ArticleComment;
 import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.auth.service.MemberLowService;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.global.error.articlecomment.CommentNotAuthorException;
 import site.codemonster.comon.global.error.articlecomment.CommentNotFoundException;
@@ -25,6 +28,8 @@ public class ArticleCommentHighService {
     private final ArticleCommentLowService articleCommentLowService;
     private final ArticleLowService articleLowService;
     private final TeamMemberLowService teamMemberLowService;
+    private final MemberLowService memberLowService;
+    private final AlarmLowService alarmLowService;
 
     public ArticleCreateCommentResponse createComment(Long articleId, Member member, ArticleCommentRequest request) {
         Article article = articleLowService.findById(articleId);
@@ -32,7 +37,16 @@ public class ArticleCommentHighService {
         teamMemberLowService.validateTeamMember(article.getTeam().getTeamId(), member);
 
         ArticleComment articleComment = articleCommentLowService.save(new ArticleComment(article, member, request.description()));
-        return new ArticleCreateCommentResponse(articleComment.getCommentId(), article.getMember().getId(), article.getArticleTitle(), articleComment.getDescription());
+
+
+        Member articleOwner = memberLowService.getReferenceById(article.getMember().getId());
+
+        String title = article.getArticleTitle() + "에 댓글이 달렸습니다.";
+
+        alarmLowService.save(new Alarm(title, articleComment.getDescription(), articleOwner));
+
+
+        return new ArticleCreateCommentResponse(articleComment.getCommentId(), articleOwner.getId(), title, articleComment.getDescription());
     }
 
     @Transactional(readOnly = true)

@@ -41,14 +41,9 @@ public class FcmService {
 
         List<DeviceToken> deviceTokens = deviceTokenLowService.findByMemberId(memberId);
 
-        Member articleOwner = memberLowService.getReferenceById(memberId);
-
-        String title = articleTitle + "에 댓글이 달렸습니다.";
-
-        alarmLowService.save(new Alarm(title,articleComment, articleOwner));
 
         deviceTokens.forEach(deviceToken -> {
-            sendMessageTo(deviceToken.getToken(), title, articleComment);
+            sendMessageTo(deviceToken.getToken(), articleTitle, articleComment);
         });
 
     }
