@@ -29,7 +29,7 @@ public class FcmConfig {
 
             return googleCredentials;
         } catch (IOException ex) {
-            log.error("Firebase Credential not found");
+            log.error("Failed to load Firebase credentials from classpath: {}", firebaseConfigPath, ex);
             throw new FcmCredentialsException();
         }
     }
