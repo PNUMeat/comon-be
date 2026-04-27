@@ -3,6 +3,7 @@ package site.codemonster.comon.domain.team.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,16 +77,15 @@ class TeamControllerTest {
         });
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = {0,51})
-    @DisplayName("팀 생성 실패 - 팀원 수는 1이상 50 이하")
-    void teamCreateFail(int memberLimit) throws Exception {
+    @Test
+    @DisplayName("팀 생성 실패 - 팀원 수는 1이상")
+    void teamCreateFail() throws Exception {
 
         Member member = memberRepository.save(TestUtil.createMember());
 
         TestSecurityContextInjector.inject(member);
 
-        TeamCreateRequest teamCreateRequest = new TeamCreateRequest("팀이름", "팀설명", Topic.CODINGTEST.getName(), memberLimit, "1234", null, null, null);
+        TeamCreateRequest teamCreateRequest = new TeamCreateRequest("팀이름", "팀설명", Topic.CODINGTEST.getName(), 0, "1234", null, null, null);
         String requestBody = objectMapper.writeValueAsString(teamCreateRequest);
 
 
@@ -104,9 +104,9 @@ class TeamControllerTest {
 
         assertSoftly(softly -> {
             softly.assertThat(apiResponse.getStatus()).isEqualTo(ApiResponse.FAIL);
-            softly.assertThat(data.get("memberLimit")).isEqualTo("1 ~ 50 사이의 숫자를 입력해주세요.");
+            softly.assertThat(data.get("memberLimit")).isEqualTo("팀 인원은 최소 1명 이상이어야합니다.");
             softly.assertThat(apiResponse.getCode()).isEqualTo(ErrorValidationResult.ERROR_STATUS_CODE);
-            softly.assertThat(apiResponse.getMessage()).isEqualTo("1 ~ 50 사이의 숫자를 입력해주세요.");
+            softly.assertThat(apiResponse.getMessage()).isEqualTo("팀 인원은 최소 1명 이상이어야합니다.");
         });
     }
 

@@ -1,5 +1,6 @@
 package site.codemonster.comon.domain.auth.service;
 
+import site.codemonster.comon.domain.alarm.service.AlarmLowService;
 import site.codemonster.comon.domain.article.service.ArticleCommentLowService;
 import site.codemonster.comon.domain.article.service.ArticleImageLowService;
 import site.codemonster.comon.domain.article.service.ArticleLowService;
@@ -10,6 +11,7 @@ import site.codemonster.comon.domain.auth.dto.response.MemberProfileResponse;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
 import site.codemonster.comon.domain.auth.repository.RefreshTokenRepository;
+import site.codemonster.comon.domain.fcm.service.DeviceTokenLowService;
 import site.codemonster.comon.domain.team.dto.response.TeamAbstractResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.repository.TeamRepository;
@@ -43,6 +45,8 @@ public class MemberService {
     private final TeamRecruitLowService teamRecruitLowService;
     private final TeamApplyLowService teamApplyLowService;
     private final TeamRecruitImageRepository teamRecruitImageRepository;
+    private final DeviceTokenLowService deviceTokenLowService;
+    private final AlarmLowService alarmLowService;
 
     public void createMemberProfile(
         MemberProfileCreateRequest memberProfileCreateRequest,
@@ -91,6 +95,10 @@ public class MemberService {
 
             teamLowService.deleteById(teamId);
         }
+
+        alarmLowService.deleteByMemberId(memberId);
+
+        deviceTokenLowService.deleteByMemberId(memberId);
 
         articleLowService.deleteByMemberId(memberId);
 
