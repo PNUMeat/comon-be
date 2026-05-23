@@ -38,7 +38,13 @@ public class ArticleCommentController {
     ) {
         ArticleCreateCommentResponse response = articleCommentHighService.createComment(articleId, member, request);
 
-        fcmService.sendArticleAlarm(response.articleOwnerId(), response.articleTitle(), response.commentDescription());
+        fcmService.sendArticleAlarm(
+                response.articleOwnerId(),
+                response.articleTitle(),
+                response.commentDescription(),
+                response.deepLink(),
+                response.routingId()
+        );
 
         return ResponseEntity.status(COMMENT_CREATE_SUCCESS.getStatusCode())
                 .contentType(MediaType.APPLICATION_JSON)

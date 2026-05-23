@@ -4,6 +4,8 @@ public record ArticleCreateCommentResponse(
         Long commentId,
         Long articleOwnerId,
         String articleTitle,
-        String commentDescription
+        String commentDescription,
+        String deepLink,
+        Long routingId
 ) {
 }
