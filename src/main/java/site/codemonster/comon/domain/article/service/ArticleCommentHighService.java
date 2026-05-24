@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.codemonster.comon.domain.alarm.entity.Alarm;
+import site.codemonster.comon.domain.alarm.entity.AlarmType;
 import site.codemonster.comon.domain.alarm.service.AlarmLowService;
 import site.codemonster.comon.domain.article.dto.request.ArticleCommentRequest;
 import site.codemonster.comon.domain.article.dto.response.ArticleCommentResponse;
@@ -25,6 +26,8 @@ import java.util.List;
 @Transactional
 public class ArticleCommentHighService {
 
+    private static final String ARTICLE_COMMENT_DEEP_LINK = "/api/v1/articles/%s/by-date?date=%s";
+
     private final ArticleCommentLowService articleCommentLowService;
     private final ArticleLowService articleLowService;
     private final TeamMemberLowService teamMemberLowService;
@@ -43,10 +46,19 @@ public class ArticleCommentHighService {
 
         String title = article.getArticleTitle() + "에 댓글이 달렸습니다.";
 
-        alarmLowService.save(new Alarm(title, articleComment.getDescription(), articleOwner));
+        String deepLink = ARTICLE_COMMENT_DEEP_LINK.formatted(article.getTeam().getTeamId(), article.getCreatedDate().toLocalDate().toString());
+
+        alarmLowService.save(new Alarm(title, articleComment.getDescription(), articleOwner, deepLink, articleId, AlarmType.ARTICLE_COMMENT_ALARM));
 
 
-        return new ArticleCreateCommentResponse(articleComment.getCommentId(), articleOwner.getId(), title, articleComment.getDescription());
+        return new ArticleCreateCommentResponse(
+                articleComment.getCommentId(),
+                articleOwner.getId(),
+                title,
+                articleComment.getDescription(),
+                deepLink,
+                articleId
+        );
     }
 
     @Transactional(readOnly = true)

@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.alarm.entity.AlarmType;
 import site.codemonster.comon.domain.alarm.repository.AlarmRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
@@ -42,9 +43,9 @@ class AlarmControllerTest {
         Member member = memberRepository.save(TestUtil.createMember());
         Member otherMember = memberRepository.save(TestUtil.createOtherMember());
 
-        alarmRepository.save(new Alarm("첫 번째 알람", "첫 번째 내용", member));
-        alarmRepository.save(new Alarm("두 번째 알람", "두 번째 내용", member));
-        alarmRepository.save(new Alarm("다른 회원 알람", "다른 회원 내용", otherMember));
+        alarmRepository.save(new Alarm("첫 번째 알람", "첫 번째 내용", member, "/api/v1/articles/1/by-date?date=2026-05-23", 1L, AlarmType.ARTICLE_COMMENT_ALARM));
+        alarmRepository.save(new Alarm("두 번째 알람", "두 번째 내용", member, "/api/v1/articles/1/by-date?date=2026-05-23", 1L, AlarmType.ARTICLE_COMMENT_ALARM));
+        alarmRepository.save(new Alarm("다른 회원 알람", "다른 회원 내용", otherMember, "/api/v1/articles/2/by-date?date=2026-05-23", 2L, AlarmType.ARTICLE_COMMENT_ALARM));
 
         TestSecurityContextInjector.inject(member);
 
@@ -58,8 +59,14 @@ class AlarmControllerTest {
                 .andExpect(jsonPath("$.code").value(HttpStatus.OK.value()))
                 .andExpect(jsonPath("$.data.content[0].title").value("두 번째 알람"))
                 .andExpect(jsonPath("$.data.content[0].content").value("두 번째 내용"))
+                .andExpect(jsonPath("$.data.content[0].deepLink").value("/api/v1/articles/1/by-date?date=2026-05-23"))
+                .andExpect(jsonPath("$.data.content[0].routingId").value(1))
+                .andExpect(jsonPath("$.data.content[0].alarmType").value(AlarmType.ARTICLE_COMMENT_ALARM.name()))
                 .andExpect(jsonPath("$.data.content[1].title").value("첫 번째 알람"))
                 .andExpect(jsonPath("$.data.content[1].content").value("첫 번째 내용"))
+                .andExpect(jsonPath("$.data.content[1].deepLink").value("/api/v1/articles/1/by-date?date=2026-05-23"))
+                .andExpect(jsonPath("$.data.content[1].routingId").value(1))
+                .andExpect(jsonPath("$.data.content[1].alarmType").value(AlarmType.ARTICLE_COMMENT_ALARM.name()))
                 .andExpect(jsonPath("$.data.page.number").value(0))
                 .andExpect(jsonPath("$.data.page.size").value(5))
                 .andExpect(jsonPath("$.data.page.totalElements").value(2));

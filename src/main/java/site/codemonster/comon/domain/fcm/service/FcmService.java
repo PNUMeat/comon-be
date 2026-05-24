@@ -6,13 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import site.codemonster.comon.domain.alarm.entity.Alarm;
-import site.codemonster.comon.domain.alarm.service.AlarmLowService;
-import site.codemonster.comon.domain.article.entity.Article;
-import site.codemonster.comon.domain.article.entity.ArticleComment;
-import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.alarm.entity.AlarmType;
 import site.codemonster.comon.domain.fcm.dto.DeviceTokenRequest;
 import site.codemonster.comon.domain.fcm.entity.DeviceToken;
+import site.codemonster.comon.domain.auth.entity.Member;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,18 +33,18 @@ public class FcmService {
     }
 
     @Async("sendAlarm")
-    public void sendArticleAlarm(Long memberId, String articleTitle, String articleComment) {
+    public void sendArticleAlarm(Long memberId, String articleTitle, String articleComment, String deepLink, Long routingId) {
 
         List<DeviceToken> deviceTokens = deviceTokenLowService.findByMemberId(memberId);
 
 
         deviceTokens.forEach(deviceToken -> {
-            sendMessageTo(deviceToken.getToken(), articleTitle, articleComment);
+            sendMessageTo(deviceToken.getToken(), articleTitle, articleComment, deepLink, routingId, AlarmType.ARTICLE_COMMENT_ALARM);
         });
 
     }
 
-    private void sendMessageTo(String targetToken, String title, String body) {
+    private void sendMessageTo(String targetToken, String title, String body, String deepLink, Long routingId, AlarmType alarmType) {
 
         Message message = Message.builder()
                 .setToken(targetToken)
@@ -57,6 +54,9 @@ public class FcmService {
                                 .setBody(body)
                                 .build()
                 )
+                .putData("deepLink", deepLink)
+                .putData("routingId", String.valueOf(routingId))
+                .putData("alarmType", alarmType.name())
                 .build();
 
         FirebaseMessaging firebaseMessaging = FirebaseMessaging.getInstance();
