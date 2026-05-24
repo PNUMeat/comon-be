@@ -17,6 +17,7 @@ import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.global.error.articles.ArticleNotFoundException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -129,6 +130,16 @@ public class ArticleLowService {
                         CodingTestCountProjection::getTeamId,
                         CodingTestCountProjection::getCount
                 ));
+    }
+
+    @Transactional(readOnly = true)
+    public long countByMemberId(Long memberId) {
+        return articleRepository.countByMemberId(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LocalDateTime> findCreatedDatesByMemberAndTeamInRange(Long memberId, Long teamId, LocalDateTime fromInclusive, LocalDateTime toExclusive) {
+        return articleRepository.findCreatedDatesByMemberAndTeamInRange(memberId, teamId, fromInclusive, toExclusive);
     }
 
     private void deleteByArticleId(Long articleId) {

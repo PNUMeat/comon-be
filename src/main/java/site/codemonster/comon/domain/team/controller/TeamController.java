@@ -169,6 +169,18 @@ public class TeamController {
                 .body(ApiResponse.successResponseWithData(subjectArticlesUsingCalender));
     }
 
+    @GetMapping("/{teamId}/dashboard")
+    public ResponseEntity<ApiResponse<TeamDashboardResponse>> getDashboard(
+            @AuthenticationPrincipal Member member,
+            @PathVariable Long teamId
+    ) {
+        TeamDashboardResponse dashboard = articleService.getDashboard(member, teamId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponseWithData(dashboard));
+    }
+
     @DeleteMapping("/{teamId}/members/me")
     public ResponseEntity<ApiResponse<?>> removeMemberFromTeam(
             @AuthenticationPrincipal Member member,

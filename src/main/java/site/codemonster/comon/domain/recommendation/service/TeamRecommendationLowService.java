@@ -26,6 +26,11 @@ public class TeamRecommendationLowService {
                 .orElseThrow(TeamRecommendationNotFoundException::new);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<TeamRecommendation> findByTeamId(Long teamId) {
+        return teamRecommendationRepository.findByTeamId(teamId);
+    }
+
     public boolean isExistByTeam(Team team) {
         return teamRecommendationRepository.existsByTeam(team);
     }
