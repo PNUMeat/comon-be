@@ -9,10 +9,15 @@ import site.codemonster.comon.domain.article.entity.Article;
 import site.codemonster.comon.domain.article.enums.ArticleCategory;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
+import site.codemonster.comon.domain.recommendation.entity.TeamRecommendationDay;
+import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationRepository;
 import site.codemonster.comon.domain.team.dto.response.MyTeamResponse;
+import site.codemonster.comon.domain.team.dto.response.TeamDashboardResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamPageResponse;
 import site.codemonster.comon.domain.team.entity.Team;
 import site.codemonster.comon.domain.team.service.TeamLowService;
+import site.codemonster.comon.domain.teamMember.entity.TeamMember;
 import site.codemonster.comon.domain.teamMember.service.TeamMemberLowService;
 import site.codemonster.comon.global.error.Team.TeamManagerInvalidException;
 import site.codemonster.comon.global.error.articles.*;
@@ -22,9 +27,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static site.codemonster.comon.domain.article.enums.ArticleCategory.fromName;
 import static site.codemonster.comon.domain.article.enums.ArticleCategory.getSubjectCategories;
@@ -37,6 +48,10 @@ public class ArticleService {
     private final TeamMemberLowService teamMemberLowService;
     private final ArticleLowService articleLowService;
     private final TeamLowService teamLowService;
+    private final TeamRecommendationRepository teamRecommendationRepository;
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+    private static final int LOOKBACK_DAYS = 90;
 
     public Article articleCreate(Member member, ArticleCreateRequest articleCreateRequest) {
 
@@ -211,5 +226,44 @@ public class ArticleService {
         return articles.stream()
                 .map(ArticleResponse::new)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public TeamDashboardResponse getDashboard(Member member, Long teamId) {
+        TeamMember teamMember = teamMemberLowService.getTeamMemberByTeamIdAndMemberId(teamId, member);
+
+        LocalDate today = LocalDate.now(KST);
+        LocalDate joinDate = toKstDate(teamMember.getCreatedDate());
+        LocalDate lookbackFloor = laterOf(joinDate, today.minusDays(LOOKBACK_DAYS));
+
+        Map<LocalDate, Long> solveCountsByDate = countSolvesByDate(member.getId(), teamId, lookbackFloor, today);
+        Set<DayOfWeek> recommendationDays = findRecommendationDays(teamId);
+        long cumulativeSolveCount = articleLowService.countByMemberId(member.getId());
+
+        return TeamDashboardResponse.of(teamMember, joinDate, recommendationDays, solveCountsByDate, today, lookbackFloor, cumulativeSolveCount);
+    }
+
+    private Map<LocalDate, Long> countSolvesByDate(Long memberId, Long teamId, LocalDate from, LocalDate to) {
+        return articleLowService
+                .findCreatedDatesByMemberAndTeamInRange(memberId, teamId, from.atStartOfDay(), to.plusDays(1).atStartOfDay())
+                .stream()
+                .collect(Collectors.groupingBy(this::toKstDate, Collectors.counting()));
+    }
+
+    private LocalDate laterOf(LocalDate a, LocalDate b) {
+        return a.isAfter(b) ? a : b;
+    }
+
+    private Set<DayOfWeek> findRecommendationDays(Long teamId) {
+        return teamRecommendationRepository.findByTeamId(teamId)
+                .map(TeamRecommendation::getTeamRecommendationDays)
+                .map(days -> days.stream()
+                        .map(TeamRecommendationDay::getDayOfWeek)
+                        .collect(Collectors.toCollection(() -> EnumSet.noneOf(DayOfWeek.class))))
+                .orElseGet(() -> EnumSet.noneOf(DayOfWeek.class));
+    }
+
+    private LocalDate toKstDate(LocalDateTime dateTime) {
+        return dateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(KST).toLocalDate();
     }
 }

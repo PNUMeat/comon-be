@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,4 +75,12 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "WHERE a.team.teamId IN :teamIds AND a.articleCategory = 'CODING_TEST' " +
             "GROUP BY a.team.teamId")
     List<CodingTestCountProjection> countCodingTestByTeamIds(@Param("teamIds") List<Long> teamIds);
+
+    long countByMemberId(Long memberId);
+
+    @Query("SELECT article.createdDate FROM Article article " +
+            "WHERE article.member.id = :memberId AND article.team.teamId = :teamId " +
+            "AND article.createdDate >= :fromInclusive AND article.createdDate < :toExclusive")
+    List<LocalDateTime> findCreatedDatesByMemberAndTeamInRange(
+            Long memberId, Long teamId, LocalDateTime fromInclusive, LocalDateTime toExclusive);
 }
