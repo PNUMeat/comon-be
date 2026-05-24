@@ -11,7 +11,7 @@ import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
 import site.codemonster.comon.domain.recommendation.entity.TeamRecommendation;
 import site.codemonster.comon.domain.recommendation.entity.TeamRecommendationDay;
-import site.codemonster.comon.domain.recommendation.repository.TeamRecommendationRepository;
+import site.codemonster.comon.domain.recommendation.service.TeamRecommendationLowService;
 import site.codemonster.comon.domain.team.dto.response.MyTeamResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamDashboardResponse;
 import site.codemonster.comon.domain.team.dto.response.TeamPageResponse;
@@ -48,7 +48,7 @@ public class ArticleService {
     private final TeamMemberLowService teamMemberLowService;
     private final ArticleLowService articleLowService;
     private final TeamLowService teamLowService;
-    private final TeamRecommendationRepository teamRecommendationRepository;
+    private final TeamRecommendationLowService teamRecommendationLowService;
 
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
     private static final int LOOKBACK_DAYS = 90;
@@ -245,7 +245,7 @@ public class ArticleService {
 
     private Map<LocalDate, Long> countSolvesByDate(Long memberId, Long teamId, LocalDate from, LocalDate to) {
         return articleLowService
-                .findCreatedDatesByMemberAndTeamInRange(memberId, teamId, from.atStartOfDay(), to.plusDays(1).atStartOfDay())
+                .findCreatedDatesByMemberAndTeamInRange(memberId, teamId, kstDayStartInSystemDefault(from), kstDayStartInSystemDefault(to.plusDays(1)))
                 .stream()
                 .collect(Collectors.groupingBy(this::toKstDate, Collectors.counting()));
     }
@@ -255,7 +255,7 @@ public class ArticleService {
     }
 
     private Set<DayOfWeek> findRecommendationDays(Long teamId) {
-        return teamRecommendationRepository.findByTeamId(teamId)
+        return teamRecommendationLowService.findByTeamId(teamId)
                 .map(TeamRecommendation::getTeamRecommendationDays)
                 .map(days -> days.stream()
                         .map(TeamRecommendationDay::getDayOfWeek)
@@ -265,5 +265,9 @@ public class ArticleService {
 
     private LocalDate toKstDate(LocalDateTime dateTime) {
         return dateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(KST).toLocalDate();
+    }
+
+    private LocalDateTime kstDayStartInSystemDefault(LocalDate date) {
+        return date.atStartOfDay(KST).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
     }
 }

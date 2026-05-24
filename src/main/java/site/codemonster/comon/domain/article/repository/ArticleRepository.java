@@ -82,5 +82,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "WHERE article.member.id = :memberId AND article.team.teamId = :teamId " +
             "AND article.createdDate >= :fromInclusive AND article.createdDate < :toExclusive")
     List<LocalDateTime> findCreatedDatesByMemberAndTeamInRange(
-            Long memberId, Long teamId, LocalDateTime fromInclusive, LocalDateTime toExclusive);
+            @Param("memberId") Long memberId,
+            @Param("teamId") Long teamId,
+            @Param("fromInclusive") LocalDateTime fromInclusive,
+            @Param("toExclusive") LocalDateTime toExclusive);
 }
