@@ -76,10 +76,15 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
             "GROUP BY a.team.teamId")
     List<CodingTestCountProjection> countCodingTestByTeamIds(@Param("teamIds") List<Long> teamIds);
 
-    long countByMemberId(Long memberId);
+    // 누적 풀이 수: 본인이 작성한 NORMAL + 노출(isVisible) 글만 카운트 (피드백용 비노출 초안 제외, 리스트 쿼리와 동일 기준)
+    @Query("SELECT COUNT(a) FROM Article a WHERE a.member.id = :memberId " +
+            "AND a.articleCategory = 'NORMAL' AND a.isVisible = true")
+    long countByMemberId(@Param("memberId") Long memberId);
 
+    // 주간/연속/잔디 카운트 기준 일자 조회: NORMAL + 노출 글만 (피드백용 비노출 초안 제외, 리스트 쿼리와 동일 기준)
     @Query("SELECT article.createdDate FROM Article article " +
             "WHERE article.member.id = :memberId AND article.team.teamId = :teamId " +
+            "AND article.articleCategory = 'NORMAL' AND article.isVisible = true " +
             "AND article.createdDate >= :fromInclusive AND article.createdDate < :toExclusive")
     List<LocalDateTime> findCreatedDatesByMemberAndTeamInRange(
             @Param("memberId") Long memberId,
