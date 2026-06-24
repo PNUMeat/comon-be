@@ -40,4 +40,11 @@ public interface RecommendationHistoryRepository extends JpaRepository<Recommend
 
     @Query("select rh from RecommendationHistory rh where rh.team.teamId = :teamId")
     List<RecommendationHistory> findByTeamId(Long teamId);
+
+    @Query("select rh from RecommendationHistory rh " +
+            "join fetch rh.problem p " +
+            "where rh.team.teamId = :teamId and rh.recommendedAt = :date " +
+            "order by p.problemStep asc")
+    List<RecommendationHistory> findByTeamIdAndRecommendedAtOrderByStep(
+            @Param("teamId") Long teamId, @Param("date") LocalDate date);
 }

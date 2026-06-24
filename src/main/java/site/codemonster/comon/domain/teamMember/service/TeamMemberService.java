@@ -31,6 +31,11 @@ public class TeamMemberService {
     private final TeamMemberLowService teamMemberLowService;
 
 
+    @Transactional(readOnly = true)
+    public void validateTeamMember(Long teamId, Member member){
+        teamMemberLowService.validateTeamMember(teamId, member);
+    }
+
     public void removeTeamMember(Member member, Long teamId){
         if(!teamMemberLowService.existsByTeamIdAndMemberId(teamId, member)){
             throw new TeamMemberInvalidException();

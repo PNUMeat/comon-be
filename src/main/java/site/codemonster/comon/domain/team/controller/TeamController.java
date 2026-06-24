@@ -4,6 +4,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import site.codemonster.comon.domain.article.dto.request.CalenderSubjectRequest;
 import site.codemonster.comon.domain.article.service.ArticleService;
 import site.codemonster.comon.domain.auth.entity.Member;
+import site.codemonster.comon.domain.recommendation.dto.response.RecommendationProblemResponse;
+import site.codemonster.comon.domain.recommendation.service.RecommendationHistoryLowService;
 import site.codemonster.comon.domain.team.dto.request.*;
 import site.codemonster.comon.domain.team.dto.response.*;
 import site.codemonster.comon.domain.team.entity.Team;
@@ -17,11 +19,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +40,7 @@ public class TeamController {
     private final TeamService teamService;
     private final TeamMemberService teamMemberService;
     private final ArticleService articleService;
+    private final RecommendationHistoryLowService recommendationHistoryLowService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<TeamCreateResponse>> createTeam(
@@ -179,6 +184,21 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ApiResponse.successResponseWithData(dashboard));
+    }
+
+    @GetMapping("/{teamId}/recommendations")
+    public ResponseEntity<ApiResponse<List<RecommendationProblemResponse>>> getRecommendations(
+            @AuthenticationPrincipal Member member,
+            @PathVariable Long teamId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        teamMemberService.validateTeamMember(teamId, member);
+        List<RecommendationProblemResponse> recommendations =
+                recommendationHistoryLowService.getTeamRecommendations(teamId, date);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponseWithData(recommendations));
     }
 
     @DeleteMapping("/{teamId}/members/me")

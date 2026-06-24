@@ -3,6 +3,7 @@ package site.codemonster.comon.domain.recommendation.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.recommendation.dto.response.RecommendationProblemResponse;
 import site.codemonster.comon.domain.recommendation.entity.RecommendationHistory;
 import site.codemonster.comon.domain.recommendation.repository.RecommendationHistoryRepository;
 import site.codemonster.comon.domain.team.entity.Team;
@@ -25,6 +26,14 @@ public class RecommendationHistoryLowService {
 
     public List<RecommendationHistory> findByTeamId(Long teamId) {
         return recommendationHistoryRepository.findByTeamId(teamId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecommendationProblemResponse> getTeamRecommendations(Long teamId, LocalDate date) {
+        return recommendationHistoryRepository.findByTeamIdAndRecommendedAtOrderByStep(teamId, date)
+                .stream()
+                .map(rh -> RecommendationProblemResponse.from(rh.getProblem()))
+                .toList();
     }
 
     public void saveAll(List<RecommendationHistory> recommendationHistorys) {
