@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.EnumSet;
 import java.util.List;
@@ -241,6 +242,22 @@ public class ArticleService {
         long cumulativeSolveCount = articleLowService.countByMemberId(member.getId());
 
         return TeamDashboardResponse.of(teamMember, joinDate, recommendationDays, solveCountsByDate, today, lookbackFloor, cumulativeSolveCount);
+    }
+
+    // 월간 캘린더 풀이 체크박스: 해당 월에 풀이(NORMAL+노출)를 작성한 KST 날짜 목록
+    @Transactional(readOnly = true)
+    public List<LocalDate> getSolvedDates(Member member, Long teamId, int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate from = yearMonth.atDay(1);
+        LocalDate toExclusive = yearMonth.plusMonths(1).atDay(1);
+
+        return articleLowService
+                .findCreatedDatesByMemberAndTeamInRange(member.getId(), teamId, kstDayStartInSystemDefault(from), kstDayStartInSystemDefault(toExclusive))
+                .stream()
+                .map(this::toKstDate)
+                .distinct()
+                .sorted()
+                .toList();
     }
 
     private Map<LocalDate, Long> countSolvesByDate(Long memberId, Long teamId, LocalDate from, LocalDate to) {

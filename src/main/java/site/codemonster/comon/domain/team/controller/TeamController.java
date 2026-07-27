@@ -201,6 +201,21 @@ public class TeamController {
                 .body(ApiResponse.successResponseWithData(recommendations));
     }
 
+    @GetMapping("/{teamId}/solved-dates")
+    public ResponseEntity<ApiResponse<List<LocalDate>>> getSolvedDates(
+            @AuthenticationPrincipal Member member,
+            @PathVariable Long teamId,
+            @RequestParam("year") int year,
+            @RequestParam("month") int month
+    ) {
+        teamMemberService.validateTeamMember(teamId, member);
+        List<LocalDate> solvedDates = articleService.getSolvedDates(member, teamId, year, month);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ApiResponse.successResponseWithData(solvedDates));
+    }
+
     @DeleteMapping("/{teamId}/members/me")
     public ResponseEntity<ApiResponse<?>> removeMemberFromTeam(
             @AuthenticationPrincipal Member member,

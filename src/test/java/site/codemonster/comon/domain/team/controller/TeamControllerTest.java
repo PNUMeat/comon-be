@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import site.codemonster.comon.domain.article.repository.ArticleRepository;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.auth.repository.MemberRepository;
 import site.codemonster.comon.domain.problem.entity.Problem;
@@ -34,6 +35,7 @@ import site.codemonster.comon.global.error.response.ErrorValidationResult;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Map;
 
 import static org.assertj.core.api.SoftAssertions.*;
@@ -69,6 +71,9 @@ class TeamControllerTest {
 
     @Autowired
     private RecommendationHistoryRepository recommendationHistoryRepository;
+
+    @Autowired
+    private ArticleRepository articleRepository;
 
 
     @ParameterizedTest
@@ -189,6 +194,62 @@ class TeamControllerTest {
 
         mockMvc.perform(get("/api/v1/teams/{teamId}/recommendations", team.getTeamId())
                         .param("date", "2026-05-04")
+                        .with(securityContext(SecurityContextHolder.getContext())))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("풀이 날짜 조회 성공 - 같은 날 여러 글은 한 날짜로 중복 제거")
+    void getSolvedDatesSuccess() throws Exception {
+
+        Member member = memberRepository.save(TestUtil.createMember());
+        Team team = teamRepository.save(TestUtil.createTeam());
+        teamMemberRepository.save(TestUtil.createTeamMember(team, member));
+        TestSecurityContextInjector.inject(member);
+
+        articleRepository.save(TestUtil.createArticle(team, member));
+        articleRepository.save(TestUtil.createArticle(team, member));
+
+        LocalDate todayKst = LocalDate.now(ZoneId.of("Asia/Seoul"));
+
+        mockMvc.perform(get("/api/v1/teams/{teamId}/solved-dates", team.getTeamId())
+                        .param("year", String.valueOf(todayKst.getYear()))
+                        .param("month", String.valueOf(todayKst.getMonthValue()))
+                        .with(securityContext(SecurityContextHolder.getContext())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0]").value(todayKst.toString()));
+    }
+
+    @Test
+    @DisplayName("풀이 날짜 조회 - 작성 글이 없는 달은 빈 배열")
+    void getSolvedDatesEmpty() throws Exception {
+
+        Member member = memberRepository.save(TestUtil.createMember());
+        Team team = teamRepository.save(TestUtil.createTeam());
+        teamMemberRepository.save(TestUtil.createTeamMember(team, member));
+        TestSecurityContextInjector.inject(member);
+
+        mockMvc.perform(get("/api/v1/teams/{teamId}/solved-dates", team.getTeamId())
+                        .param("year", "1999")
+                        .param("month", "1")
+                        .with(securityContext(SecurityContextHolder.getContext())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("풀이 날짜 조회 실패 - 팀 비멤버는 400")
+    void getSolvedDatesNotMember() throws Exception {
+
+        Member member = memberRepository.save(TestUtil.createMember());
+        Team team = teamRepository.save(TestUtil.createTeam()); // 팀에 가입시키지 않음
+        TestSecurityContextInjector.inject(member);
+
+        mockMvc.perform(get("/api/v1/teams/{teamId}/solved-dates", team.getTeamId())
+                        .param("year", "2026")
+                        .param("month", "7")
                         .with(securityContext(SecurityContextHolder.getContext())))
                 .andExpect(status().isBadRequest());
     }
