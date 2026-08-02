@@ -105,7 +105,8 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(domainProperties.getBackend(), domainProperties.getFrontend()));
+        configuration.setAllowedOriginPatterns(List.of(domainProperties.getBackend(), domainProperties.getFrontend(),
+                "https://codemonster.site", "https://*.codemonster.site"));
         configuration.setAllowedMethods(List.of("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Cookie", "Content-Type"));
         configuration.setAllowCredentials(true);
