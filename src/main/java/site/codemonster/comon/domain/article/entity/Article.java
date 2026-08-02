@@ -32,7 +32,7 @@ public class Article extends TimeStamp {
 
     private String articleTitle;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String articleBody;
 
     @Enumerated(value = EnumType.STRING)
