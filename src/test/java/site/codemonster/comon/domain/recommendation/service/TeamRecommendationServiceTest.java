@@ -372,10 +372,10 @@ class TeamRecommendationServiceTest {
         Problem middle = problemWithId(20L);
         Problem newest = problemWithId(30L);
         List<RecommendationHistory> histories = List.of(
-                new RecommendationHistory(team, newest, LocalDate.of(2026, 3, 1)),
-                new RecommendationHistory(team, oldest, LocalDate.of(2026, 1, 1)),
-                new RecommendationHistory(team, middle, LocalDate.of(2026, 2, 1)),
-                new RecommendationHistory(team, oldest, LocalDate.of(2025, 12, 1)) // 같은 문제의 더 오래된 기록
+                history(team,newest, LocalDate.of(2026, 3, 1)),
+                history(team,oldest, LocalDate.of(2026, 1, 1)),
+                history(team,middle, LocalDate.of(2026, 2, 1)),
+                history(team,oldest, LocalDate.of(2025, 12, 1)) // 같은 문제의 더 오래된 기록
         );
         Member member = TestUtil.createMemberWithId();
         TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
@@ -432,8 +432,8 @@ class TeamRecommendationServiceTest {
         Problem oldest = problemWithId(10L);
         Problem newest = problemWithId(30L);
         List<RecommendationHistory> histories = List.of(
-                new RecommendationHistory(team, newest, LocalDate.of(2026, 3, 1)),
-                new RecommendationHistory(team, oldest, LocalDate.of(2026, 1, 1))
+                history(team,newest, LocalDate.of(2026, 3, 1)),
+                history(team,oldest, LocalDate.of(2026, 1, 1))
         );
         Member member = TestUtil.createMemberWithId();
         TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
@@ -472,6 +472,13 @@ class TeamRecommendationServiceTest {
         Problem problem = new Problem(Platform.PROGRAMMERS, String.valueOf(problemId), "문제" + problemId, ProblemStep.STEP1, "url");
         ReflectionTestUtils.setField(problem, "problemId", problemId);
         return problem;
+    }
+
+    /** 평소 흐름처럼 추천 당일에 저장된 기록: createdDate = recommendedAt (순환 순서는 저장 순서 기준) */
+    private static RecommendationHistory history(Team team, Problem problem, LocalDate recommendedAt) {
+        RecommendationHistory history = new RecommendationHistory(team, problem, recommendedAt);
+        ReflectionTestUtils.setField(history, "createdDate", recommendedAt.atStartOfDay());
+        return history;
     }
 
 

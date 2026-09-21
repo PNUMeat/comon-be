@@ -204,15 +204,15 @@ public class TeamRecommendationHighService {
             List<Problem> selected = new ArrayList<>(problemQueryService
                     .findRecommendationProblem(excludedProblemIds, platformRecommendation));
 
-            // 2) 모자라면 이 팀에 가장 오래전에 추천했던 문제부터 순환
+            // 2) 모자라면 이 팀에 가장 오래전에 추천했던 문제부터 순환 (미추천 문제와는 겹치지 않음: 순환 후보는 전부 추천 기록에 있는 문제)
             int shortfall = platformRecommendation.getProblemCount() - selected.size();
             if (shortfall > 0) {
-                Set<Long> alreadySelectedIds = selected.stream().map(Problem::getProblemId).collect(Collectors.toSet());
                 List<Problem> recycled = RecommendationProblemRecycler.pickOldest(histories,
-                        platformRecommendation.getPlatform(), platformRecommendation.getProblemStep(),
-                        alreadySelectedIds, shortfall);
-                log.info("미추천 문제 소진으로 순환 추천 - 팀 {}, {} {}, 순환 {}개",
-                        teamId, platformRecommendation.getPlatform(), platformRecommendation.getProblemStep(), recycled.size());
+                        platformRecommendation.getPlatform(), platformRecommendation.getProblemStep(), shortfall);
+                if (!recycled.isEmpty()) {
+                    log.info("미추천 문제 소진으로 순환 추천 - 팀 {}, {} {}, 순환 {}개",
+                            teamId, platformRecommendation.getPlatform(), platformRecommendation.getProblemStep(), recycled.size());
+                }
                 selected.addAll(recycled);
             }
 
