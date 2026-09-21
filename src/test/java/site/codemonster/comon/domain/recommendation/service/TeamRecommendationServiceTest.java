@@ -4,6 +4,7 @@ package site.codemonster.comon.domain.recommendation.service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -11,6 +12,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import site.codemonster.comon.domain.article.service.ArticleService;
 import site.codemonster.comon.domain.auth.entity.Member;
 import site.codemonster.comon.domain.problem.entity.Problem;
+import site.codemonster.comon.domain.problem.entity.ProblemStep;
+import site.codemonster.comon.domain.problem.enums.Platform;
 import site.codemonster.comon.domain.problem.service.ProblemLowService;
 import site.codemonster.comon.domain.recommendation.dto.request.ManualRecommendationRequest;
 import site.codemonster.comon.domain.recommendation.dto.request.TeamRecommendationRequest;
@@ -325,20 +328,18 @@ class TeamRecommendationServiceTest {
     }
 
     @Test
-    @DisplayName("추천 실행 실패 - 문제 수 부족")
+    @DisplayName("추천 실행 실패 - 플랫폼/STEP 전체 문제 수 부족 (추천 기록도 없음)")
     void executeRecommendationFail() {
 
         // given
         Team team = TestUtil.createTeamWithId();
-        Problem problem = TestUtil.createProblemWithId();
         TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
         PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
-        RecommendationHistory recommendationHistory = TestUtil.createRecommendationHistoryWithId(team, problem);
         ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
 
 
         given(recommendationHistoryLowService.findByTeamId(any()))
-                .willReturn(List.of(recommendationHistory));
+                .willReturn(List.of()); // 추천 기록 없음 -> 순환할 문제도 없음
 
         given(problemQueryService.findRecommendationProblem(any(),any()))
                 .willReturn(List.of()); // 추천 가능한 문제 0개
@@ -354,6 +355,123 @@ class TeamRecommendationServiceTest {
                 teamLowService,recommendationHistoryLowService,
                 problemQueryService,teamMemberLowService,
                 articleService);
+    }
+
+    @Test
+    @DisplayName("추천 실행 성공 - STEP 소진 시 가장 오래전에 추천한 문제부터 순환")
+    void executeRecommendationRecyclesOldestWhenStepExhausted() {
+
+        // given
+        Team team = TestUtil.createTeamWithId();
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
+        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
+        ReflectionTestUtils.setField(platformRecommendation, "problemCount", 2);
+        ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
+
+        Problem oldest = problemWithId(10L);
+        Problem middle = problemWithId(20L);
+        Problem newest = problemWithId(30L);
+        List<RecommendationHistory> histories = List.of(
+                new RecommendationHistory(team, newest, LocalDate.of(2026, 3, 1)),
+                new RecommendationHistory(team, oldest, LocalDate.of(2026, 1, 1)),
+                new RecommendationHistory(team, middle, LocalDate.of(2026, 2, 1)),
+                new RecommendationHistory(team, oldest, LocalDate.of(2025, 12, 1)) // 같은 문제의 더 오래된 기록
+        );
+        Member member = TestUtil.createMemberWithId();
+        TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
+
+        given(recommendationHistoryLowService.findByTeamId(any()))
+                .willReturn(histories);
+
+        given(problemQueryService.findRecommendationProblem(any(),any()))
+                .willReturn(List.of()); // 아직 추천 안 한 문제 0개 (STEP 소진)
+
+        given(teamMemberLowService.getTeamManagerByTeamId(any()))
+                .willReturn(teamMember);
+
+        given(articleService.createRecommendationArticle(any(),any(),any(), any()))
+                .willReturn("제목");
+
+        // when
+        String title = teamRecommendationService.executeRecommendation(teamRecommendation, LocalDate.now());
+
+        // then
+        assertThat(title).isEqualTo("제목");
+
+        ArgumentCaptor<List<Problem>> problemsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(articleService).createRecommendationArticle(any(), any(), problemsCaptor.capture(), any());
+        assertThat(problemsCaptor.getValue()).containsExactly(oldest, middle);
+
+        ArgumentCaptor<List<RecommendationHistory>> historyCaptor = ArgumentCaptor.forClass(List.class);
+        verify(recommendationHistoryLowService).saveAll(historyCaptor.capture());
+        assertThat(historyCaptor.getValue())
+                .extracting(RecommendationHistory::getProblem)
+                .containsExactly(oldest, middle);
+
+        verify(recommendationHistoryLowService).findByTeamId(any());
+        verify(problemQueryService).findRecommendationProblem(any(),any());
+        verify(teamMemberLowService).getTeamManagerByTeamId(any());
+        verifyNoMoreInteractions(
+                teamLowService,recommendationHistoryLowService,
+                problemQueryService,teamMemberLowService,
+                articleService);
+    }
+
+    @Test
+    @DisplayName("추천 실행 성공 - 안 한 문제를 먼저 쓰고 부족분만 순환으로 채움")
+    void executeRecommendationFillsShortfallWithRecycledProblems() {
+
+        // given
+        Team team = TestUtil.createTeamWithId();
+        TeamRecommendation teamRecommendation = TestUtil.createTeamRecommendationWithId(team);
+        PlatformRecommendation platformRecommendation = TestUtil.createPlatformRecommendationWithId(teamRecommendation);
+        ReflectionTestUtils.setField(platformRecommendation, "problemCount", 2);
+        ReflectionTestUtils.setField(teamRecommendation, "platformRecommendations", List.of(platformRecommendation));
+
+        Problem unused = problemWithId(40L);
+        Problem oldest = problemWithId(10L);
+        Problem newest = problemWithId(30L);
+        List<RecommendationHistory> histories = List.of(
+                new RecommendationHistory(team, newest, LocalDate.of(2026, 3, 1)),
+                new RecommendationHistory(team, oldest, LocalDate.of(2026, 1, 1))
+        );
+        Member member = TestUtil.createMemberWithId();
+        TeamMember teamMember = TestUtil.createTeamManagerWithId(team, member);
+
+        given(recommendationHistoryLowService.findByTeamId(any()))
+                .willReturn(histories);
+
+        given(problemQueryService.findRecommendationProblem(any(),any()))
+                .willReturn(List.of(unused)); // 아직 추천 안 한 문제 1개, 필요 수는 2개
+
+        given(teamMemberLowService.getTeamManagerByTeamId(any()))
+                .willReturn(teamMember);
+
+        given(articleService.createRecommendationArticle(any(),any(),any(), any()))
+                .willReturn("제목");
+
+        // when
+        teamRecommendationService.executeRecommendation(teamRecommendation, LocalDate.now());
+
+        // then
+        ArgumentCaptor<List<Problem>> problemsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(articleService).createRecommendationArticle(any(), any(), problemsCaptor.capture(), any());
+        assertThat(problemsCaptor.getValue()).containsExactly(unused, oldest);
+
+        verify(recommendationHistoryLowService).findByTeamId(any());
+        verify(recommendationHistoryLowService).saveAll(any());
+        verify(problemQueryService).findRecommendationProblem(any(),any());
+        verify(teamMemberLowService).getTeamManagerByTeamId(any());
+        verifyNoMoreInteractions(
+                teamLowService,recommendationHistoryLowService,
+                problemQueryService,teamMemberLowService,
+                articleService);
+    }
+
+    private static Problem problemWithId(Long problemId) {
+        Problem problem = new Problem(Platform.PROGRAMMERS, String.valueOf(problemId), "문제" + problemId, ProblemStep.STEP1, "url");
+        ReflectionTestUtils.setField(problem, "problemId", problemId);
+        return problem;
     }
 
 

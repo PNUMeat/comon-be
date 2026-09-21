@@ -188,26 +188,40 @@ public class TeamRecommendationHighService {
     public String executeRecommendation(TeamRecommendation teamRecommendation, LocalDate selectedDate) {
 
         List<PlatformRecommendation> platformRecommendations = teamRecommendation.getPlatformRecommendations();
+        Long teamId = teamRecommendation.getTeam().getTeamId();
 
-        // 이미 사용한 Problem의 PK들
-        List<Long> excludedProblemIds = recommendationHistoryLowService.findByTeamId(teamRecommendation.getTeam().getTeamId())
-                .stream().map(recommendationHistory -> recommendationHistory.getProblem().getProblemId()).toList();
+        // 팀의 추천 기록: 미추천 문제를 고를 때 제외하고, STEP 소진 시 순환 후보로 쓴다
+        List<RecommendationHistory> histories = recommendationHistoryLowService.findByTeamId(teamId);
+        List<Long> excludedProblemIds = histories.stream()
+                .map(recommendationHistory -> recommendationHistory.getProblem().getProblemId())
+                .distinct().toList();
 
-        // 추천 가능한 문제들
+        // 추천할 문제들
         List<Problem> recommendationProblems = new ArrayList<>();
 
-        // 추천해야하는 문제 개수
-        int totalProblemCount = 0;
-
         for (PlatformRecommendation platformRecommendation : platformRecommendations) {
-            recommendationProblems.addAll(problemQueryService
+            // 1) 아직 추천하지 않은 문제부터
+            List<Problem> selected = new ArrayList<>(problemQueryService
                     .findRecommendationProblem(excludedProblemIds, platformRecommendation));
-            totalProblemCount += platformRecommendation.getProblemCount();
-        }
 
-        // 추천해야하는 문제 개수보다 적다면 예외 반환
-        if (recommendationProblems.size() < totalProblemCount)
-            throw new TeamRecommendationProblemShortageException();
+            // 2) 모자라면 이 팀에 가장 오래전에 추천했던 문제부터 순환
+            int shortfall = platformRecommendation.getProblemCount() - selected.size();
+            if (shortfall > 0) {
+                Set<Long> alreadySelectedIds = selected.stream().map(Problem::getProblemId).collect(Collectors.toSet());
+                List<Problem> recycled = RecommendationProblemRecycler.pickOldest(histories,
+                        platformRecommendation.getPlatform(), platformRecommendation.getProblemStep(),
+                        alreadySelectedIds, shortfall);
+                log.info("미추천 문제 소진으로 순환 추천 - 팀 {}, {} {}, 순환 {}개",
+                        teamId, platformRecommendation.getPlatform(), platformRecommendation.getProblemStep(), recycled.size());
+                selected.addAll(recycled);
+            }
+
+            // 3) 플랫폼/STEP 전체 문제 수 자체가 부족하면 예외
+            if (selected.size() < platformRecommendation.getProblemCount())
+                throw new TeamRecommendationProblemShortageException();
+
+            recommendationProblems.addAll(selected);
+        }
 
         // 문제 추천할 TeamManager 아무나 한 명 조회
         TeamMember findTeamManager = teamMemberLowService.getTeamManagerByTeamId(teamRecommendation.getTeam().getTeamId());
