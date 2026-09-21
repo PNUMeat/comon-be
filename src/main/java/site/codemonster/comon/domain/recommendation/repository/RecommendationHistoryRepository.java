@@ -38,7 +38,10 @@ public interface RecommendationHistoryRepository extends JpaRepository<Recommend
     @Query("select rh from RecommendationHistory rh where rh.recommendedAt = :today")
     List<RecommendationHistory> findByLocalDate(LocalDate today);
 
-    @Query("select rh from RecommendationHistory rh where rh.team.teamId = :teamId")
+    /**
+     * 팀의 추천 기록 (문제까지 fetch join: 순환 추천에서 문제의 플랫폼/STEP을 바로 읽는다)
+     */
+    @Query("select rh from RecommendationHistory rh join fetch rh.problem where rh.team.teamId = :teamId")
     List<RecommendationHistory> findByTeamId(Long teamId);
 
     @Query("select rh from RecommendationHistory rh " +
